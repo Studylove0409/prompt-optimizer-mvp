@@ -7,7 +7,7 @@
       "config": { "maxLambdaSize": "15mb" }
     },
     {
-      "src": "frontend/index.html",
+      "src": "frontend/**",
       "use": "@vercel/static"
     }
   ],
@@ -17,7 +17,15 @@
       "dest": "backend/app/main.py"
     },
     {
-      "handle": "filesystem" 
+      "src": "/style.css",
+      "dest": "frontend/style.css"
+    },
+    {
+      "src": "/script.js",
+      "dest": "frontend/script.js"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
