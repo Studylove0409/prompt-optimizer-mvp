@@ -1,0 +1,220 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+import openai
+
+# 加载环境变量
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+# 从环境变量中获取API密钥
+LLM_API_KEY = os.getenv("MY_LLM_API_KEY")
+
+# 调试：检查API密钥是否正确加载
+if not LLM_API_KEY:
+    print("警告：MY_LLM_API_KEY 环境变量未设置或为空")
+else:
+    print(f"API密钥已加载：{LLM_API_KEY[:10]}...")  # 只显示前10个字符用于调试
+
+# 元提示词模板
+META_PROMPT_TEMPLATE = """## 角色与核心任务
+你是一位经验丰富的AI提示词工程与优化大师。你的核心使命是分析用户提供的原始AI提示词，并将其精心改写与重塑，使其变得极致清晰、高度具体、结构合理、信息充分、且极易被各类AI模型（如大型语言模型、文本生成AI、知识问答系统等）准确理解。最终目标是引导目标AI产出最优质、最精准、最能满足用户深层需求的响应。
+
+## 通用优化黄金准则
+在优化用户输入的原始提示词时，请严格遵循并灵活运用以下准则：
+
+1.  **明确核心意图与目标 (Crystal-Clear Intent & Goal):**
+    * 深入挖掘用户提示词背后真实的需求和目的。
+    * 消除所有模糊不清、模棱两可的表述，确保指令直接、明确。
+    * 若原始提示词过于宽泛，请将其聚焦到一个或一组具体、可操作的任务上。
+
+2.  **补充关键上下文与背景信息 (Essential Context & Background):**
+    * **识别信息缺口:** 判断提示词是否缺少必要的背景知识、相关前提、特定情境或先前对话的延续性信息。
+    * **通用场景:** 对于生活咨询、学习问题、创意生成等，确保提供了相关的个人偏好、限制条件、期望风格、主题范围等。
+    * **专业/技术场景 (非限定于编程):** 如果提示词涉及特定领域（如科学、法律、金融、IT技术等），引导用户明确关键术语、版本号（如软件版本、标准版本）、相关理论、或特定配置参数等。
+
+3.  **提升细节颗粒度与具体性 (Granular Detail & Specificity):**
+    * 将抽象的请求（例如"给我一些建议"、"写一个故事"）转化为具体的、可量化的指令（例如"针对[特定情况]，提供三个关于[具体方面]的可行建议，并说明各自的优缺点"、"写一个关于[主题]，包含[关键元素A、B、C]，基调为[悲伤/幽默]的短篇故事，约500字"）。
+    * 鼓励使用精确的词汇和限定词。
+
+4.  **赋予结构与条理性 (Structured & Organized Phrasing):**
+    * 对于复杂或多步骤的请求，建议将提示词组织得更有逻辑层次，例如使用点列、编号、小标题、或明确的步骤指引。
+    * 考虑目标AI的最佳输入格式，有时结构化的提示能带来更好的输出。
+
+5.  **引导期望的输出形态 (Desired Output Specification):**
+    * 帮助用户明确他们期望AI返回结果的格式、类型、长度或风格。例如：JSON对象、Markdown文本、总结报告、代码片段、诗歌、正式邮件、非正式对话等。
+    * 如果用户未指定，但根据意图可以推断，可以在优化后的提示词中加入合理的输出格式建议。
+
+6.  **设定AI角色或视角 (Persona or Viewpoint Assignment - 若适用):**
+    * 如果为目标AI设定一个特定角色（如"扮演一位经验丰富的旅行规划师"、"你是一位专业的科研论文审稿人"、"以苏格拉底的风格进行对话"）能提升输出质量，请在优化后的提示词中包含此类指令。
+
+7.  **激励深度思考与全面回应 (Encourage In-depth & Comprehensive Responses):**
+    * 加入引导AI进行深入分析、提供多角度观点、列举实例、解释原因、探讨利弊或考虑边缘案例的语句。
+
+8.  **保持简洁高效，去除冗余 (Conciseness, Efficiency & Noise Reduction):**
+    * 在确保信息完整和清晰的前提下，删除不必要的客套话、口语化表达、重复信息或与核心意图无关的干扰内容，使提示词直击要点。
+
+## 用户输入格式
+用户的原始提示词将按如下方式提供：
+用户原始提示词：
+
+{user_input_prompt}
+
+
+## 输出要求
+请你**仅直接输出经过你精心优化后的提示词文本内容**。不要添加任何关于你如何进行优化的解释、额外的对话、开场白、或对优化行为本身的评论。你的输出必须是一个可以直接复制并发送给任何目标AI模型的高质量、即用型提示词。
+
+优化后的提示词：
+"""
+
+app = FastAPI(
+    title="Prompt Optimizer API",
+    description="一个用于优化提示词的API服务",
+    version="1.0.0"
+)
+
+# 配置CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有源
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有方法
+    allow_headers=["*"],  # 允许所有头部
+)
+
+# Pydantic模型
+class PromptRequest(BaseModel):
+    original_prompt: str
+    model: str = "deepseek-chat"  # 默认使用更快的 deepseek-chat 模型
+
+class PromptResponse(BaseModel):
+    optimized_prompt: str
+    model_used: str
+
+@app.get("/")
+async def root():
+    """根路径，返回API信息"""
+    return {"message": "欢迎使用Prompt Optimizer API", "version": "1.0.0"}
+
+@app.get("/api/health")
+async def health_check():
+    """健康检查端点"""
+    return {"status": "healthy"}
+
+@app.get("/api/models")
+async def get_available_models():
+    """获取可用的模型列表"""
+    return {
+        "models": [
+            {
+                "id": "deepseek-chat",
+                "name": "DeepSeek Chat (V3-0324)",
+                "description": "更快的响应速度，适合日常对话和简单任务",
+                "speed": "fast"
+            },
+            {
+                "id": "deepseek-reasoner",
+                "name": "DeepSeek Reasoner (R1-0528)",
+                "description": "更强的推理能力，适合复杂分析和深度思考",
+                "speed": "slow"
+            }
+        ],
+        "default": "deepseek-chat"
+    }
+
+@app.post("/api/optimize", response_model=PromptResponse)
+async def optimize_prompt(request_body: PromptRequest):
+    """优化提示词的API端点"""
+    # 检查API密钥是否存在
+    if not LLM_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="API密钥未配置：请检查环境变量 MY_LLM_API_KEY 是否正确设置"
+        )
+
+    # 验证模型选择
+    valid_models = ["deepseek-chat", "deepseek-reasoner"]
+    if request_body.model not in valid_models:
+        raise HTTPException(
+            status_code=400,
+            detail=f"无效的模型选择。支持的模型: {', '.join(valid_models)}"
+        )
+
+    try:
+        # 格式化元提示词模板
+        formatted_user_content_for_deepseek = META_PROMPT_TEMPLATE.format(
+            user_input_prompt=request_body.original_prompt
+        )
+
+        # 初始化DeepSeek的OpenAI客户端
+        client = OpenAI(
+            api_key=LLM_API_KEY,
+            base_url="https://api.deepseek.com/v1"
+        )
+
+        # 构建发送给DeepSeek API的messages列表
+        messages = [
+            {
+                "role": "system",
+                "content": "你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。"
+            },
+            {
+                "role": "user",
+                "content": formatted_user_content_for_deepseek
+            }
+        ]
+
+        # 调用DeepSeek API，使用用户选择的模型
+        response = client.chat.completions.create(
+            model=request_body.model,
+            messages=messages,
+            stream=False,
+            temperature=0.5,
+            max_tokens=2000
+        )
+
+        # 提取优化后的提示词
+        if response.choices and len(response.choices) > 0:
+            optimized_content = response.choices[0].message.content
+            if optimized_content:
+                return PromptResponse(
+                    optimized_prompt=optimized_content.strip(),
+                    model_used=request_body.model
+                )
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="解析DeepSeek响应失败：响应内容为空"
+                )
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="解析DeepSeek响应失败：未找到有效的响应选择"
+            )
+
+    except openai.APIConnectionError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"DeepSeek API连接失败: {str(e)}"
+        )
+    except openai.RateLimitError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"DeepSeek API速率限制: {str(e)}"
+        )
+    except openai.APIStatusError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"DeepSeek API状态错误: {str(e)}"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"DeepSeek API调用失败: {str(e)}"
+        )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

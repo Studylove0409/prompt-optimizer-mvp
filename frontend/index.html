@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Optimizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prompt Optimizer</h1>
+            <p>优化您的AI提示词，获得更好的结果</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <h2>输入您的提示词</h2>
+                <textarea id="originalPrompt" placeholder="请输入您想要优化的提示词..."></textarea>
+
+                <div class="model-selection">
+                    <h3>选择模型</h3>
+                    <div class="model-options">
+                        <label class="model-option">
+                            <input type="radio" name="model" value="deepseek-chat" checked>
+                            <div class="model-info">
+                                <span class="model-name">DeepSeek Chat (V3-0324)</span>
+                                <span class="model-desc">更快的响应速度，适合日常对话和简单任务</span>
+                                <span class="model-speed fast">快速</span>
+                            </div>
+                        </label>
+                        <label class="model-option">
+                            <input type="radio" name="model" value="deepseek-reasoner">
+                            <div class="model-info">
+                                <span class="model-name">DeepSeek Reasoner (R1-0528)</span>
+                                <span class="model-desc">更强的推理能力，适合复杂分析和深度思考</span>
+                                <span class="model-speed slow">深度</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="optimizeBtn">优化提示词</button>
+            </div>
+
+            <div class="output-section" id="outputSection" style="display: none;">
+                <h2>优化后的提示词</h2>
+                <div class="model-used" id="modelUsed"></div>
+                <div id="optimizedPrompt" class="result-box"></div>
+                <div class="actions">
+                    <button id="copyBtn">复制结果</button>
+                    <button id="clearBtn">清空</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>正在优化中，请稍候...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
