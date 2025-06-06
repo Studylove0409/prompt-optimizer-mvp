@@ -139,6 +139,11 @@ h3 {
     border-color: #0ea5e9;
 }
 
+.model-option.ultra {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border-color: #a855f7;
+}
+
 .model-option:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.1);
@@ -157,6 +162,11 @@ h3 {
 .model-option.premium:hover {
     border-color: #0284c7;
     background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+}
+
+.model-option.ultra:hover {
+    border-color: #9333ea;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
 }
 
 .model-option input[type="radio"] {
@@ -181,6 +191,12 @@ h3 {
     border-color: #0284c7;
     background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
     box-shadow: 0 8px 25px rgba(2, 132, 199, 0.2);
+}
+
+.model-option:has(input[type="radio"]:checked).ultra {
+    border-color: #9333ea;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    box-shadow: 0 8px 25px rgba(147, 51, 234, 0.2);
 }
 
 .model-info {
@@ -230,8 +246,17 @@ h3 {
     overflow: hidden;
 }
 
+.ultra-badge {
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(168, 85, 247, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
 .pro-badge::before,
-.premium-badge::before {
+.premium-badge::before,
+.ultra-badge::before {
     content: '';
     position: absolute;
     top: -50%;

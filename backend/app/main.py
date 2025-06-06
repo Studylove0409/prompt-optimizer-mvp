@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
-import google.generativeai as genai
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -24,10 +23,6 @@ if not GEMINI_API_KEY:
     print("警告：GEMINI_API_KEY 环境变量未设置或为空")
 else:
     print(f"Gemini API密钥已加载：{GEMINI_API_KEY[:10]}...")
-
-# 配置Gemini API
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 # 元提示词模板
 META_PROMPT_TEMPLATE = """## 角色与核心任务
@@ -132,9 +127,15 @@ async def get_available_models():
                 "speed": "slow"
             },
             {
-                "id": "gemini-pro",
-                "name": "Gemini Pro",
-                "description": "Google的先进AI模型，平衡性能与质量",
+                "id": "gemini-2.0-flash",
+                "name": "Gemini 2.0 Flash",
+                "description": "Google最新的Gemini 2.0 Flash，快速响应与高质量并存",
+                "speed": "fast"
+            },
+            {
+                "id": "gemini-2.5-pro-preview-03-25",
+                "name": "Gemini 2.5 Pro Preview",
+                "description": "Google最新的Gemini 2.5 Pro预览版，具备更强的推理和创新能力",
                 "speed": "medium"
             }
         ],
@@ -152,7 +153,7 @@ async def optimize_prompt(request_body: PromptRequest):
         )
 
     # 验证模型选择
-    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-pro"]
+    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-2.0-flash", "gemini-2.5-pro-preview-03-25"]
     if request_body.model not in valid_models:
         raise HTTPException(
             status_code=400,
@@ -165,33 +166,43 @@ async def optimize_prompt(request_body: PromptRequest):
             user_input_prompt=request_body.original_prompt
         )
 
-        if request_body.model == "gemini-pro":
-            # 使用Gemini模型
+        if request_body.model.startswith("gemini-"):
+            # 使用Gemini模型（通过OpenAI兼容模式）
             if not GEMINI_API_KEY:
                 raise HTTPException(
                     status_code=500,
                     detail="Gemini API密钥未配置：请检查环境变量 GEMINI_API_KEY 是否正确设置"
                 )
 
-            # 初始化Gemini模型
-            model = genai.GenerativeModel('gemini-pro')
+            # 初始化Gemini的OpenAI兼容客户端
+            gemini_client = OpenAI(
+                api_key=GEMINI_API_KEY,
+                base_url="https://www.chataiapi.com/v1"
+            )
 
-            # 构建Gemini的提示词
-            gemini_prompt = f"""你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。
+            # 构建发送给Gemini API的messages列表
+            messages = [
+                {
+                    "role": "system",
+                    "content": "你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。"
+                },
+                {
+                    "role": "user",
+                    "content": formatted_user_content
+                }
+            ]
 
-{formatted_user_content}"""
-
-            # 调用Gemini API
-            response = model.generate_content(
-                gemini_prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=0.5,
-                    max_output_tokens=2000,
-                )
+            # 调用Gemini API（使用OpenAI兼容模式）
+            response = gemini_client.chat.completions.create(
+                model=request_body.model,  # 使用完整的模型名称
+                messages=messages,
+                stream=False,
+                temperature=0.5,
+                max_tokens=2000
             )
 
             # 获取优化后的提示词
-            optimized_prompt = response.text.strip()
+            optimized_prompt = response.choices[0].message.content.strip()
 
         else:
             # 使用DeepSeek模型

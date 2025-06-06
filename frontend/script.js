@@ -24,7 +24,8 @@ function getModelDisplayName(modelId) {
     const modelNames = {
         'deepseek-chat': '普通版',
         'deepseek-reasoner': 'Pro版',
-        'gemini-pro': 'Gemini版'
+        'gemini-2.0-flash': 'Gemini Flash版',
+        'gemini-2.5-pro-preview-03-25': 'Gemini Pro版'
     };
     return modelNames[modelId] || modelId;
 }
