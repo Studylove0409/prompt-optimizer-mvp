@@ -3,106 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt Optimizer</title>
+    <title>Prompt Optimizer - 智能提示词优化器</title>
     <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 Prompt Optimizer</h1>
-            <p>智能优化您的AI提示词，释放AI的无限潜能</p>
-        </header>
+    <!-- 粒子背景画布 -->
+    <canvas id="particleCanvas"></canvas>
 
-        <main>
-            <div class="input-section">
-                <h2>📝 输入您的提示词</h2>
-                <textarea id="originalPrompt" placeholder="在这里输入您想要优化的提示词，我们将为您提供专业的优化建议..."></textarea>
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="logo">
+                    <span class="logo-icon">✨</span>
+                    <span class="logo-text">Prompt Optimizer</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#" class="nav-link active">优化器</a>
+                    <a href="#" class="nav-link">帮助</a>
+                </div>
+            </div>
+        </nav>
 
-                <div class="model-selection">
-                    <h3>选择版本</h3>
-                    <div class="model-options">
-                        <label class="model-option standard">
-                            <input type="radio" name="model" value="deepseek-chat" checked>
-                            <div class="model-info">
-                                <div class="model-header">
-                                    <span class="model-name">普通版</span>
-                                    <span class="model-badge standard-badge">标准</span>
-                                </div>
-                                <span class="model-desc">快速响应，适合日常提示词优化需求</span>
-                                <div class="model-features">
-                                    <span class="feature">✓ 快速处理</span>
-                                    <span class="feature">✓ 基础优化</span>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="model-option pro">
-                            <input type="radio" name="model" value="deepseek-reasoner">
-                            <div class="model-info">
-                                <div class="model-header">
-                                    <span class="model-name">Pro版</span>
-                                    <span class="model-badge pro-badge">PRO</span>
-                                </div>
-                                <span class="model-desc">深度分析，提供更专业的提示词优化建议</span>
-                                <div class="model-features">
-                                    <span class="feature">✓ 深度推理</span>
-                                    <span class="feature">✓ 高级优化</span>
-                                    <span class="feature">✓ 专业建议</span>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="model-option premium">
-                            <input type="radio" name="model" value="gemini-2.0-flash">
-                            <div class="model-info">
-                                <div class="model-header">
-                                    <span class="model-name">Gemini Flash</span>
-                                    <span class="model-badge premium-badge">FLASH</span>
-                                </div>
-                                <span class="model-desc">Google最新Gemini 2.0 Flash，快速响应与高质量并存</span>
-                                <div class="model-features">
-                                    <span class="feature">✓ 极速响应</span>
-                                    <span class="feature">✓ 高质量输出</span>
-                                    <span class="feature">✓ 智能优化</span>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="model-option ultra">
-                            <input type="radio" name="model" value="gemini-2.5-pro-preview-03-25">
-                            <div class="model-info">
-                                <div class="model-header">
-                                    <span class="model-name">Gemini Pro</span>
-                                    <span class="model-badge ultra-badge">ULTRA</span>
-                                </div>
-                                <span class="model-desc">Google最新Gemini 2.5 Pro预览版，顶级AI推理能力</span>
-                                <div class="model-features">
-                                    <span class="feature">✓ 顶级推理</span>
-                                    <span class="feature">✓ 创新思维</span>
-                                    <span class="feature">✓ 前沿技术</span>
-                                </div>
-                            </div>
-                        </label>
+        <!-- 英雄区域 -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">智能提示词</span>
+                    <span class="title-line gradient-text">优化器</span>
+                </h1>
+                <p class="hero-subtitle">
+                    释放AI的无限潜能，让每一个提示词都精准有效
+                </p>
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎯</span>
+                        <span>精准优化</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⚡</span>
+                        <span>极速响应</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🧠</span>
+                        <span>智能分析</span>
                     </div>
                 </div>
-
-                <button id="optimizeBtn">✨ 开始优化</button>
             </div>
+        </section>
 
-            <div class="output-section" id="outputSection" style="display: none;">
-                <h2>🎯 优化结果</h2>
-                <div class="model-used" id="modelUsed"></div>
-                <div id="optimizedPrompt" class="result-box"></div>
-                <div class="actions">
-                    <button id="copyBtn">📋 复制结果</button>
-                    <button id="clearBtn">🗑️ 清空重置</button>
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <div class="content-container">
+                <!-- 输入区域 -->
+                <section class="input-section">
+                    <div class="section-header">
+                        <h2 class="section-title">输入您的提示词</h2>
+                        <p class="section-subtitle">描述您的需求，我们将为您提供专业的优化建议</p>
+                    </div>
+
+                    <div class="input-container">
+                        <div class="textarea-wrapper">
+                            <textarea
+                                id="originalPrompt"
+                                placeholder="在这里输入您想要优化的提示词..."
+                                class="prompt-textarea"
+                            ></textarea>
+                            <div class="textarea-footer">
+                                <span class="char-count">0 字符</span>
+                                <span class="shortcut-hint">Ctrl + Enter 快速优化</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模型选择 -->
+                    <div class="model-selection">
+                        <h3 class="model-title">选择AI模型</h3>
+                        <div class="model-grid">
+                            <label class="model-card standard" data-model="deepseek-chat">
+                                <input type="radio" name="model" value="deepseek-chat" checked>
+                                <div class="model-content">
+                                    <div class="model-header">
+                                        <div class="model-icon">🚀</div>
+                                        <div class="model-info">
+                                            <span class="model-name">普通版</span>
+                                            <span class="model-badge standard-badge">标准</span>
+                                        </div>
+                                    </div>
+                                    <p class="model-desc">快速响应，适合日常提示词优化需求</p>
+                                    <div class="model-features">
+                                        <span class="feature">快速处理</span>
+                                        <span class="feature">基础优化</span>
+                                    </div>
+                                </div>
+                                <div class="model-overlay"></div>
+                            </label>
+
+                            <label class="model-card pro" data-model="deepseek-reasoner">
+                                <input type="radio" name="model" value="deepseek-reasoner">
+                                <div class="model-content">
+                                    <div class="model-header">
+                                        <div class="model-icon">🧠</div>
+                                        <div class="model-info">
+                                            <span class="model-name">Pro版</span>
+                                            <span class="model-badge pro-badge">PRO</span>
+                                        </div>
+                                    </div>
+                                    <p class="model-desc">深度分析，提供更专业的提示词优化建议</p>
+                                    <div class="model-features">
+                                        <span class="feature">深度推理</span>
+                                        <span class="feature">高级优化</span>
+                                        <span class="feature">专业建议</span>
+                                    </div>
+                                </div>
+                                <div class="model-overlay"></div>
+                            </label>
+
+                            <label class="model-card premium" data-model="gemini-2.0-flash">
+                                <input type="radio" name="model" value="gemini-2.0-flash">
+                                <div class="model-content">
+                                    <div class="model-header">
+                                        <div class="model-icon">⚡</div>
+                                        <div class="model-info">
+                                            <span class="model-name">Gemini Flash</span>
+                                            <span class="model-badge premium-badge">FLASH</span>
+                                        </div>
+                                    </div>
+                                    <p class="model-desc">Google最新Gemini 2.0 Flash，快速响应与高质量并存</p>
+                                    <div class="model-features">
+                                        <span class="feature">极速响应</span>
+                                        <span class="feature">高质量输出</span>
+                                        <span class="feature">智能优化</span>
+                                    </div>
+                                </div>
+                                <div class="model-overlay"></div>
+                            </label>
+
+                            <label class="model-card ultra" data-model="gemini-2.5-pro-preview-03-25">
+                                <input type="radio" name="model" value="gemini-2.5-pro-preview-03-25">
+                                <div class="model-content">
+                                    <div class="model-header">
+                                        <div class="model-icon">💎</div>
+                                        <div class="model-info">
+                                            <span class="model-name">Gemini Pro</span>
+                                            <span class="model-badge ultra-badge">ULTRA</span>
+                                        </div>
+                                    </div>
+                                    <p class="model-desc">Google最新Gemini 2.5 Pro预览版，顶级AI推理能力</p>
+                                    <div class="model-features">
+                                        <span class="feature">顶级推理</span>
+                                        <span class="feature">创新思维</span>
+                                        <span class="feature">前沿技术</span>
+                                    </div>
+                                </div>
+                                <div class="model-overlay"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 优化按钮 -->
+                    <div class="action-section">
+                        <button id="optimizeBtn" class="optimize-button">
+                            <span class="button-icon">✨</span>
+                            <span class="button-text">开始优化</span>
+                            <div class="button-ripple"></div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 输出区域 -->
+                <section class="output-section" id="outputSection" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">优化结果</h2>
+                        <div class="model-used" id="modelUsed"></div>
+                    </div>
+
+                    <div class="result-container">
+                        <div class="result-content">
+                            <div id="optimizedPrompt" class="result-text"></div>
+                        </div>
+
+                        <div class="result-actions">
+                            <button id="copyBtn" class="action-button primary">
+                                <span class="button-icon">📋</span>
+                                <span class="button-text">复制结果</span>
+                            </button>
+                            <button id="clearBtn" class="action-button secondary">
+                                <span class="button-icon">🗑️</span>
+                                <span class="button-text">清空重置</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 加载状态 -->
+                <div class="loading-overlay" id="loading" style="display: none;">
+                    <div class="loading-content">
+                        <div class="loading-animation">
+                            <div class="loading-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                        <h3 class="loading-title">AI正在优化中</h3>
+                        <p class="loading-subtitle">请稍候，我们正在为您精心优化提示词...</p>
+                    </div>
                 </div>
             </div>
-
-            <div class="loading" id="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p>🤖 AI正在为您精心优化提示词，请稍候...</p>
-            </div>
         </main>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Prompt Optimizer. 让AI更智能，让创作更高效。</p>
+            </div>
+        </footer>
     </div>
 
+    <!-- 脚本文件 -->
     <script src="/script.js"></script>
+    <script src="/particles.js"></script>
 </body>
 </html>
