@@ -97,14 +97,16 @@ function initDecryptionKey(token) {
 // 编码数据 - 与服务器使用相同的编码方法
 function encodeData(data) {
     const jsonStr = JSON.stringify(data);
-    return btoa(jsonStr);
+    // 修复Unicode字符编码问题
+    return btoa(unescape(encodeURIComponent(jsonStr)));
 }
 
 // 解密数据 - 简单的Base64解码和JSON解析
 // 注意: 这不是真正的加密，只是简单的数据编码，用于基本混淆
 function decodeData(encodedData) {
     try {
-        const jsonStr = atob(encodedData);
+        // 修复Unicode字符解码问题
+        const jsonStr = decodeURIComponent(escape(atob(encodedData)));
         return JSON.parse(jsonStr);
     } catch (error) {
         console.error('解码失败:', error);

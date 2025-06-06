@@ -29,12 +29,16 @@ else:
 # 简单编码数据
 def encode_data(data):
     json_str = json.dumps(data)
-    return base64.b64encode(json_str.encode()).decode()
+    # 确保编码支持Unicode字符
+    encoded_bytes = json_str.encode('utf-8')
+    return base64.b64encode(encoded_bytes).decode('utf-8')
 
 # 解码数据
 def decode_data(encoded_data):
     try:
-        json_str = base64.b64decode(encoded_data).decode()
+        # 确保解码支持Unicode字符
+        json_bytes = base64.b64decode(encoded_data)
+        json_str = json_bytes.decode('utf-8')
         return json.loads(json_str)
     except Exception as e:
         print(f"解码失败: {e}")
