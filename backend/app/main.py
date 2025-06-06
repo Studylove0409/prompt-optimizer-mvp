@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
+from google import genai
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -133,9 +134,9 @@ async def get_available_models():
                 "speed": "fast"
             },
             {
-                "id": "gemini-2.5-pro-preview-03-25",
-                "name": "Gemini 2.5 Pro Preview",
-                "description": "Google最新的Gemini 2.5 Pro预览版，具备更强的推理和创新能力",
+                "id": "gemini-2.5-flash-preview-05-20",
+                "name": "Gemini 2.5 Flash Preview",
+                "description": "Google最新的Gemini 2.5 Flash预览版，具备更强的推理和创新能力",
                 "speed": "medium"
             }
         ],
@@ -153,7 +154,7 @@ async def optimize_prompt(request_body: PromptRequest):
         )
 
     # 验证模型选择
-    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-2.0-flash", "gemini-2.5-pro-preview-03-25"]
+    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-2.0-flash", "gemini-2.5-flash-preview-05-20"]
     if request_body.model not in valid_models:
         raise HTTPException(
             status_code=400,
@@ -167,7 +168,7 @@ async def optimize_prompt(request_body: PromptRequest):
         )
 
         if request_body.model.startswith("gemini-"):
-            # 使用Gemini模型（通过OpenAI兼容模式）
+            # 使用新的Google GenAI客户端
             if not GEMINI_API_KEY:
                 raise HTTPException(
                     status_code=500,
@@ -177,68 +178,29 @@ async def optimize_prompt(request_body: PromptRequest):
             print(f"使用Gemini模型: {request_body.model}")
             print(f"API密钥: {GEMINI_API_KEY[:10]}...")
 
-            # 初始化Gemini的OpenAI兼容客户端
-            gemini_client = OpenAI(
-                api_key=GEMINI_API_KEY,
-                base_url="https://www.chataiapi.com/v1"
-            )
+            # 初始化Google GenAI客户端
+            gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
-            # 构建发送给Gemini API的messages列表
-            messages = [
-                {
-                    "role": "system",
-                    "content": "你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。"
-                },
-                {
-                    "role": "user",
-                    "content": formatted_user_content
-                }
-            ]
+            # 构建完整的提示词内容
+            full_prompt = f"""你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。
 
-            # 调用Gemini API（使用OpenAI兼容模式）
-            response = gemini_client.chat.completions.create(
-                model=request_body.model,  # 使用完整的模型名称
-                messages=messages,
-                temperature=0.5,
-                max_tokens=2000
+{formatted_user_content}"""
+
+            # 调用Google GenAI API
+            response = gemini_client.models.generate_content(
+                model=request_body.model,
+                contents=full_prompt
             )
 
             # 获取优化后的提示词
-            if response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
-                if message and message.content and message.content.strip():
-                    optimized_prompt = message.content.strip()
-                    print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
-                else:
-                    print(f"Gemini响应为空，模型: {request_body.model}")
-                    # 对于某些模型，尝试使用备用处理或返回友好提示
-                    if request_body.model == "gemini-2.5-pro-preview-03-25":
-                        print("尝试使用gemini-2.0-flash作为备用")
-                        # 使用备用模型重试
-                        backup_response = gemini_client.chat.completions.create(
-                            model="gemini-2.0-flash",
-                            messages=messages,
-                            temperature=0.5,
-                            max_tokens=2000
-                        )
-                        if backup_response.choices and backup_response.choices[0].message.content:
-                            optimized_prompt = backup_response.choices[0].message.content.strip()
-                            print(f"备用模型响应成功，内容长度: {len(optimized_prompt)}")
-                        else:
-                            raise HTTPException(
-                                status_code=500,
-                                detail="Gemini模型暂时无法处理此请求，请稍后重试或选择其他模型"
-                            )
-                    else:
-                        raise HTTPException(
-                            status_code=500,
-                            detail="Gemini API返回空响应，请稍后重试"
-                        )
+            if response and response.text and response.text.strip():
+                optimized_prompt = response.text.strip()
+                print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
             else:
-                print("Gemini响应格式错误")
+                print(f"Gemini响应为空，模型: {request_body.model}")
                 raise HTTPException(
                     status_code=500,
-                    detail="Gemini API响应格式错误"
+                    detail="Gemini API返回空响应，请稍后重试"
                 )
 
         else:
@@ -302,15 +264,15 @@ async def optimize_prompt(request_body: PromptRequest):
         )
     except openai.APIError as e:
         # OpenAI API相关错误
-        error_detail = f"API调用失败: {str(e)}"
-        if request_body.model.startswith("gemini-"):
-            error_detail = f"Gemini API调用失败: {str(e)}"
+        error_detail = f"DeepSeek API调用失败: {str(e)}"
         raise HTTPException(status_code=500, detail=error_detail)
     except Exception as e:
-        # 其他未知错误
+        # 其他未知错误，包括Google GenAI相关错误
         error_detail = f"未知错误: {str(e)}"
         if request_body.model.startswith("gemini-"):
             error_detail = f"Gemini模型调用失败: {str(e)}"
+        elif request_body.model.startswith("deepseek-"):
+            error_detail = f"DeepSeek模型调用失败: {str(e)}"
         print(f"错误详情: {error_detail}")
         raise HTTPException(status_code=500, detail=error_detail)
 
