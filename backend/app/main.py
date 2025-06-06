@@ -174,6 +174,9 @@ async def optimize_prompt(request_body: PromptRequest):
                     detail="Gemini API密钥未配置：请检查环境变量 GEMINI_API_KEY 是否正确设置"
                 )
 
+            print(f"使用Gemini模型: {request_body.model}")
+            print(f"API密钥: {GEMINI_API_KEY[:10]}...")
+
             # 初始化Gemini的OpenAI兼容客户端
             gemini_client = OpenAI(
                 api_key=GEMINI_API_KEY,
@@ -196,13 +199,28 @@ async def optimize_prompt(request_body: PromptRequest):
             response = gemini_client.chat.completions.create(
                 model=request_body.model,  # 使用完整的模型名称
                 messages=messages,
-                stream=False,
                 temperature=0.5,
                 max_tokens=2000
             )
 
             # 获取优化后的提示词
-            optimized_prompt = response.choices[0].message.content.strip()
+            if response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content:
+                    optimized_prompt = message.content.strip()
+                    print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
+                else:
+                    print("Gemini响应为空")
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Gemini API返回空响应"
+                    )
+            else:
+                print("Gemini响应格式错误")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Gemini API响应格式错误"
+                )
 
         else:
             # 使用DeepSeek模型
@@ -263,18 +281,19 @@ async def optimize_prompt(request_body: PromptRequest):
             status_code=500,
             detail=f"DeepSeek API状态错误: {str(e)}"
         )
+    except openai.APIError as e:
+        # OpenAI API相关错误
+        error_detail = f"API调用失败: {str(e)}"
+        if request_body.model.startswith("gemini-"):
+            error_detail = f"Gemini API调用失败: {str(e)}"
+        raise HTTPException(status_code=500, detail=error_detail)
     except Exception as e:
-        # 检查是否是Gemini相关的错误
-        if "gemini" in str(e).lower() or request_body.model == "gemini-pro":
-            raise HTTPException(
-                status_code=500,
-                detail=f"Gemini API调用失败: {str(e)}"
-            )
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail=f"API调用失败: {str(e)}"
-            )
+        # 其他未知错误
+        error_detail = f"未知错误: {str(e)}"
+        if request_body.model.startswith("gemini-"):
+            error_detail = f"Gemini模型调用失败: {str(e)}"
+        print(f"错误详情: {error_detail}")
+        raise HTTPException(status_code=500, detail=error_detail)
 
 if __name__ == "__main__":
     import uvicorn
