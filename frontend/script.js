@@ -295,6 +295,9 @@ async function copyToClipboard() {
         copyBtn.style.borderColor = 'var(--color-success)';
         copyBtn.style.color = 'white';
 
+        // 显示复制成功提示框
+        showCustomAlert('提示词已成功复制到剪贴板', 'success', 2000);
+
         setTimeout(() => {
             copyBtn.querySelector('.button-icon').textContent = originalIcon;
             copyBtn.querySelector('.button-text').textContent = originalText;
@@ -320,7 +323,7 @@ async function copyToClipboard() {
             copyBtn.style.color = '';
         }, 2000);
 
-        showCustomAlert('复制失败，请手动选择文本复制', 'error');
+        showCustomAlert('复制失败，请手动选择文本复制', 'error', 3500);
     }
 }
 
