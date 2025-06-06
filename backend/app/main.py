@@ -1,10 +1,22 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import os
+import time
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
+
+# 导入速率限制相关库
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+# 检查是否在Vercel环境
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+if IS_VERCEL:
+    print("检测到Vercel环境，将使用适配的速率限制策略")
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -12,6 +24,13 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 # 从环境变量中获取API密钥
 LLM_API_KEY = os.getenv("MY_LLM_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 获取速率限制配置的环境变量
+RATE_LIMIT_DEFAULT = os.getenv("RATE_LIMIT_DEFAULT", "10/minute")
+RATE_LIMIT_HEALTH = os.getenv("RATE_LIMIT_HEALTH", "30/minute") 
+RATE_LIMIT_ROOT = os.getenv("RATE_LIMIT_ROOT", "20/minute")
+RATE_LIMIT_MODELS = os.getenv("RATE_LIMIT_MODELS", "15/minute")
+RATE_LIMIT_OPTIMIZE = os.getenv("RATE_LIMIT_OPTIMIZE", "10/minute")
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
@@ -75,11 +94,106 @@ META_PROMPT_TEMPLATE = """## 角色与核心任务
 优化后的提示词：
 """
 
+# 创建简单的内存存储类，用于Vercel等环境
+class SimpleRateLimitStore:
+    def __init__(self):
+        self.store = {}  # {ip: {endpoint: [timestamps]}}
+        self.clean_interval = 60  # 每分钟清理一次过期记录
+        self.last_clean = time.time()
+
+    def add_request(self, key, endpoint, limits):
+        """添加请求记录"""
+        now = time.time()
+        
+        # 定期清理过期记录
+        if now - self.last_clean > self.clean_interval:
+            self._clean_expired()
+            self.last_clean = now
+        
+        if key not in self.store:
+            self.store[key] = {}
+        
+        if endpoint not in self.store[key]:
+            self.store[key][endpoint] = []
+            
+        self.store[key][endpoint].append(now)
+        
+    def check_limit(self, key, endpoint, limit_string):
+        """检查是否超过限制"""
+        if key not in self.store or endpoint not in self.store[key]:
+            return False, None, None
+            
+        # 解析限制字符串，如 "10/minute"
+        parts = limit_string.split('/')
+        if len(parts) != 2:
+            return False, None, None
+            
+        try:
+            count = int(parts[0])
+            period = parts[1].lower()
+            
+            if period == 'second':
+                period_seconds = 1
+            elif period == 'minute':
+                period_seconds = 60
+            elif period == 'hour':
+                period_seconds = 3600
+            elif period == 'day':
+                period_seconds = 86400
+            else:
+                return False, None, None
+                
+            # 获取时间窗口内的请求数
+            now = time.time()
+            window_start = now - period_seconds
+            recent_requests = [t for t in self.store[key][endpoint] if t > window_start]
+            
+            # 更新列表，只保留窗口内的记录
+            self.store[key][endpoint] = recent_requests
+            
+            # 检查是否超限
+            is_limited = len(recent_requests) >= count
+            reset_time = window_start + period_seconds
+            retry_after = max(0, int(reset_time - now))
+            
+            return is_limited, retry_after, limit_string
+            
+        except (ValueError, IndexError):
+            return False, None, None
+    
+    def _clean_expired(self):
+        """清理过期的记录，防止内存泄漏"""
+        now = time.time()
+        oldest = now - 86400  # 保留最近24小时的记录
+        
+        for key in list(self.store.keys()):
+            for endpoint in list(self.store[key].keys()):
+                # 只保留24小时内的记录
+                self.store[key][endpoint] = [t for t in self.store[key][endpoint] if t > oldest]
+                
+                # 如果没有记录，删除该端点
+                if not self.store[key][endpoint]:
+                    del self.store[key][endpoint]
+                    
+            # 如果该IP没有任何端点记录，删除该IP
+            if not self.store[key]:
+                del self.store[key]
+
+# 创建速率限制器实例
+limiter = Limiter(key_func=get_remote_address)
+
+# 创建内存存储
+simple_store = SimpleRateLimitStore()
+
 app = FastAPI(
     title="Prompt Optimizer API",
     description="一个用于优化提示词的API服务",
     version="1.0.0"
 )
+
+# 添加速率限制异常处理器
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # 配置CORS
 app.add_middleware(
@@ -99,18 +213,55 @@ class PromptResponse(BaseModel):
     optimized_prompt: str
     model_used: str
 
+# 中间件：内存速率限制实现
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    client_ip = request.client.host
+    path = request.url.path
+    
+    # 为不同的路径设置不同的限制规则
+    limit_rule = RATE_LIMIT_DEFAULT
+    if path == "/":
+        limit_rule = RATE_LIMIT_ROOT
+    elif path == "/api/health":
+        limit_rule = RATE_LIMIT_HEALTH
+    elif path == "/api/models":
+        limit_rule = RATE_LIMIT_MODELS
+    elif path == "/api/optimize":
+        limit_rule = RATE_LIMIT_OPTIMIZE
+        
+    # 检查并记录请求
+    is_limited, retry_after, limit = simple_store.check_limit(client_ip, path, limit_rule)
+    simple_store.add_request(client_ip, path, limit_rule)
+    
+    # 如果超出限制，返回429错误
+    if is_limited:
+        return JSONResponse(
+            status_code=429, 
+            content={
+                "detail": "请求速率超过限制，请稍后重试",
+                "limit": limit,
+                "retry_after": str(retry_after)
+            }
+        )
+    
+    # 继续处理请求
+    response = await call_next(request)
+    return response
+
+# 以下路由保持原样，但可以删除@limiter.limit装饰器，因为我们使用中间件处理了速率限制
 @app.get("/")
-async def root():
+async def root(request: Request):
     """根路径，返回API信息"""
     return {"message": "欢迎使用Prompt Optimizer API", "version": "1.0.0"}
 
 @app.get("/api/health")
-async def health_check():
+async def health_check(request: Request):
     """健康检查端点"""
     return {"status": "healthy"}
 
 @app.get("/api/models")
-async def get_available_models():
+async def get_available_models(request: Request):
     """获取可用的模型列表"""
     return {
         "models": [
@@ -149,8 +300,12 @@ async def get_available_models():
     }
 
 @app.post("/api/optimize", response_model=PromptResponse)
-async def optimize_prompt(request_body: PromptRequest):
+async def optimize_prompt(request_body: PromptRequest, request: Request):
     """优化提示词的API端点"""
+    # 获取客户端真实IP
+    client_ip = request.client.host
+    print(f"接收到优化请求，客户端IP: {client_ip}")
+    
     # 检查API密钥是否存在
     if not LLM_API_KEY:
         raise HTTPException(
@@ -319,6 +474,18 @@ async def optimize_prompt(request_body: PromptRequest):
             error_detail = f"Gemini模型调用失败: {str(e)}"
         print(f"错误详情: {error_detail}")
         raise HTTPException(status_code=500, detail=error_detail)
+
+# 添加速率限制超出时的自定义错误处理
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "请求速率超过限制，请稍后重试",
+            "limit": str(exc.detail),
+            "retry_after": exc.headers.get("Retry-After", "60")
+        }
+    )
 
 if __name__ == "__main__":
     import uvicorn

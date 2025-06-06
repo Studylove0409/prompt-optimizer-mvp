@@ -3,11 +3,7 @@
   "builds": [
     {
       "src": "backend/app/main.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
-      }
+      "use": "@vercel/python"
     },
     {
       "src": "frontend/**",
@@ -20,23 +16,21 @@
       "dest": "backend/app/main.py"
     },
     {
-      "src": "/style.css",
-      "dest": "frontend/style.css"
-    },
-    {
-      "src": "/script.js",
-      "dest": "frontend/script.js"
-    },
-    {
-      "src": "/particles.js",
-      "dest": "frontend/particles.js"
-    },
-    {
-      "handle": "filesystem"
+      "src": "/(.*)",
+      "dest": "frontend/$1",
+      "continue": true
     },
     {
       "src": "/(.*)",
       "dest": "frontend/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VERCEL": "1",
+    "RATE_LIMIT_DEFAULT": "10/minute",
+    "RATE_LIMIT_ROOT": "20/minute",
+    "RATE_LIMIT_HEALTH": "30/minute",
+    "RATE_LIMIT_MODELS": "15/minute",
+    "RATE_LIMIT_OPTIMIZE": "10/minute"
+  }
 }
