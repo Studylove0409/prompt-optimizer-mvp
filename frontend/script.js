@@ -17,6 +17,27 @@ const API_BASE_URL = window.location.protocol === 'file:'
     ? 'http://localhost:8000/api'  // 本地开发环境
     : '/api';                      // 部署环境（相对路径）
 
+// 安全令牌 - 将在应用初始化时获取
+let API_TOKEN = '';
+
+// 初始化API令牌
+async function initApiToken() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/key`);
+        if (!response.ok) {
+            console.error('无法获取API令牌');
+            return false;
+        }
+        const data = await response.json();
+        API_TOKEN = data.key;
+        console.log('API令牌已初始化');
+        return true;
+    } catch (error) {
+        console.error('初始化API令牌失败:', error);
+        return false;
+    }
+}
+
 // 创建自定义提示框
 function showCustomAlert(message, type = 'info', duration = 3000) {
     // 移除现有的提示框
@@ -202,25 +223,33 @@ function addButtonAnimation(button) {
 // 优化提示词
 async function optimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
-    const selectedModel = getSelectedModel();
 
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
         throw new Error('没有输入提示词');
     }
 
+    // 检查API令牌是否已初始化
+    if (!API_TOKEN) {
+        const tokenInitialized = await initApiToken();
+        if (!tokenInitialized) {
+            showCustomAlert('无法连接到服务器，请刷新页面重试', 'error', 3500);
+            throw new Error('API令牌未初始化');
+        }
+    }
+
     // 显示加载状态
     showLoading();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/optimize`, {
+        const response = await fetch(`${API_BASE_URL}/secure-optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                original_prompt: originalPrompt,
-                model: selectedModel
+                prompt: originalPrompt,
+                token: API_TOKEN
             })
         });
 
@@ -432,41 +461,47 @@ function createTemporaryParticles(x, y) {
     }
 }
 
-// 事件监听器
-optimizeBtn.addEventListener('click', () => {
-    optimizeBtn.classList.remove('pulse-hint');
-    addButtonAnimation(optimizeBtn);
-    optimizePrompt();
-});
-
-copyBtn.addEventListener('click', copyToClipboard);
-clearBtn.addEventListener('click', clearAll);
-
-// 字符计数更新
-originalPromptTextarea.addEventListener('input', updateCharCount);
-
-// 键盘事件处理
-originalPromptTextarea.addEventListener('keydown', (e) => {
-    // Enter: 普通优化 (使用当前选择的模型)
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        optimizeBtn.classList.remove('pulse-hint');
-        addButtonAnimation(optimizeBtn);
-        optimizePrompt();
-    }
-    // Shift + Enter: 换行 (默认行为)
-});
-
 // 页面加载完成后的初始化
-document.addEventListener('DOMContentLoaded', () => {
-    originalPromptTextarea.focus();
-    updateCharCount();
-    addModelCardEffects();
-
+document.addEventListener('DOMContentLoaded', async () => {
     // 添加页面加载动画
     document.body.style.opacity = '0';
     setTimeout(() => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '1';
     }, 100);
+
+    // 初始化API令牌
+    await initApiToken();
+    
+    // 按钮点击事件
+    optimizeBtn.addEventListener('click', () => {
+        optimizeBtn.classList.remove('pulse-hint');
+        addButtonAnimation(optimizeBtn);
+        optimizePrompt();
+    });
+
+    copyBtn.addEventListener('click', copyToClipboard);
+    clearBtn.addEventListener('click', clearAll);
+
+    // 字符计数更新
+    originalPromptTextarea.addEventListener('input', updateCharCount);
+
+    // 键盘事件处理
+    originalPromptTextarea.addEventListener('keydown', (e) => {
+        // Enter: 普通优化 (使用当前选择的模型)
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            optimizeBtn.classList.remove('pulse-hint');
+            addButtonAnimation(optimizeBtn);
+            optimizePrompt();
+        }
+        // Shift + Enter: 换行 (默认行为)
+    });
+
+    // 添加模型卡片效果
+    addModelCardEffects();
+
+    // 初始更新字符计数和聚焦
+    updateCharCount();
+    originalPromptTextarea.focus();
 });

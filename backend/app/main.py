@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
+import secrets
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -12,6 +13,15 @@ load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 # 从环境变量中获取API密钥
 LLM_API_KEY = os.getenv("MY_LLM_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# 生成一个安全的API密钥用于前端和后端之间的通信
+if not os.getenv("FRONTEND_API_KEY"):
+    print("生成新的前端API密钥...")
+    # 在实际生产环境中，应该将此密钥存储在环境变量或配置文件中
+    FRONTEND_API_KEY = secrets.token_urlsafe(32)
+else:
+    FRONTEND_API_KEY = os.getenv("FRONTEND_API_KEY")
+    print(f"使用已存在的前端API密钥: {FRONTEND_API_KEY[:10]}...")
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
@@ -99,6 +109,20 @@ class PromptResponse(BaseModel):
     optimized_prompt: str
     model_used: str
 
+class SecurePromptRequest(BaseModel):
+    prompt: str
+    token: str  # 前端验证令牌
+
+# 验证前端请求的函数
+def verify_frontend_request(token: str):
+    """验证前端请求是否包含有效的令牌"""
+    if token != FRONTEND_API_KEY:
+        raise HTTPException(
+            status_code=403,
+            detail="无效的访问令牌"
+        )
+    return True
+
 @app.get("/")
 async def root():
     """根路径，返回API信息"""
@@ -108,6 +132,29 @@ async def root():
 async def health_check():
     """健康检查端点"""
     return {"status": "healthy"}
+
+@app.get("/api/key")
+async def get_frontend_key():
+    """获取前端API密钥 - 注意：在实际生产环境中，应该通过更安全的方式分发密钥"""
+    return {"key": FRONTEND_API_KEY}
+
+@app.post("/api/secure-optimize")
+async def secure_optimize(request_body: SecurePromptRequest, request: Request):
+    """安全的代理接口，验证请求并转发到实际的优化服务"""
+    # 验证请求来源
+    client_host = request.client.host if request.client else "unknown"
+    print(f"请求来源: {client_host}")
+    
+    # 验证令牌
+    verify_frontend_request(request_body.token)
+    
+    # 创建标准的PromptRequest对象并调用原始优化函数
+    prompt_request = PromptRequest(
+        original_prompt=request_body.prompt,
+        model="deepseek-chat"  # 使用默认模型，增加安全性
+    )
+    
+    return await optimize_prompt(prompt_request)
 
 @app.get("/api/models")
 async def get_available_models():
