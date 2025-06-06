@@ -137,6 +137,12 @@ async def get_available_models():
                 "name": "Gemini 2.5 Pro Preview",
                 "description": "Google最新的Gemini 2.5 Pro预览版，具备更强的推理和创新能力",
                 "speed": "medium"
+            },
+            {
+                "id": "gemini-2.5-flash-preview-05-20",
+                "name": "Gemini 2.5 Flash Preview",
+                "description": "Google最新的Gemini 2.5 Flash预览版，具备极速响应和卓越性能",
+                "speed": "fast"
             }
         ],
         "default": "deepseek-chat"
@@ -153,7 +159,7 @@ async def optimize_prompt(request_body: PromptRequest):
         )
 
     # 验证模型选择
-    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-2.0-flash", "gemini-2.5-pro-preview-03-25"]
+    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-2.0-flash", "gemini-2.5-pro-preview-03-25", "gemini-2.5-flash-preview-05-20"]
     if request_body.model not in valid_models:
         raise HTTPException(
             status_code=400,
