@@ -226,12 +226,6 @@ async function optimizePrompt() {
         });
 
         if (!response.ok) {
-            // 处理速率限制错误
-            if (response.status === 429) {
-                const errorData = await response.json();
-                const retryAfter = errorData.retry_after || '60';
-                throw new Error(`请求频率过高，请在${retryAfter}秒后重试`);
-            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -247,14 +241,7 @@ async function optimizePrompt() {
 
     } catch (error) {
         console.error('优化失败:', error);
-        
-        // 根据错误类型提供更友好的提示
-        if (error.message.includes('请求频率过高')) {
-            showCustomAlert(error.message, 'warning', 5000);
-        } else {
-            showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
-        }
-        
+        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
