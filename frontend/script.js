@@ -17,6 +17,148 @@ const API_BASE_URL = window.location.protocol === 'file:'
     ? 'http://localhost:8000/api'  // 本地开发环境
     : '/api';                      // 部署环境（相对路径）
 
+// 创建自定义提示框
+function showCustomAlert(message, type = 'info', duration = 3000) {
+    // 移除现有的提示框
+    const existingAlerts = document.querySelectorAll('.custom-alert');
+    existingAlerts.forEach(alert => {
+        if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+        }
+    });
+
+    // 创建提示框元素
+    const alertBox = document.createElement('div');
+    alertBox.className = `custom-alert ${type}`;
+    
+    // 根据类型设置图标
+    let icon = '💬';
+    if (type === 'error') icon = '❌';
+    if (type === 'success') icon = '✅';
+    if (type === 'warning') icon = '⚠️';
+    if (type === 'info') icon = 'ℹ️';
+    
+    alertBox.innerHTML = `
+        <div class="alert-content">
+            <span class="alert-icon">${icon}</span>
+            <span class="alert-message">${message}</span>
+        </div>
+        <button class="alert-close">×</button>
+    `;
+    
+    // 添加到页面
+    document.body.appendChild(alertBox);
+    
+    // 显示动画
+    setTimeout(() => {
+        alertBox.classList.add('show');
+    }, 10);
+    
+    // 关闭按钮事件
+    const closeBtn = alertBox.querySelector('.alert-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            alertBox.classList.remove('show');
+            setTimeout(() => {
+                if (alertBox.parentNode) {
+                    alertBox.parentNode.removeChild(alertBox);
+                }
+            }, 300);
+        });
+    }
+    
+    // 自动关闭
+    if (duration > 0) {
+        setTimeout(() => {
+            if (alertBox.parentNode) {
+                alertBox.classList.remove('show');
+                setTimeout(() => {
+                    if (alertBox.parentNode) {
+                        alertBox.parentNode.removeChild(alertBox);
+                    }
+                }, 300);
+            }
+        }, duration);
+    }
+    
+    return alertBox;
+}
+
+// 创建自定义确认对话框
+function showCustomConfirm(message, onConfirm, onCancel) {
+    // 创建确认框元素
+    const confirmBox = document.createElement('div');
+    confirmBox.className = 'custom-confirm';
+    
+    confirmBox.innerHTML = `
+        <div class="confirm-content">
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-buttons">
+                <button class="confirm-button cancel">取消</button>
+                <button class="confirm-button confirm">确认</button>
+            </div>
+        </div>
+    `;
+    
+    // 添加背景遮罩
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    document.body.appendChild(overlay);
+    
+    // 添加到页面
+    document.body.appendChild(confirmBox);
+    
+    // 显示动画
+    setTimeout(() => {
+        overlay.classList.add('show');
+        confirmBox.classList.add('show');
+    }, 10);
+    
+    // 按钮事件
+    const cancelBtn = confirmBox.querySelector('.cancel');
+    const confirmBtn = confirmBox.querySelector('.confirm');
+    
+    // 关闭确认框
+    const closeConfirm = () => {
+        confirmBox.classList.remove('show');
+        overlay.classList.remove('show');
+        
+        setTimeout(() => {
+            if (confirmBox.parentNode) confirmBox.parentNode.removeChild(confirmBox);
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 300);
+    };
+    
+    // 取消按钮事件
+    cancelBtn.addEventListener('click', () => {
+        closeConfirm();
+        if (typeof onCancel === 'function') onCancel();
+    });
+    
+    // 确认按钮事件
+    confirmBtn.addEventListener('click', () => {
+        closeConfirm();
+        if (typeof onConfirm === 'function') onConfirm();
+    });
+    
+    // ESC键关闭
+    const keyHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeConfirm();
+            if (typeof onCancel === 'function') onCancel();
+            document.removeEventListener('keydown', keyHandler);
+        }
+    };
+    
+    document.addEventListener('keydown', keyHandler);
+    
+    // 点击背景关闭
+    overlay.addEventListener('click', () => {
+        closeConfirm();
+        if (typeof onCancel === 'function') onCancel();
+    });
+}
+
 // 获取选中的模型
 function getSelectedModel() {
     const selectedRadio = document.querySelector('input[name="model"]:checked');
@@ -41,6 +183,13 @@ function updateCharCount() {
     if (charCountElement) {
         charCountElement.textContent = `${count} 字符`;
     }
+
+    // 当有内容时，给按钮添加脉冲提示
+    if (count > 0 && !optimizeBtn.classList.contains('pulse-hint')) {
+        optimizeBtn.classList.add('pulse-hint');
+    } else if (count === 0) {
+        optimizeBtn.classList.remove('pulse-hint');
+    }
 }
 
 // 添加按钮点击动画
@@ -57,7 +206,7 @@ async function optimizePrompt() {
     const selectedModel = getSelectedModel();
 
     if (!originalPrompt) {
-        alert('请输入要优化的提示词');
+        showCustomAlert('请输入要优化的提示词', 'warning');
         throw new Error('没有输入提示词');
     }
 
@@ -89,7 +238,7 @@ async function optimizePrompt() {
 
     } catch (error) {
         console.error('优化失败:', error);
-        alert('优化失败，请检查网络连接或稍后重试');
+        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error');
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
@@ -168,7 +317,7 @@ async function copyToClipboard() {
             copyBtn.style.color = '';
         }, 2000);
 
-        alert('复制失败，请手动选择文本复制');
+        showCustomAlert('复制失败，请手动选择文本复制', 'error');
     }
 }
 
@@ -178,20 +327,25 @@ function clearAll() {
 
     // 添加确认对话框
     if (originalPromptTextarea.value.trim() || optimizedPromptDiv.textContent.trim()) {
-        if (!confirm('确定要清空所有内容吗？')) {
-            return;
-        }
+        showCustomConfirm('确定要清空所有内容吗？', () => {
+            // 确认后清空内容
+            originalPromptTextarea.value = '';
+            optimizedPromptDiv.textContent = '';
+            modelUsedDiv.textContent = '';
+            outputSection.style.display = 'none';
+            updateCharCount();
+            originalPromptTextarea.focus();
+            
+            // 显示成功提示
+            showCustomAlert('已清空所有内容', 'success', 2000);
+
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    } else {
+        // 如果没有内容，直接获取焦点
+        originalPromptTextarea.focus();
     }
-
-    originalPromptTextarea.value = '';
-    optimizedPromptDiv.textContent = '';
-    modelUsedDiv.textContent = '';
-    outputSection.style.display = 'none';
-    updateCharCount();
-    originalPromptTextarea.focus();
-
-    // 滚动到顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // 模型卡片点击效果
@@ -274,6 +428,7 @@ function createTemporaryParticles(x, y) {
 
 // 事件监听器
 optimizeBtn.addEventListener('click', () => {
+    optimizeBtn.classList.remove('pulse-hint');
     addButtonAnimation(optimizeBtn);
     optimizePrompt();
 });
@@ -302,6 +457,7 @@ originalPromptTextarea.addEventListener('keydown', (e) => {
     // Enter: 普通优化 (使用当前选择的模型)
     else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        optimizeBtn.classList.remove('pulse-hint');
         addButtonAnimation(optimizeBtn);
         optimizePrompt();
     }
@@ -329,6 +485,7 @@ function triggerQuickOptimize() {
         showQuickOptimizeHint();
 
         // 执行优化
+        optimizeBtn.classList.remove('pulse-hint');
         addButtonAnimation(optimizeBtn);
 
         // 使用async/await处理优化
