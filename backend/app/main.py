@@ -5,18 +5,29 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
+import google.generativeai as genai
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 # 从环境变量中获取API密钥
 LLM_API_KEY = os.getenv("MY_LLM_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
     print("警告：MY_LLM_API_KEY 环境变量未设置或为空")
 else:
-    print(f"API密钥已加载：{LLM_API_KEY[:10]}...")  # 只显示前10个字符用于调试
+    print(f"DeepSeek API密钥已加载：{LLM_API_KEY[:10]}...")  # 只显示前10个字符用于调试
+
+if not GEMINI_API_KEY:
+    print("警告：GEMINI_API_KEY 环境变量未设置或为空")
+else:
+    print(f"Gemini API密钥已加载：{GEMINI_API_KEY[:10]}...")
+
+# 配置Gemini API
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # 元提示词模板
 META_PROMPT_TEMPLATE = """## 角色与核心任务
@@ -119,6 +130,12 @@ async def get_available_models():
                 "name": "DeepSeek Reasoner (R1-0528)",
                 "description": "更强的推理能力，适合复杂分析和深度思考",
                 "speed": "slow"
+            },
+            {
+                "id": "gemini-pro",
+                "name": "Gemini Pro",
+                "description": "Google的先进AI模型，平衡性能与质量",
+                "speed": "medium"
             }
         ],
         "default": "deepseek-chat"
@@ -135,7 +152,7 @@ async def optimize_prompt(request_body: PromptRequest):
         )
 
     # 验证模型选择
-    valid_models = ["deepseek-chat", "deepseek-reasoner"]
+    valid_models = ["deepseek-chat", "deepseek-reasoner", "gemini-pro"]
     if request_body.model not in valid_models:
         raise HTTPException(
             status_code=400,
@@ -144,55 +161,81 @@ async def optimize_prompt(request_body: PromptRequest):
 
     try:
         # 格式化元提示词模板
-        formatted_user_content_for_deepseek = META_PROMPT_TEMPLATE.format(
+        formatted_user_content = META_PROMPT_TEMPLATE.format(
             user_input_prompt=request_body.original_prompt
         )
 
-        # 初始化DeepSeek的OpenAI客户端
-        client = OpenAI(
-            api_key=LLM_API_KEY,
-            base_url="https://api.deepseek.com/v1"
-        )
-
-        # 构建发送给DeepSeek API的messages列表
-        messages = [
-            {
-                "role": "system",
-                "content": "你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。"
-            },
-            {
-                "role": "user",
-                "content": formatted_user_content_for_deepseek
-            }
-        ]
-
-        # 调用DeepSeek API，使用用户选择的模型
-        response = client.chat.completions.create(
-            model=request_body.model,
-            messages=messages,
-            stream=False,
-            temperature=0.5,
-            max_tokens=2000
-        )
-
-        # 提取优化后的提示词
-        if response.choices and len(response.choices) > 0:
-            optimized_content = response.choices[0].message.content
-            if optimized_content:
-                return PromptResponse(
-                    optimized_prompt=optimized_content.strip(),
-                    model_used=request_body.model
-                )
-            else:
+        if request_body.model == "gemini-pro":
+            # 使用Gemini模型
+            if not GEMINI_API_KEY:
                 raise HTTPException(
                     status_code=500,
-                    detail="解析DeepSeek响应失败：响应内容为空"
+                    detail="Gemini API密钥未配置：请检查环境变量 GEMINI_API_KEY 是否正确设置"
                 )
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="解析DeepSeek响应失败：未找到有效的响应选择"
+
+            # 初始化Gemini模型
+            model = genai.GenerativeModel('gemini-pro')
+
+            # 构建Gemini的提示词
+            gemini_prompt = f"""你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。
+
+{formatted_user_content}"""
+
+            # 调用Gemini API
+            response = model.generate_content(
+                gemini_prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.5,
+                    max_output_tokens=2000,
+                )
             )
+
+            # 获取优化后的提示词
+            optimized_prompt = response.text.strip()
+
+        else:
+            # 使用DeepSeek模型
+            if not LLM_API_KEY:
+                raise HTTPException(
+                    status_code=500,
+                    detail="DeepSeek API密钥未配置：请检查环境变量 MY_LLM_API_KEY 是否正确设置"
+                )
+
+            # 初始化DeepSeek的OpenAI客户端
+            client = OpenAI(
+                api_key=LLM_API_KEY,
+                base_url="https://api.deepseek.com/v1"
+            )
+
+            # 构建发送给DeepSeek API的messages列表
+            messages = [
+                {
+                    "role": "system",
+                    "content": "你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，并将其改写得更清晰、更具体、结构更合理、信息更充分，以便任何AI模型都能更好地理解并给出高质量的回复。请直接返回优化后的提示词文本，不要包含任何额外的解释或对话。"
+                },
+                {
+                    "role": "user",
+                    "content": formatted_user_content
+                }
+            ]
+
+            # 调用DeepSeek API，使用用户选择的模型
+            response = client.chat.completions.create(
+                model=request_body.model,
+                messages=messages,
+                stream=False,
+                temperature=0.5,
+                max_tokens=2000
+            )
+
+            # 获取优化后的提示词
+            optimized_prompt = response.choices[0].message.content.strip()
+
+        # 返回优化结果
+        return PromptResponse(
+            optimized_prompt=optimized_prompt,
+            model_used=request_body.model
+        )
 
     except openai.APIConnectionError as e:
         raise HTTPException(
@@ -210,10 +253,17 @@ async def optimize_prompt(request_body: PromptRequest):
             detail=f"DeepSeek API状态错误: {str(e)}"
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"DeepSeek API调用失败: {str(e)}"
-        )
+        # 检查是否是Gemini相关的错误
+        if "gemini" in str(e).lower() or request_body.model == "gemini-pro":
+            raise HTTPException(
+                status_code=500,
+                detail=f"Gemini API调用失败: {str(e)}"
+            )
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"API调用失败: {str(e)}"
+            )
 
 if __name__ == "__main__":
     import uvicorn

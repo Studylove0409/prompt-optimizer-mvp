@@ -23,7 +23,8 @@ function getSelectedModel() {
 function getModelDisplayName(modelId) {
     const modelNames = {
         'deepseek-chat': '普通版',
-        'deepseek-reasoner': 'Pro版'
+        'deepseek-reasoner': 'Pro版',
+        'gemini-pro': 'Gemini版'
     };
     return modelNames[modelId] || modelId;
 }
