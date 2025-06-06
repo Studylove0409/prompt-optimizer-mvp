@@ -200,22 +200,42 @@ body {
 
 /* ===== 英雄区域 ===== */
 .hero-section {
-    padding: var(--spacing-3xl) var(--spacing-lg);
+    padding: var(--spacing-3xl) var(--spacing-xl);
     text-align: center;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+    position: relative;
+    overflow: hidden;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(0, 122, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 149, 0, 0.05) 0%, transparent 50%);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0, 122, 255, 0.2) 50%,
+        transparent 100%);
+    box-shadow: 0 0 25px rgba(0, 122, 255, 0.3);
 }
 
 .hero-content {
+    position: relative;
+    z-index: 1;
     max-width: 800px;
     margin: 0 auto;
 }
 
 .hero-title {
-    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-size: 3.5rem;
     font-weight: var(--font-weight-bold);
-    line-height: 1.1;
     margin-bottom: var(--spacing-lg);
-    color: var(--color-gray-900);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 
 .title-line {
@@ -230,12 +250,17 @@ body {
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
+    font-size: 1rem;
     color: var(--color-gray-600);
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: var(--spacing-xl);
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    font-weight: var(--font-weight-light);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    opacity: 0.9;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .hero-features {
@@ -243,6 +268,9 @@ body {
     justify-content: center;
     gap: var(--spacing-xl);
     flex-wrap: wrap;
+    margin-bottom: var(--spacing-xl);
+    animation: fadeInUp 0.8s ease-out both;
+    animation-delay: 0.3s;
 }
 
 .feature-item {
@@ -251,10 +279,28 @@ body {
     gap: var(--spacing-sm);
     font-weight: var(--font-weight-medium);
     color: var(--color-gray-700);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    background: rgba(255, 255, 255, 0.85);
 }
 
 .feature-icon {
     font-size: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 /* ===== 主要内容区域 ===== */
