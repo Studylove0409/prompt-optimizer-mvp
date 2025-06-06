@@ -206,15 +206,34 @@ async def optimize_prompt(request_body: PromptRequest):
             # 获取优化后的提示词
             if response.choices and len(response.choices) > 0:
                 message = response.choices[0].message
-                if message and message.content:
+                if message and message.content and message.content.strip():
                     optimized_prompt = message.content.strip()
                     print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
                 else:
-                    print("Gemini响应为空")
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Gemini API返回空响应"
-                    )
+                    print(f"Gemini响应为空，模型: {request_body.model}")
+                    # 对于某些模型，尝试使用备用处理或返回友好提示
+                    if request_body.model == "gemini-2.5-pro-preview-03-25":
+                        print("尝试使用gemini-2.0-flash作为备用")
+                        # 使用备用模型重试
+                        backup_response = gemini_client.chat.completions.create(
+                            model="gemini-2.0-flash",
+                            messages=messages,
+                            temperature=0.5,
+                            max_tokens=2000
+                        )
+                        if backup_response.choices and backup_response.choices[0].message.content:
+                            optimized_prompt = backup_response.choices[0].message.content.strip()
+                            print(f"备用模型响应成功，内容长度: {len(optimized_prompt)}")
+                        else:
+                            raise HTTPException(
+                                status_code=500,
+                                detail="Gemini模型暂时无法处理此请求，请稍后重试或选择其他模型"
+                            )
+                    else:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Gemini API返回空响应，请稍后重试"
+                        )
             else:
                 print("Gemini响应格式错误")
                 raise HTTPException(
