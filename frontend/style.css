@@ -466,6 +466,48 @@ body {
     color: var(--color-white);
 }
 
+/* ===== 快速优化提示 ===== */
+.quick-optimize-hint {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 122, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    font-size: 14px;
+    z-index: 1001;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+}
+
+.quick-optimize-hint.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.quick-optimize-hint.hide {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.hint-icon {
+    font-size: 16px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.hint-text {
+    white-space: nowrap;
+}
+
 .model-desc {
     font-size: 14px;
     color: var(--color-gray-600);

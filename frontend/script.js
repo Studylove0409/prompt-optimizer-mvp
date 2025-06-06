@@ -57,7 +57,7 @@ async function optimizePrompt() {
 
     if (!originalPrompt) {
         alert('请输入要优化的提示词');
-        return;
+        throw new Error('没有输入提示词');
     }
 
     // 显示加载状态
@@ -84,9 +84,12 @@ async function optimizePrompt() {
         // 显示结果
         showResult(data.optimized_prompt, data.model_used);
 
+        return data; // 返回结果数据
+
     } catch (error) {
         console.error('优化失败:', error);
         alert('优化失败，请检查网络连接或稍后重试');
+        throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
     }
@@ -280,14 +283,87 @@ clearBtn.addEventListener('click', clearAll);
 // 字符计数更新
 originalPromptTextarea.addEventListener('input', updateCharCount);
 
-// 支持 Enter + Ctrl 快捷键优化
+// 支持 Enter + Ctrl 快捷键优化 - 默认使用Gemini Flash模型
 originalPromptTextarea.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
-        addButtonAnimation(optimizeBtn);
-        optimizePrompt();
+
+        // 临时切换到Gemini Flash模型
+        const geminiFlashRadio = document.querySelector('input[value="gemini-2.0-flash"]');
+
+        if (geminiFlashRadio) {
+            // 保存当前选择
+            const currentSelectedRadio = document.querySelector('input[name="model"]:checked');
+
+            // 临时选择Gemini Flash
+            geminiFlashRadio.checked = true;
+
+            // 触发粒子效果
+            const geminiFlashCard = geminiFlashRadio.closest('.model-card');
+            if (geminiFlashCard) {
+                triggerParticleBurst(geminiFlashCard);
+            }
+
+            // 添加视觉提示
+            showQuickOptimizeHint();
+
+            // 执行优化
+            addButtonAnimation(optimizeBtn);
+
+            // 使用async/await处理优化
+            (async () => {
+                try {
+                    await optimizePrompt();
+                    // 优化完成后恢复原来的选择
+                    if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
+                        setTimeout(() => {
+                            currentSelectedRadio.checked = true;
+                        }, 1500);
+                    }
+                } catch (error) {
+                    // 如果出错也恢复选择
+                    if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
+                        currentSelectedRadio.checked = true;
+                    }
+                    console.error('快速优化失败:', error);
+                }
+            })();
+        } else {
+            // 如果找不到Gemini Flash，使用当前选择的模型
+            addButtonAnimation(optimizeBtn);
+            optimizePrompt();
+        }
     }
 });
+
+// 显示快速优化提示
+function showQuickOptimizeHint() {
+    // 创建提示元素
+    const hint = document.createElement('div');
+    hint.className = 'quick-optimize-hint';
+    hint.innerHTML = `
+        <span class="hint-icon">⚡</span>
+        <span class="hint-text">快速优化模式 - 使用 Gemini Flash</span>
+    `;
+
+    // 添加到页面
+    document.body.appendChild(hint);
+
+    // 显示动画
+    setTimeout(() => {
+        hint.classList.add('show');
+    }, 10);
+
+    // 3秒后移除
+    setTimeout(() => {
+        hint.classList.add('hide');
+        setTimeout(() => {
+            if (hint.parentNode) {
+                hint.parentNode.removeChild(hint);
+            }
+        }, 300);
+    }, 2000);
+}
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
