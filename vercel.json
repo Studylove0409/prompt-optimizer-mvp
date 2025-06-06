@@ -28,6 +28,10 @@
       "dest": "frontend/script.js"
     },
     {
+      "src": "/particles.js",
+      "dest": "frontend/particles.js"
+    },
+    {
       "handle": "filesystem"
     },
     {

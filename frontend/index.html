@@ -228,5 +228,25 @@
     <!-- 脚本文件 -->
     <script src="/script.js"></script>
     <script src="/particles.js"></script>
+
+    <!-- 备用粒子系统初始化 -->
+    <script>
+        // 确保粒子系统能够加载
+        window.addEventListener('load', function() {
+            if (!window.particleSystem) {
+                console.log('备用粒子系统初始化...');
+                setTimeout(function() {
+                    if (typeof ParticleSystem !== 'undefined' && !window.particleSystem) {
+                        try {
+                            window.particleSystem = new ParticleSystem();
+                            console.log('备用粒子系统初始化成功');
+                        } catch (error) {
+                            console.error('备用粒子系统初始化失败:', error);
+                        }
+                    }
+                }, 500);
+            }
+        });
+    </script>
 </body>
 </html>

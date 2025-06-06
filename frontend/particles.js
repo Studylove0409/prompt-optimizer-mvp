@@ -244,20 +244,52 @@ class Particle {
 }
 
 // 初始化粒子系统
-document.addEventListener('DOMContentLoaded', () => {
-    // 检查设备性能，移动设备使用较少粒子
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-        // 移动设备减少粒子数量以提高性能
-        window.particleSystem = new ParticleSystem();
-        window.particleSystem.config.particleCount = 25;
-        window.particleSystem.config.connectionDistance = 80;
-        window.particleSystem.createParticles();
-    } else {
-        window.particleSystem = new ParticleSystem();
+function initParticleSystem() {
+    try {
+        console.log('正在初始化粒子系统...');
+
+        // 检查Canvas支持
+        const canvas = document.getElementById('particleCanvas');
+        if (!canvas) {
+            console.error('找不到粒子画布元素');
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('浏览器不支持Canvas 2D');
+            return;
+        }
+
+        // 检查设备性能，移动设备使用较少粒子
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // 移动设备减少粒子数量以提高性能
+            window.particleSystem = new ParticleSystem();
+            window.particleSystem.config.particleCount = 25;
+            window.particleSystem.config.connectionDistance = 80;
+            window.particleSystem.createParticles();
+            console.log('移动设备粒子系统初始化完成 (25个粒子)');
+        } else {
+            window.particleSystem = new ParticleSystem();
+            console.log('桌面设备粒子系统初始化完成 (50个粒子)');
+        }
+    } catch (error) {
+        console.error('粒子系统初始化失败:', error);
     }
-});
+}
+
+// 多种方式确保粒子系统能够初始化
+document.addEventListener('DOMContentLoaded', initParticleSystem);
+
+// 如果DOMContentLoaded已经触发，立即初始化
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParticleSystem);
+} else {
+    // DOM已经加载完成
+    initParticleSystem();
+}
 
 // 页面卸载时清理
 window.addEventListener('beforeunload', () => {
