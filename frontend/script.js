@@ -19,11 +19,6 @@ const API_BASE_URL = window.location.protocol === 'file:'
 
 // 安全令牌 - 将在应用初始化时获取
 let API_TOKEN = '';
-// 时间戳偏移量 - 用于请求时间验证
-let TIME_OFFSET = 0;
-
-// 用于数据解密的库（使用开源库）
-let decryptionKey = null;
 
 // 初始化API令牌
 async function initApiToken() {
@@ -35,126 +30,12 @@ async function initApiToken() {
         }
         const data = await response.json();
         API_TOKEN = data.key;
-        
-        // 获取服务器时间和偏移量
-        if (data.server_time) {
-            const serverTime = parseInt(data.server_time);
-            const clientTime = Math.floor(Date.now() / 1000);
-            TIME_OFFSET = serverTime - clientTime;
-        }
-        
         console.log('API令牌已初始化');
         return true;
     } catch (error) {
         console.error('初始化API令牌失败:', error);
         return false;
     }
-}
-
-// 加载加密库
-async function loadCryptoLibrary() {
-    return new Promise((resolve, reject) => {
-        if (window.cryptojs_loaded) {
-            resolve();
-            return;
-        }
-        
-        // 加载 CryptoJS 库
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
-        script.onload = () => {
-            window.cryptojs_loaded = true;
-            resolve();
-        };
-        script.onerror = () => reject(new Error('无法加载加密库'));
-        document.head.appendChild(script);
-        
-        // 加载 Stanford JavaScript Crypto Library (SJCL)
-        const sjclScript = document.createElement('script');
-        sjclScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.min.js';
-        sjclScript.onload = () => {
-            window.sjcl_loaded = true;
-            resolve();
-        };
-        sjclScript.onerror = () => reject(new Error('无法加载SJCL库'));
-        document.head.appendChild(sjclScript);
-    });
-}
-
-// 初始化解密密钥
-function initDecryptionKey(token) {
-    // 使用令牌生成解密密钥
-    const salt = 'prompt_optimizer_salt';
-    const iterations = 1000;
-    const keySize = 256 / 32;
-    
-    decryptionKey = CryptoJS.PBKDF2(token, salt, {
-        keySize: keySize,
-        iterations: iterations
-    });
-}
-
-// 编码数据 - 支持Unicode字符
-function encodeData(data) {
-    try {
-        const jsonStr = JSON.stringify(data);
-        // 解决Unicode字符编码问题
-        return btoa(unescape(encodeURIComponent(jsonStr)));
-    } catch (error) {
-        console.error('编码失败，尝试备用方法:', error);
-        try {
-            // 备用编码方法
-            const jsonStr = JSON.stringify(data);
-            // 直接使用btoa，但限制在ASCII范围内
-            return btoa(jsonStr.replace(/[\u0080-\uFFFF]/g, (ch) => {
-                return '\\u' + ('0000' + ch.charCodeAt(0).toString(16)).slice(-4);
-            }));
-        } catch (backupError) {
-            console.error('备用编码也失败:', backupError);
-            throw new Error('无法编码数据');
-        }
-    }
-}
-
-// 解码数据
-function decodeData(encodedData) {
-    try {
-        // 主要解码方法
-        const jsonStr = decodeURIComponent(escape(atob(encodedData)));
-        return JSON.parse(jsonStr);
-    } catch (error) {
-        console.error('主要解码失败，尝试备用方法:', error);
-        try {
-            // 备用解码方法
-            const rawStr = atob(encodedData);
-            // 处理可能的Unicode转义序列
-            const jsonStr = rawStr.replace(/\\u([0-9a-fA-F]{4})/g, (match, hex) => {
-                return String.fromCharCode(parseInt(hex, 16));
-            });
-            return JSON.parse(jsonStr);
-        } catch (backupError) {
-            console.error('备用解码也失败:', backupError);
-            throw new Error('无法解码数据');
-        }
-    }
-}
-
-// 生成安全校验和
-function generateChecksum(data, token, timestamp) {
-    // 简单的哈希函数 - 在实际生产中应使用更强的算法
-    const hashInput = `${data}|${token}|${timestamp}`;
-    console.log(`校验和输入长度: ${hashInput.length}, 时间戳: ${timestamp}`);
-    
-    let hash = 0;
-    for (let i = 0; i < hashInput.length; i++) {
-        const char = hashInput.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // 转换为32位整数
-    }
-    
-    const result = Math.abs(hash).toString(16);
-    console.log(`生成校验和: ${result.substring(0, 10)}...`);
-    return result;
 }
 
 // 创建自定义提示框
@@ -339,37 +220,6 @@ function addButtonAnimation(button) {
     }, 150);
 }
 
-// 优化提示词函数（带重试机制）
-async function optimizePromptWithRetry(maxRetries = 3) {
-    let retries = 0;
-    let lastError = null;
-
-    while (retries < maxRetries) {
-        try {
-            // 尝试执行优化
-            const result = await optimizePrompt();
-            return result; // 成功则返回结果
-        } catch (error) {
-            retries++;
-            lastError = error;
-            console.log(`请求失败，正在重试 (${retries}/${maxRetries})...`, error);
-            
-            if (retries >= maxRetries) {
-                console.error('达到最大重试次数，放弃请求');
-                break; // 超过最大重试次数，退出循环
-            }
-            
-            // 等待时间逐渐增加（指数退避）
-            const waitTime = 1000 * Math.pow(2, retries - 1); // 1秒, 2秒, 4秒...
-            console.log(`等待 ${waitTime/1000} 秒后重试`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-        }
-    }
-    
-    // 所有重试都失败，抛出最后一个错误
-    throw lastError || new Error('优化请求失败，请稍后重试');
-}
-
 // 优化提示词
 async function optimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
@@ -392,68 +242,34 @@ async function optimizePrompt() {
     showLoading();
 
     try {
-        // 生成时间戳（考虑服务器时间偏移）
-        const timestamp = Math.floor(Date.now() / 1000) + TIME_OFFSET;
-        console.log(`当前时间戳: ${timestamp}, 本地时间: ${Math.floor(Date.now() / 1000)}, 偏移: ${TIME_OFFSET}`);
-        
-        // 准备原始数据
-        const originalData = {
-            prompt: originalPrompt,
-            timestamp: timestamp
-        };
-        
-        // 编码数据
-        const encodedData = encodeData(originalData);
-        
-        // 生成校验和
-        const checksum = generateChecksum(encodedData, API_TOKEN, timestamp);
-        console.log(`生成校验和: ${checksum}, 数据长度: ${encodedData.length}`);
-        
-        // 发送请求
         const response = await fetch(`${API_BASE_URL}/secure-optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                data: encodedData,
-                checksum: checksum,
-                timestamp: timestamp,
-                token_id: API_TOKEN.substring(0, 8) // 只发送令牌的一小部分用于标识
+                prompt: originalPrompt,
+                token: API_TOKEN
             })
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`HTTP错误: ${response.status}`, errorText);
-            throw new Error(`HTTP error! status: ${response.status}, ${errorText}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const encryptedData = await response.json();
-        
-        // 验证响应校验和
-        const responseChecksum = encryptedData.checksum;
-        const expectedChecksum = generateChecksum(encryptedData.data, API_TOKEN, encryptedData.timestamp);
-        
-        if (responseChecksum !== expectedChecksum) {
-            console.error(`校验和不匹配: 收到=${responseChecksum}, 预期=${expectedChecksum}`);
-            throw new Error('无效的响应校验和');
-        }
-        
-        // 解码数据
-        const decodedData = decodeData(encryptedData.data);
-        
+        const data = await response.json();
+
         // 显示结果
-        showResult(decodedData.optimized_prompt, decodedData.model_used);
+        showResult(data.optimized_prompt, data.model_used);
         
         // 显示成功提示
         showCustomAlert('提示词优化成功！', 'success', 2000);
 
-        return decodedData; // 返回解码后的结果数据
+        return data; // 返回结果数据
 
     } catch (error) {
         console.error('优化失败:', error);
-        hideLoading(); // 确保在抛出错误前隐藏加载状态
+        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
@@ -658,16 +474,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initApiToken();
     
     // 按钮点击事件
-    optimizeBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
+    optimizeBtn.addEventListener('click', () => {
+        optimizeBtn.classList.remove('pulse-hint');
         addButtonAnimation(optimizeBtn);
-        
-        try {
-            await optimizePromptWithRetry();
-        } catch (error) {
-            showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
-            console.error('所有重试都失败:', error);
-        }
+        optimizePrompt();
     });
 
     copyBtn.addEventListener('click', copyToClipboard);
@@ -677,18 +487,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     originalPromptTextarea.addEventListener('input', updateCharCount);
 
     // 键盘事件处理
-    originalPromptTextarea.addEventListener('keydown', async (e) => {
-        if (e.ctrlKey && e.key === 'Enter') {
+    originalPromptTextarea.addEventListener('keydown', (e) => {
+        // Enter: 普通优化 (使用当前选择的模型)
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
+            optimizeBtn.classList.remove('pulse-hint');
             addButtonAnimation(optimizeBtn);
-            
-            try {
-                await optimizePromptWithRetry();
-            } catch (error) {
-                showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
-                console.error('所有重试都失败:', error);
-            }
+            optimizePrompt();
         }
+        // Shift + Enter: 换行 (默认行为)
     });
 
     // 添加模型卡片效果

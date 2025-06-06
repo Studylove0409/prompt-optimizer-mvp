@@ -2,13 +2,10 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
-import time
 from dotenv import load_dotenv
 from openai import OpenAI
 import openai
 import secrets
-import base64
-import json
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -25,65 +22,6 @@ if not os.getenv("FRONTEND_API_KEY"):
 else:
     FRONTEND_API_KEY = os.getenv("FRONTEND_API_KEY")
     print(f"使用已存在的前端API密钥: {FRONTEND_API_KEY[:10]}...")
-
-# 简单编码数据
-def encode_data(data):
-    json_str = json.dumps(data)
-    # 确保编码支持Unicode字符
-    encoded_bytes = json_str.encode('utf-8')
-    return base64.b64encode(encoded_bytes).decode('utf-8')
-
-# 解码数据
-def decode_data(encoded_data):
-    try:
-        # 主要解码方法
-        json_bytes = base64.b64decode(encoded_data)
-        json_str = json_bytes.decode('utf-8')
-        return json.loads(json_str)
-    except UnicodeDecodeError as e:
-        print(f"Unicode解码失败: {e}，尝试使用Latin-1编码...")
-        try:
-            # 使用Latin-1尝试解码
-            json_str = json_bytes.decode('latin-1')
-            return json.loads(json_str)
-        except Exception as e2:
-            print(f"备用解码方法也失败: {e2}")
-            raise ValueError(f"无法解码数据: {e}, {e2}")
-    except json.JSONDecodeError as e:
-        print(f"JSON解析失败: {e}")
-        # 尝试处理可能的转义问题
-        try:
-            json_str_fixed = json_str.replace('\\\\u', '\\u')
-            return json.loads(json_str_fixed)
-        except Exception as e2:
-            print(f"尝试修复JSON失败: {e2}")
-            raise ValueError(f"无法解析JSON: {e}")
-    except Exception as e:
-        print(f"解码失败: {e}")
-        raise ValueError(f"无法解码数据: {e}")
-
-# 生成校验和
-def generate_checksum(data, token, timestamp):
-    # 简单的哈希函数 - 在实际生产中应使用更强的算法
-    hash_input = f"{data}|{token}|{timestamp}"
-    hash_value = 0
-    
-    print(f"校验和输入长度: {len(hash_input)}，时间戳: {timestamp}")
-    
-    for char in hash_input:
-        hash_value = ((hash_value << 5) - hash_value) + ord(char)
-        hash_value = hash_value & 0xFFFFFFFF  # 转换为32位整数
-    
-    result = format(abs(hash_value), 'x')
-    print(f"生成校验和: {result[:10]}...")
-    return result
-
-# 验证请求时间戳
-def verify_timestamp(timestamp, max_age=600):  # 增加到10分钟
-    current_time = int(time.time())
-    time_diff = abs(current_time - timestamp)
-    print(f"时间差异: {time_diff}秒，当前时间: {current_time}，请求时间: {timestamp}")
-    return time_diff <= max_age
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
@@ -171,54 +109,18 @@ class PromptResponse(BaseModel):
     optimized_prompt: str
     model_used: str
 
-class SecureRequest(BaseModel):
-    data: str  # 编码后的数据
-    checksum: str  # 校验和
-    timestamp: int  # 时间戳
-    token_id: str  # 令牌标识符（部分令牌）
-
-class SecureResponse(BaseModel):
-    data: str  # 编码后的数据
-    checksum: str  # 校验和
-    timestamp: int  # 时间戳
+class SecurePromptRequest(BaseModel):
+    prompt: str
+    token: str  # 前端验证令牌
 
 # 验证前端请求的函数
-def verify_secure_request(request: SecureRequest):
-    """验证加密请求的有效性"""
-    # 检查时间戳是否有效
-    if not verify_timestamp(request.timestamp):
-        print(f"时间戳验证失败: {request.timestamp}")
+def verify_frontend_request(token: str):
+    """验证前端请求是否包含有效的令牌"""
+    if token != FRONTEND_API_KEY:
         raise HTTPException(
             status_code=403,
-            detail="请求已过期"
+            detail="无效的访问令牌"
         )
-    
-    # 验证校验和
-    expected_checksum = generate_checksum(request.data, FRONTEND_API_KEY, request.timestamp)
-    if request.checksum != expected_checksum:
-        print(f"校验和不匹配: 收到={request.checksum}, 预期={expected_checksum}")
-        
-        # 尝试不同的时间戳容差
-        for offset in [-1, 1, -2, 2, -3, 3]:
-            test_timestamp = request.timestamp + offset
-            test_checksum = generate_checksum(request.data, FRONTEND_API_KEY, test_timestamp)
-            if request.checksum == test_checksum:
-                print(f"找到匹配的校验和，时间偏移: {offset}秒")
-                return True
-        
-        raise HTTPException(
-            status_code=403,
-            detail="无效的请求校验和"
-        )
-    
-    # 验证令牌ID
-    if request.token_id != FRONTEND_API_KEY[:8]:
-        print(f"令牌ID不匹配: {request.token_id} != {FRONTEND_API_KEY[:8]}")
-        raise HTTPException(
-            status_code=403,
-            detail="无效的令牌标识符"
-        )
-    
     return True
 
 @app.get("/")
@@ -234,70 +136,25 @@ async def health_check():
 @app.get("/api/key")
 async def get_frontend_key():
     """获取前端API密钥 - 注意：在实际生产环境中，应该通过更安全的方式分发密钥"""
-    # 返回当前服务器时间戳，用于客户端时间同步
-    current_time = int(time.time())
-    return {"key": FRONTEND_API_KEY, "server_time": current_time}
+    return {"key": FRONTEND_API_KEY}
 
-@app.post("/api/secure-optimize", response_model=SecureResponse)
-async def secure_optimize(request_body: SecureRequest, request: Request):
-    """安全的代理接口，验证请求并转发到实际的优化服务，返回加密数据"""
+@app.post("/api/secure-optimize")
+async def secure_optimize(request_body: SecurePromptRequest, request: Request):
+    """安全的代理接口，验证请求并转发到实际的优化服务"""
     # 验证请求来源
     client_host = request.client.host if request.client else "unknown"
     print(f"请求来源: {client_host}")
     
-    # 验证请求
-    verify_secure_request(request_body)
+    # 验证令牌
+    verify_frontend_request(request_body.token)
     
-    try:
-        # 解码请求数据
-        decoded_data = decode_data(request_body.data)
-        original_prompt = decoded_data.get("prompt", "")
-        
-        if not original_prompt:
-            raise HTTPException(
-                status_code=400,
-                detail="提示词为空"
-            )
-        
-        # 创建标准的PromptRequest对象并调用原始优化函数
-        prompt_request = PromptRequest(
-            original_prompt=original_prompt,
-            model="deepseek-chat"  # 使用默认模型，增加安全性
-        )
-        
-        # 获取优化结果
-        result = await optimize_prompt(prompt_request)
-        
-        # 编码结果数据
-        result_data = {
-            "optimized_prompt": result.optimized_prompt,
-            "model_used": result.model_used
-        }
-        encoded_data = encode_data(result_data)
-        
-        # 创建当前时间戳
-        current_timestamp = int(time.time())
-        
-        # 生成响应校验和
-        response_checksum = generate_checksum(encoded_data, FRONTEND_API_KEY, current_timestamp)
-        
-        # 返回编码数据
-        return SecureResponse(
-            data=encoded_data,
-            checksum=response_checksum,
-            timestamp=current_timestamp
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
-    except Exception as e:
-        print(f"处理安全请求时出错: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="处理请求时出错"
-        )
+    # 创建标准的PromptRequest对象并调用原始优化函数
+    prompt_request = PromptRequest(
+        original_prompt=request_body.prompt,
+        model="deepseek-chat"  # 使用默认模型，增加安全性
+    )
+    
+    return await optimize_prompt(prompt_request)
 
 @app.get("/api/models")
 async def get_available_models():
