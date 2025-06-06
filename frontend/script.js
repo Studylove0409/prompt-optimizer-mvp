@@ -1,6 +1,7 @@
 // DOM 元素
 const originalPromptTextarea = document.getElementById('originalPrompt');
 const optimizeBtn = document.getElementById('optimizeBtn');
+const quickOptimizeBtn = document.getElementById('quickOptimizeBtn');
 const outputSection = document.getElementById('outputSection');
 const optimizedPromptDiv = document.getElementById('optimizedPrompt');
 const modelUsedDiv = document.getElementById('modelUsed');
@@ -277,64 +278,83 @@ optimizeBtn.addEventListener('click', () => {
     optimizePrompt();
 });
 
+// 快速优化按钮
+if (quickOptimizeBtn) {
+    quickOptimizeBtn.addEventListener('click', () => {
+        addButtonAnimation(quickOptimizeBtn);
+        triggerQuickOptimize();
+    });
+}
+
 copyBtn.addEventListener('click', copyToClipboard);
 clearBtn.addEventListener('click', clearAll);
 
 // 字符计数更新
 originalPromptTextarea.addEventListener('input', updateCharCount);
 
-// 支持 Enter + Ctrl 快捷键优化 - 默认使用Gemini Flash模型
+// 键盘事件处理
 originalPromptTextarea.addEventListener('keydown', (e) => {
+    // Ctrl + Enter: 快速优化 (使用Gemini Flash)
     if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
-
-        // 临时切换到Gemini Flash模型
-        const geminiFlashRadio = document.querySelector('input[value="gemini-2.0-flash"]');
-
-        if (geminiFlashRadio) {
-            // 保存当前选择
-            const currentSelectedRadio = document.querySelector('input[name="model"]:checked');
-
-            // 临时选择Gemini Flash
-            geminiFlashRadio.checked = true;
-
-            // 触发粒子效果
-            const geminiFlashCard = geminiFlashRadio.closest('.model-card');
-            if (geminiFlashCard) {
-                triggerParticleBurst(geminiFlashCard);
-            }
-
-            // 添加视觉提示
-            showQuickOptimizeHint();
-
-            // 执行优化
-            addButtonAnimation(optimizeBtn);
-
-            // 使用async/await处理优化
-            (async () => {
-                try {
-                    await optimizePrompt();
-                    // 优化完成后恢复原来的选择
-                    if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
-                        setTimeout(() => {
-                            currentSelectedRadio.checked = true;
-                        }, 1500);
-                    }
-                } catch (error) {
-                    // 如果出错也恢复选择
-                    if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
-                        currentSelectedRadio.checked = true;
-                    }
-                    console.error('快速优化失败:', error);
-                }
-            })();
-        } else {
-            // 如果找不到Gemini Flash，使用当前选择的模型
-            addButtonAnimation(optimizeBtn);
-            optimizePrompt();
-        }
+        triggerQuickOptimize();
     }
+    // Enter: 普通优化 (使用当前选择的模型)
+    else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        addButtonAnimation(optimizeBtn);
+        optimizePrompt();
+    }
+    // Shift + Enter: 换行 (默认行为)
 });
+
+// 快速优化功能
+function triggerQuickOptimize() {
+    const geminiFlashRadio = document.querySelector('input[value="gemini-2.0-flash"]');
+
+    if (geminiFlashRadio) {
+        // 保存当前选择
+        const currentSelectedRadio = document.querySelector('input[name="model"]:checked');
+
+        // 临时选择Gemini Flash
+        geminiFlashRadio.checked = true;
+
+        // 触发粒子效果
+        const geminiFlashCard = geminiFlashRadio.closest('.model-card');
+        if (geminiFlashCard) {
+            triggerParticleBurst(geminiFlashCard);
+        }
+
+        // 添加视觉提示
+        showQuickOptimizeHint();
+
+        // 执行优化
+        addButtonAnimation(optimizeBtn);
+
+        // 使用async/await处理优化
+        (async () => {
+            try {
+                await optimizePrompt();
+                // 优化完成后恢复原来的选择
+                if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
+                    setTimeout(() => {
+                        currentSelectedRadio.checked = true;
+                    }, 1500);
+                }
+            } catch (error) {
+                // 如果出错也恢复选择
+                if (currentSelectedRadio && currentSelectedRadio !== geminiFlashRadio) {
+                    currentSelectedRadio.checked = true;
+                }
+                console.error('快速优化失败:', error);
+            }
+        })();
+    } else {
+        // 如果找不到Gemini Flash，使用当前选择的模型
+        addButtonAnimation(optimizeBtn);
+        optimizePrompt();
+    }
+}
 
 // 显示快速优化提示
 function showQuickOptimizeHint() {

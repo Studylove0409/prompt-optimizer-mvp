@@ -75,7 +75,22 @@
                             ></textarea>
                             <div class="textarea-footer">
                                 <span class="char-count">0 字符</span>
-                                <span class="shortcut-hint">Ctrl + Enter 快速优化 (Gemini Flash)</span>
+                                <span class="shortcut-hint">Enter 优化 | Ctrl + Enter 快速优化 | Shift + Enter 换行</span>
+                            </div>
+                        </div>
+
+                        <!-- 优化按钮紧跟输入框 -->
+                        <div class="input-actions">
+                            <button id="optimizeBtn" class="optimize-button">
+                                <span class="button-icon">✨</span>
+                                <span class="button-text">开始优化</span>
+                                <div class="button-ripple"></div>
+                            </button>
+                            <div class="quick-actions">
+                                <button id="quickOptimizeBtn" class="quick-optimize-btn" title="使用Gemini Flash快速优化">
+                                    <span class="button-icon">⚡</span>
+                                    <span class="button-text">快速优化</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -163,15 +178,6 @@
                                 <div class="model-overlay"></div>
                             </label>
                         </div>
-                    </div>
-
-                    <!-- 优化按钮 -->
-                    <div class="action-section">
-                        <button id="optimizeBtn" class="optimize-button">
-                            <span class="button-icon">✨</span>
-                            <span class="button-text">开始优化</span>
-                            <div class="button-ripple"></div>
-                        </button>
                     </div>
                 </section>
 
