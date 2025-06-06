@@ -196,12 +196,76 @@ function addModelCardEffects() {
 
     modelCards.forEach(card => {
         card.addEventListener('click', () => {
-            // 移除其他卡片的选中状态
-            modelCards.forEach(c => c.classList.remove('selected'));
-            // 添加当前卡片的选中状态
-            card.classList.add('selected');
+            // 触发粒子迸发效果
+            triggerParticleBurst(card);
         });
     });
+}
+
+// 粒子迸发效果
+function triggerParticleBurst(card) {
+    // 检查是否已经选中，避免重复触发
+    const radio = card.querySelector('input[type="radio"]');
+    if (radio.checked) {
+        return; // 如果已经选中，不触发效果
+    }
+
+    // 移除所有卡片的粒子效果类
+    document.querySelectorAll('.model-card').forEach(c => {
+        c.classList.remove('particle-burst');
+    });
+
+    // 添加粒子迸发效果
+    card.classList.add('particle-burst');
+
+    // 0.8秒后移除效果类，准备下次使用
+    setTimeout(() => {
+        card.classList.remove('particle-burst');
+    }, 800);
+
+    // 同时触发主粒子系统的交互效果
+    if (window.particleSystem) {
+        const rect = card.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2 + window.scrollY;
+
+        // 创建临时的强化粒子效果
+        setTimeout(() => {
+            createTemporaryParticles(centerX, centerY);
+        }, 100);
+    }
+}
+
+// 创建临时粒子效果
+function createTemporaryParticles(x, y) {
+    if (!window.particleSystem) return;
+
+    // 创建柔和的临时粒子效果
+    const tempParticles = [];
+    const particleCount = 5;
+
+    for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+        const speed = 0.8 + Math.random() * 1.2;
+
+        tempParticles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            decay: 0.02,
+            size: 1.5 + Math.random() * 1,
+            color: `rgba(0, 122, 255, ${0.6 + Math.random() * 0.4})`
+        });
+    }
+
+    // 将临时粒子添加到主粒子系统中进行渲染
+    if (window.particleSystem.tempParticles) {
+        window.particleSystem.tempParticles.push(...tempParticles);
+    } else {
+        window.particleSystem.tempParticles = tempParticles;
+    }
 }
 
 // 事件监听器

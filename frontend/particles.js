@@ -71,17 +71,55 @@ class ParticleSystem {
     
     animate() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         // 更新粒子
         this.particles.forEach(particle => {
             particle.update(this.mouse, this.config.mouseInfluence);
             particle.draw(this.ctx, this.config.colors.particle);
         });
-        
+
         // 绘制连接线
         this.drawConnections();
-        
+
+        // 更新和绘制临时粒子
+        this.updateTempParticles();
+
         this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    updateTempParticles() {
+        if (!this.tempParticles || this.tempParticles.length === 0) return;
+
+        // 更新临时粒子
+        for (let i = this.tempParticles.length - 1; i >= 0; i--) {
+            const particle = this.tempParticles[i];
+
+            // 更新位置
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life -= particle.decay;
+            particle.vx *= 0.98;
+            particle.vy *= 0.98;
+
+            // 绘制粒子
+            const alpha = particle.life;
+            this.ctx.beginPath();
+            this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+
+            // 使用粒子自定义颜色或默认颜色
+            if (particle.color) {
+                this.ctx.fillStyle = particle.color.replace(/[\d.]+\)$/g, `${alpha * 0.7})`);
+            } else {
+                this.ctx.fillStyle = `rgba(0, 122, 255, ${alpha * 0.6})`;
+            }
+
+            this.ctx.fill();
+
+            // 移除生命周期结束的粒子
+            if (particle.life <= 0) {
+                this.tempParticles.splice(i, 1);
+            }
+        }
     }
     
     drawConnections() {
