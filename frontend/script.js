@@ -19,6 +19,8 @@ const API_BASE_URL = window.location.protocol === 'file:'
 
 // 安全令牌 - 将在应用初始化时获取
 let API_TOKEN = '';
+// 时间戳偏移量 - 用于请求时间验证
+let TIME_OFFSET = 0;
 
 // 用于数据解密的库（使用开源库）
 let decryptionKey = null;
@@ -33,6 +35,14 @@ async function initApiToken() {
         }
         const data = await response.json();
         API_TOKEN = data.key;
+        
+        // 获取服务器时间和偏移量
+        if (data.server_time) {
+            const serverTime = parseInt(data.server_time);
+            const clientTime = Math.floor(Date.now() / 1000);
+            TIME_OFFSET = serverTime - clientTime;
+        }
+        
         console.log('API令牌已初始化');
         return true;
     } catch (error) {
@@ -84,6 +94,12 @@ function initDecryptionKey(token) {
     });
 }
 
+// 编码数据 - 与服务器使用相同的编码方法
+function encodeData(data) {
+    const jsonStr = JSON.stringify(data);
+    return btoa(jsonStr);
+}
+
 // 解密数据 - 简单的Base64解码和JSON解析
 // 注意: 这不是真正的加密，只是简单的数据编码，用于基本混淆
 function decodeData(encodedData) {
@@ -94,6 +110,19 @@ function decodeData(encodedData) {
         console.error('解码失败:', error);
         throw new Error('无法解码数据');
     }
+}
+
+// 生成安全校验和
+function generateChecksum(data, token, timestamp) {
+    // 简单的哈希函数 - 在实际生产中应使用更强的算法
+    const hashInput = `${data}|${token}|${timestamp}`;
+    let hash = 0;
+    for (let i = 0; i < hashInput.length; i++) {
+        const char = hashInput.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 转换为32位整数
+    }
+    return Math.abs(hash).toString(16);
 }
 
 // 创建自定义提示框
@@ -300,14 +329,32 @@ async function optimizePrompt() {
     showLoading();
 
     try {
+        // 生成时间戳（考虑服务器时间偏移）
+        const timestamp = Math.floor(Date.now() / 1000) + TIME_OFFSET;
+        
+        // 准备原始数据
+        const originalData = {
+            prompt: originalPrompt,
+            timestamp: timestamp
+        };
+        
+        // 编码数据
+        const encodedData = encodeData(originalData);
+        
+        // 生成校验和
+        const checksum = generateChecksum(encodedData, API_TOKEN, timestamp);
+        
+        // 发送请求
         const response = await fetch(`${API_BASE_URL}/secure-optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                prompt: originalPrompt,
-                token: API_TOKEN
+                data: encodedData,
+                checksum: checksum,
+                timestamp: timestamp,
+                token_id: API_TOKEN.substring(0, 8) // 只发送令牌的一小部分用于标识
             })
         });
 
@@ -317,9 +364,12 @@ async function optimizePrompt() {
 
         const encryptedData = await response.json();
         
-        // 验证返回的令牌
-        if (encryptedData.token !== API_TOKEN) {
-            throw new Error('无效的响应令牌');
+        // 验证响应校验和
+        const responseChecksum = encryptedData.checksum;
+        const expectedChecksum = generateChecksum(encryptedData.data, API_TOKEN, encryptedData.timestamp);
+        
+        if (responseChecksum !== expectedChecksum) {
+            throw new Error('无效的响应校验和');
         }
         
         // 解码数据
