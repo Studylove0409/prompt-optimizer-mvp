@@ -33,10 +33,10 @@ function showCustomAlert(message, type = 'info', duration = 3000) {
     
     // 根据类型设置图标
     let icon = '💬';
-    if (type === 'error') icon = '❌';
-    if (type === 'success') icon = '✅';
-    if (type === 'warning') icon = '⚠️';
-    if (type === 'info') icon = 'ℹ️';
+    if (type === 'error') icon = '😨';
+    if (type === 'success') icon = '😊';
+    if (type === 'warning') icon = '😯';
+    if (type === 'info') icon = '🤓';
     
     alertBox.innerHTML = `
         <div class="alert-content">
@@ -85,14 +85,14 @@ function showCustomAlert(message, type = 'info', duration = 3000) {
 }
 
 // 创建自定义确认对话框
-function showCustomConfirm(message, onConfirm, onCancel) {
+function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
     // 创建确认框元素
     const confirmBox = document.createElement('div');
     confirmBox.className = 'custom-confirm';
     
     confirmBox.innerHTML = `
         <div class="confirm-content">
-            <div class="confirm-message">${message}</div>
+            <div class="confirm-message" data-emoji="${emoji}">${message}</div>
             <div class="confirm-buttons">
                 <button class="confirm-button cancel">取消</button>
                 <button class="confirm-button confirm">确认</button>
@@ -206,7 +206,7 @@ async function optimizePrompt() {
     const selectedModel = getSelectedModel();
 
     if (!originalPrompt) {
-        showCustomAlert('请输入要优化的提示词', 'warning');
+        showCustomAlert('请输入要优化的提示词', 'warning', 3000);
         throw new Error('没有输入提示词');
     }
 
@@ -233,12 +233,15 @@ async function optimizePrompt() {
 
         // 显示结果
         showResult(data.optimized_prompt, data.model_used);
+        
+        // 显示成功提示
+        showCustomAlert('提示词优化成功！', 'success', 2000);
 
         return data; // 返回结果数据
 
     } catch (error) {
         console.error('优化失败:', error);
-        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error');
+        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
@@ -341,7 +344,7 @@ function clearAll() {
 
             // 滚动到顶部
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        }, null, '🧹');
     } else {
         // 如果没有内容，直接获取焦点
         originalPromptTextarea.focus();
