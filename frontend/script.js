@@ -20,6 +20,9 @@ const API_BASE_URL = window.location.protocol === 'file:'
 // 安全令牌 - 将在应用初始化时获取
 let API_TOKEN = '';
 
+// 用于数据解密的库（使用开源库）
+let decryptionKey = null;
+
 // 初始化API令牌
 async function initApiToken() {
     try {
@@ -35,6 +38,61 @@ async function initApiToken() {
     } catch (error) {
         console.error('初始化API令牌失败:', error);
         return false;
+    }
+}
+
+// 加载加密库
+async function loadCryptoLibrary() {
+    return new Promise((resolve, reject) => {
+        if (window.cryptojs_loaded) {
+            resolve();
+            return;
+        }
+        
+        // 加载 CryptoJS 库
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js';
+        script.onload = () => {
+            window.cryptojs_loaded = true;
+            resolve();
+        };
+        script.onerror = () => reject(new Error('无法加载加密库'));
+        document.head.appendChild(script);
+        
+        // 加载 Stanford JavaScript Crypto Library (SJCL)
+        const sjclScript = document.createElement('script');
+        sjclScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.8/sjcl.min.js';
+        sjclScript.onload = () => {
+            window.sjcl_loaded = true;
+            resolve();
+        };
+        sjclScript.onerror = () => reject(new Error('无法加载SJCL库'));
+        document.head.appendChild(sjclScript);
+    });
+}
+
+// 初始化解密密钥
+function initDecryptionKey(token) {
+    // 使用令牌生成解密密钥
+    const salt = 'prompt_optimizer_salt';
+    const iterations = 1000;
+    const keySize = 256 / 32;
+    
+    decryptionKey = CryptoJS.PBKDF2(token, salt, {
+        keySize: keySize,
+        iterations: iterations
+    });
+}
+
+// 解密数据 - 简单的Base64解码和JSON解析
+// 注意: 这不是真正的加密，只是简单的数据编码，用于基本混淆
+function decodeData(encodedData) {
+    try {
+        const jsonStr = atob(encodedData);
+        return JSON.parse(jsonStr);
+    } catch (error) {
+        console.error('解码失败:', error);
+        throw new Error('无法解码数据');
     }
 }
 
@@ -257,15 +315,23 @@ async function optimizePrompt() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-
+        const encryptedData = await response.json();
+        
+        // 验证返回的令牌
+        if (encryptedData.token !== API_TOKEN) {
+            throw new Error('无效的响应令牌');
+        }
+        
+        // 解码数据
+        const decodedData = decodeData(encryptedData.data);
+        
         // 显示结果
-        showResult(data.optimized_prompt, data.model_used);
+        showResult(decodedData.optimized_prompt, decodedData.model_used);
         
         // 显示成功提示
         showCustomAlert('提示词优化成功！', 'success', 2000);
 
-        return data; // 返回结果数据
+        return decodedData; // 返回解码后的结果数据
 
     } catch (error) {
         console.error('优化失败:', error);

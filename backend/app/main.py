@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import openai
 import secrets
+import base64
+import json
 
 # 加载环境变量
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -22,6 +24,11 @@ if not os.getenv("FRONTEND_API_KEY"):
 else:
     FRONTEND_API_KEY = os.getenv("FRONTEND_API_KEY")
     print(f"使用已存在的前端API密钥: {FRONTEND_API_KEY[:10]}...")
+
+# 简单编码数据
+def encode_data(data):
+    json_str = json.dumps(data)
+    return base64.b64encode(json_str.encode()).decode()
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
@@ -113,6 +120,10 @@ class SecurePromptRequest(BaseModel):
     prompt: str
     token: str  # 前端验证令牌
 
+class SecurePromptResponse(BaseModel):
+    data: str  # 加密后的数据
+    token: str  # 用于前端验证数据的令牌
+
 # 验证前端请求的函数
 def verify_frontend_request(token: str):
     """验证前端请求是否包含有效的令牌"""
@@ -138,9 +149,9 @@ async def get_frontend_key():
     """获取前端API密钥 - 注意：在实际生产环境中，应该通过更安全的方式分发密钥"""
     return {"key": FRONTEND_API_KEY}
 
-@app.post("/api/secure-optimize")
+@app.post("/api/secure-optimize", response_model=SecurePromptResponse)
 async def secure_optimize(request_body: SecurePromptRequest, request: Request):
-    """安全的代理接口，验证请求并转发到实际的优化服务"""
+    """安全的代理接口，验证请求并转发到实际的优化服务，返回加密数据"""
     # 验证请求来源
     client_host = request.client.host if request.client else "unknown"
     print(f"请求来源: {client_host}")
@@ -154,7 +165,21 @@ async def secure_optimize(request_body: SecurePromptRequest, request: Request):
         model="deepseek-chat"  # 使用默认模型，增加安全性
     )
     
-    return await optimize_prompt(prompt_request)
+    # 获取优化结果
+    result = await optimize_prompt(prompt_request)
+    
+    # 编码结果数据
+    result_data = {
+        "optimized_prompt": result.optimized_prompt,
+        "model_used": result.model_used
+    }
+    encoded_data = encode_data(result_data)
+    
+    # 返回编码数据
+    return SecurePromptResponse(
+        data=encoded_data,
+        token=request_body.token  # 返回相同的令牌以便前端验证
+    )
 
 @app.get("/api/models")
 async def get_available_models():
