@@ -171,8 +171,7 @@ function getModelDisplayName(modelId) {
     const modelNames = {
         'deepseek-chat': '普通版',
         'deepseek-reasoner': 'Pro版',
-        'gemini-2.0-flash': 'Gemini Flash版',
-        'gemini-2.5-pro-preview-03-25': 'Gemini Pro版'
+        'gemini-2.0-flash': 'ULTRA版'
     };
     return modelNames[modelId] || modelId;
 }
@@ -530,7 +529,7 @@ function showQuickOptimizeHint() {
     hint.className = 'quick-optimize-hint';
     hint.innerHTML = `
         <span class="hint-icon">⚡</span>
-        <span class="hint-text">快速优化模式 - 使用 Gemini Flash</span>
+        <span class="hint-text">快速优化模式 - 使用 ULTRA版</span>
     `;
 
     // 添加到页面
