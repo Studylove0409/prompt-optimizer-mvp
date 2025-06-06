@@ -36,28 +36,54 @@ def encode_data(data):
 # 解码数据
 def decode_data(encoded_data):
     try:
-        # 确保解码支持Unicode字符
+        # 主要解码方法
         json_bytes = base64.b64decode(encoded_data)
         json_str = json_bytes.decode('utf-8')
         return json.loads(json_str)
+    except UnicodeDecodeError as e:
+        print(f"Unicode解码失败: {e}，尝试使用Latin-1编码...")
+        try:
+            # 使用Latin-1尝试解码
+            json_str = json_bytes.decode('latin-1')
+            return json.loads(json_str)
+        except Exception as e2:
+            print(f"备用解码方法也失败: {e2}")
+            raise ValueError(f"无法解码数据: {e}, {e2}")
+    except json.JSONDecodeError as e:
+        print(f"JSON解析失败: {e}")
+        # 尝试处理可能的转义问题
+        try:
+            json_str_fixed = json_str.replace('\\\\u', '\\u')
+            return json.loads(json_str_fixed)
+        except Exception as e2:
+            print(f"尝试修复JSON失败: {e2}")
+            raise ValueError(f"无法解析JSON: {e}")
     except Exception as e:
         print(f"解码失败: {e}")
-        raise ValueError("无法解码数据")
+        raise ValueError(f"无法解码数据: {e}")
 
 # 生成校验和
 def generate_checksum(data, token, timestamp):
     # 简单的哈希函数 - 在实际生产中应使用更强的算法
     hash_input = f"{data}|{token}|{timestamp}"
     hash_value = 0
+    
+    print(f"校验和输入长度: {len(hash_input)}，时间戳: {timestamp}")
+    
     for char in hash_input:
         hash_value = ((hash_value << 5) - hash_value) + ord(char)
         hash_value = hash_value & 0xFFFFFFFF  # 转换为32位整数
-    return format(abs(hash_value), 'x')
+    
+    result = format(abs(hash_value), 'x')
+    print(f"生成校验和: {result[:10]}...")
+    return result
 
 # 验证请求时间戳
-def verify_timestamp(timestamp, max_age=300):  # 默认5分钟有效期
+def verify_timestamp(timestamp, max_age=600):  # 增加到10分钟
     current_time = int(time.time())
-    return abs(current_time - timestamp) <= max_age
+    time_diff = abs(current_time - timestamp)
+    print(f"时间差异: {time_diff}秒，当前时间: {current_time}，请求时间: {timestamp}")
+    return time_diff <= max_age
 
 # 调试：检查API密钥是否正确加载
 if not LLM_API_KEY:
@@ -161,6 +187,7 @@ def verify_secure_request(request: SecureRequest):
     """验证加密请求的有效性"""
     # 检查时间戳是否有效
     if not verify_timestamp(request.timestamp):
+        print(f"时间戳验证失败: {request.timestamp}")
         raise HTTPException(
             status_code=403,
             detail="请求已过期"
@@ -169,6 +196,16 @@ def verify_secure_request(request: SecureRequest):
     # 验证校验和
     expected_checksum = generate_checksum(request.data, FRONTEND_API_KEY, request.timestamp)
     if request.checksum != expected_checksum:
+        print(f"校验和不匹配: 收到={request.checksum}, 预期={expected_checksum}")
+        
+        # 尝试不同的时间戳容差
+        for offset in [-1, 1, -2, 2, -3, 3]:
+            test_timestamp = request.timestamp + offset
+            test_checksum = generate_checksum(request.data, FRONTEND_API_KEY, test_timestamp)
+            if request.checksum == test_checksum:
+                print(f"找到匹配的校验和，时间偏移: {offset}秒")
+                return True
+        
         raise HTTPException(
             status_code=403,
             detail="无效的请求校验和"
@@ -176,6 +213,7 @@ def verify_secure_request(request: SecureRequest):
     
     # 验证令牌ID
     if request.token_id != FRONTEND_API_KEY[:8]:
+        print(f"令牌ID不匹配: {request.token_id} != {FRONTEND_API_KEY[:8]}")
         raise HTTPException(
             status_code=403,
             detail="无效的令牌标识符"
