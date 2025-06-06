@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Optimizer - 智能提示词优化器</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -73,19 +73,23 @@
                                 placeholder="在这里输入您想要优化的提示词..."
                                 class="prompt-textarea"
                             ></textarea>
+                            
                             <div class="textarea-footer">
                                 <span class="char-count">0 字符</span>
                                 <span class="shortcut-hint">Enter 优化 | Ctrl + Enter 快速优化 | Shift + Enter 换行</span>
+                                
+                                <!-- 优化按钮放在输入框右下角 -->
+                                <button id="optimizeBtn" class="optimize-button-inline" title="开始优化 (Enter)">
+                                    <svg class="enter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M9 10l-5 5 5 5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M20 4v7a4 4 0 0 1-4 4H4" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
 
-                        <!-- 优化按钮紧跟输入框 -->
+                        <!-- 快速优化按钮 -->
                         <div class="input-actions">
-                            <button id="optimizeBtn" class="optimize-button">
-                                <span class="button-icon">✨</span>
-                                <span class="button-text">开始优化</span>
-                                <div class="button-ripple"></div>
-                            </button>
                             <div class="quick-actions">
                                 <button id="quickOptimizeBtn" class="quick-optimize-btn" title="使用Gemini Flash快速优化">
                                     <span class="button-icon">⚡</span>
@@ -232,8 +236,8 @@
     </div>
 
     <!-- 脚本文件 -->
-    <script src="/script.js"></script>
-    <script src="/particles.js"></script>
+    <script src="script.js"></script>
+    <script src="particles.js"></script>
 
     <!-- 备用粒子系统初始化 -->
     <script>
