@@ -9,53 +9,66 @@
 <body>
     <div class="container">
         <header>
-            <h1>Prompt Optimizer</h1>
-            <p>优化您的AI提示词，获得更好的结果</p>
+            <h1>🚀 Prompt Optimizer</h1>
+            <p>智能优化您的AI提示词，释放AI的无限潜能</p>
         </header>
 
         <main>
             <div class="input-section">
-                <h2>输入您的提示词</h2>
-                <textarea id="originalPrompt" placeholder="请输入您想要优化的提示词..."></textarea>
+                <h2>📝 输入您的提示词</h2>
+                <textarea id="originalPrompt" placeholder="在这里输入您想要优化的提示词，我们将为您提供专业的优化建议..."></textarea>
 
                 <div class="model-selection">
-                    <h3>选择模型</h3>
+                    <h3>选择版本</h3>
                     <div class="model-options">
-                        <label class="model-option">
+                        <label class="model-option standard">
                             <input type="radio" name="model" value="deepseek-chat" checked>
                             <div class="model-info">
-                                <span class="model-name">DeepSeek Chat (V3-0324)</span>
-                                <span class="model-desc">更快的响应速度，适合日常对话和简单任务</span>
-                                <span class="model-speed fast">快速</span>
+                                <div class="model-header">
+                                    <span class="model-name">普通版</span>
+                                    <span class="model-badge standard-badge">标准</span>
+                                </div>
+                                <span class="model-desc">快速响应，适合日常提示词优化需求</span>
+                                <div class="model-features">
+                                    <span class="feature">✓ 快速处理</span>
+                                    <span class="feature">✓ 基础优化</span>
+                                </div>
                             </div>
                         </label>
-                        <label class="model-option">
+                        <label class="model-option pro">
                             <input type="radio" name="model" value="deepseek-reasoner">
                             <div class="model-info">
-                                <span class="model-name">DeepSeek Reasoner (R1-0528)</span>
-                                <span class="model-desc">更强的推理能力，适合复杂分析和深度思考</span>
-                                <span class="model-speed slow">深度</span>
+                                <div class="model-header">
+                                    <span class="model-name">Pro版</span>
+                                    <span class="model-badge pro-badge">PRO</span>
+                                </div>
+                                <span class="model-desc">深度分析，提供更专业的提示词优化建议</span>
+                                <div class="model-features">
+                                    <span class="feature">✓ 深度推理</span>
+                                    <span class="feature">✓ 高级优化</span>
+                                    <span class="feature">✓ 专业建议</span>
+                                </div>
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <button id="optimizeBtn">优化提示词</button>
+                <button id="optimizeBtn">✨ 开始优化</button>
             </div>
 
             <div class="output-section" id="outputSection" style="display: none;">
-                <h2>优化后的提示词</h2>
+                <h2>🎯 优化结果</h2>
                 <div class="model-used" id="modelUsed"></div>
                 <div id="optimizedPrompt" class="result-box"></div>
                 <div class="actions">
-                    <button id="copyBtn">复制结果</button>
-                    <button id="clearBtn">清空</button>
+                    <button id="copyBtn">📋 复制结果</button>
+                    <button id="clearBtn">🗑️ 清空重置</button>
                 </div>
             </div>
 
             <div class="loading" id="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>正在优化中，请稍候...</p>
+                <p>🤖 AI正在为您精心优化提示词，请稍候...</p>
             </div>
         </main>
     </div>

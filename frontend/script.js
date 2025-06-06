@@ -22,8 +22,8 @@ function getSelectedModel() {
 // 获取模型显示名称
 function getModelDisplayName(modelId) {
     const modelNames = {
-        'deepseek-chat': 'DeepSeek Chat (V3-0324)',
-        'deepseek-reasoner': 'DeepSeek Reasoner (R1-0528)'
+        'deepseek-chat': '普通版',
+        'deepseek-reasoner': 'Pro版'
     };
     return modelNames[modelId] || modelId;
 }
@@ -97,7 +97,7 @@ async function copyToClipboard() {
         
         // 临时改变按钮文本以显示成功
         const originalText = copyBtn.textContent;
-        copyBtn.textContent = '已复制!';
+        copyBtn.textContent = '✅ 已复制!';
         copyBtn.style.background = '#48bb78';
         copyBtn.style.color = 'white';
         
