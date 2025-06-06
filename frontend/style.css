@@ -1714,3 +1714,65 @@ body {
     25% { transform: rotate(-10deg); }
     75% { transform: rotate(10deg); }
 }
+
+/* ===== 紧凑型加载指示器 ===== */
+.loading-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 16px 24px;
+    z-index: 9999;
+    max-width: 90%;
+    width: auto;
+    animation: fadeInUp 0.5s ease-out;
+    border: none;
+}
+
+.loading-indicator-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.loading-indicator-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    animation: loading-bounce 1.4s ease-in-out infinite both;
+}
+
+.indicator-dot:nth-child(1) { animation-delay: -0.32s; }
+.indicator-dot:nth-child(2) { animation-delay: -0.16s; }
+
+.loading-indicator-text {
+    font-size: 15px;
+    font-weight: var(--font-weight-medium);
+    color: var(--color-gray-800);
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .loading-indicator {
+        bottom: 20px;
+        padding: 12px 20px;
+    }
+    
+    .loading-indicator-content {
+        gap: 12px;
+    }
+    
+    .loading-indicator-text {
+        font-size: 14px;
+    }
+}

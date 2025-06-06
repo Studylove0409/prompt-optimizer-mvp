@@ -8,6 +8,7 @@ const modelUsedDiv = document.getElementById('modelUsed');
 const copyBtn = document.getElementById('copyBtn');
 const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
+const loadingIndicator = document.getElementById('loadingIndicator');
 
 // 新增元素
 const charCountElement = document.querySelector('.char-count');
@@ -250,19 +251,22 @@ async function optimizePrompt() {
 
 // 显示加载状态
 function showLoading() {
-    loading.style.display = 'flex';
-    outputSection.style.display = 'none';
+    // 使用紧凑型加载指示器
+    loadingIndicator.style.display = 'block';
+    
+    // 禁用优化按钮
     optimizeBtn.disabled = true;
-
-    // 添加加载动画类
-    document.body.style.overflow = 'hidden';
+    if (quickOptimizeBtn) quickOptimizeBtn.disabled = true;
 }
 
 // 隐藏加载状态
 function hideLoading() {
-    loading.style.display = 'none';
+    // 隐藏紧凑型加载指示器
+    loadingIndicator.style.display = 'none';
+    
+    // 恢复按钮状态
     optimizeBtn.disabled = false;
-    document.body.style.overflow = '';
+    if (quickOptimizeBtn) quickOptimizeBtn.disabled = false;
 }
 
 // 显示结果
