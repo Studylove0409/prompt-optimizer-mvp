@@ -491,38 +491,8 @@ optimizeBtn.addEventListener('click', () => {
 copyBtn.addEventListener('click', copyToClipboard);
 clearBtn.addEventListener('click', clearAll);
 
-// 字符计数更新和输入框增强效果
-originalPromptTextarea.addEventListener('input', (e) => {
-    updateCharCount();
-
-    // 添加打字动画效果
-    const textareaWrapper = originalPromptTextarea.closest('.textarea-wrapper');
-    textareaWrapper.classList.add('typing');
-
-    // 清除之前的定时器
-    if (window.typingTimer) {
-        clearTimeout(window.typingTimer);
-    }
-
-    // 设置新的定时器，停止打字后移除动画
-    window.typingTimer = setTimeout(() => {
-        textareaWrapper.classList.remove('typing');
-    }, 1000);
-
-    // 字符数警告效果
-    const charCount = e.target.value.length;
-    const charCountElement = document.querySelector('.char-count');
-
-    if (charCount > 2000) {
-        charCountElement.classList.add('danger');
-        charCountElement.classList.remove('warning');
-    } else if (charCount > 1500) {
-        charCountElement.classList.add('warning');
-        charCountElement.classList.remove('danger');
-    } else {
-        charCountElement.classList.remove('warning', 'danger');
-    }
-});
+// 字符计数更新
+originalPromptTextarea.addEventListener('input', updateCharCount);
 
 // 键盘事件处理
 originalPromptTextarea.addEventListener('keydown', (e) => {
@@ -541,38 +511,6 @@ originalPromptTextarea.addEventListener('keydown', (e) => {
         optimizePrompt();
     }
     // Shift + Enter: 换行 (默认行为)
-});
-
-// 输入框焦点事件
-originalPromptTextarea.addEventListener('focus', () => {
-    const textareaWrapper = originalPromptTextarea.closest('.textarea-wrapper');
-    textareaWrapper.classList.add('focused');
-
-    // 如果输入框为空，添加脉冲提示
-    if (!originalPromptTextarea.value.trim()) {
-        setTimeout(() => {
-            optimizeBtn.classList.add('pulse-hint');
-        }, 2000);
-    }
-});
-
-originalPromptTextarea.addEventListener('blur', () => {
-    const textareaWrapper = originalPromptTextarea.closest('.textarea-wrapper');
-    textareaWrapper.classList.remove('focused');
-    optimizeBtn.classList.remove('pulse-hint');
-});
-
-// 输入框粘贴事件增强
-originalPromptTextarea.addEventListener('paste', (e) => {
-    setTimeout(() => {
-        updateCharCount();
-        const textareaWrapper = originalPromptTextarea.closest('.textarea-wrapper');
-        textareaWrapper.classList.add('typing');
-
-        setTimeout(() => {
-            textareaWrapper.classList.remove('typing');
-        }, 1500);
-    }, 10);
 });
 
 // 页面加载完成后的初始化
