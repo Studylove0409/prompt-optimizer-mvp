@@ -271,18 +271,19 @@
     </div>
 
     <!-- 商业合作弹框 -->
-    <div class="help-modal" id="businessModal">
-        <div class="help-modal-content">
-            <div class="help-modal-header">
+    <div class="business-modal" id="businessModal">
+        <div class="business-modal-content">
+            <div class="business-modal-header">
                 <h2>商业合作</h2>
                 <span class="close-modal" id="closeBusinessModal">&times;</span>
             </div>
-            <div class="help-modal-body">
-                <section class="help-section">
-                    <h3>📧 联系方式</h3>
-                    <p>如需商业合作，请联系我们：</p>
+            <div class="business-modal-body">
+                <div class="contact-section">
+                    <div class="contact-icon">📧</div>
+                    <p class="contact-text">如需商业合作，请联系我们：</p>
                     <p class="contact-email">song3286791241@gmail.com</p>
-                </section>
+                    <p class="contact-hint">点击邮箱地址即可复制</p>
+                </div>
             </div>
         </div>
     </div>
@@ -290,41 +291,160 @@
     <!-- 脚本文件 -->
     <style>
         /* 商业合作弹窗样式 */
-        #businessModal .contact-email {
-            font-size: 1.2rem;
+        .business-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .business-modal-content {
+            position: relative;
+            background-color: white;
+            margin: 15% auto;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .business-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .business-modal-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .business-modal-header .close-modal {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            line-height: 1;
+        }
+
+        .business-modal-header .close-modal:hover {
+            color: #f0f0f0;
+        }
+
+        .business-modal-body {
+            padding: 25px;
+        }
+
+        .contact-section {
+            text-align: center;
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-text {
+            color: #666;
+            margin: 0 0 20px 0;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .contact-email {
+            font-size: 1.1rem;
             font-weight: 600;
             color: #4285f4;
-            padding: 10px;
+            padding: 12px 20px;
             background: #f0f5ff;
-            border-radius: 6px;
+            border-radius: 8px;
             text-align: center;
-            margin: 15px auto;
-            max-width: 90%;
+            margin: 0 0 10px 0;
             user-select: all;
             cursor: pointer;
             transition: all 0.2s ease;
+            border: 2px solid transparent;
         }
-        
-        #businessModal .contact-email:hover {
+
+        .contact-email:hover {
             background: #e0eaff;
-            transform: scale(1.02);
+            transform: translateY(-1px);
+            border-color: #4285f4;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
         }
-        
+
+        .contact-hint {
+            color: #999;
+            font-size: 0.85rem;
+            margin: 0;
+            font-style: italic;
+        }
+
         /* 复制提示样式 */
         .copy-tooltip {
             position: fixed;
             background: #333;
             color: #fff;
-            padding: 5px 10px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
             font-size: 14px;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
+            z-index: 1001;
         }
-        
+
         .copy-tooltip.show {
             opacity: 1;
+        }
+
+        /* 动画效果 */
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .business-modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+
+            .business-modal-header {
+                padding: 15px 20px 12px;
+            }
+
+            .business-modal-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .business-modal-body {
+                padding: 20px;
+            }
+
+            .contact-email {
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
         }
     </style>
     <script>
