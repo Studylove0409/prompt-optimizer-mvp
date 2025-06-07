@@ -4,5 +4,3 @@ requests
 python-dotenv
 pydantic
 openai
-fastapi-limiter
-redis

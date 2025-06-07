@@ -29,13 +29,6 @@ class Settings:
         self.cors_methods = ["*"]
         self.cors_headers = ["*"]
 
-        # Redis/Vercel KV配置
-        self.redis_url = os.getenv("KV_URL", os.getenv("REDIS_URL", "redis://localhost:6379"))
-
-        # 速率限制配置
-        self.rate_limit_requests = int(os.getenv("RATE_LIMIT_REQUESTS", "10"))
-        self.rate_limit_period = int(os.getenv("RATE_LIMIT_PERIOD", "60"))  # 秒
-
 
 @lru_cache()
 def get_settings() -> Settings:
