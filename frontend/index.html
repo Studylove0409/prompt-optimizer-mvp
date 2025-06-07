@@ -24,7 +24,7 @@
                 </div>
                 <div class="nav-links">
                     <a href="#" class="nav-link active">优化器</a>
-                    <a href="#" class="nav-link">帮助</a>
+                    <a href="#" class="nav-link" id="helpLink">帮助</a>
                 </div>
             </div>
         </nav>
@@ -214,6 +214,59 @@
                 <p>&copy; 2025 Prompt Optimizer. 让AI更智能，让创作更高效。</p>
             </div>
         </footer>
+    </div>
+
+    <!-- 帮助弹框 -->
+    <div class="help-modal" id="helpModal">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2>如何使用提示词优化器</h2>
+                <span class="close-modal" id="closeHelpModal">&times;</span>
+            </div>
+            <div class="help-modal-body">
+                <section class="help-section">
+                    <h3>📝 基本使用方法</h3>
+                    <ol>
+                        <li>在输入框中输入您的原始提示词</li>
+                        <li>选择适合您需求的AI模型</li>
+                        <li>点击优化按钮或按Enter键</li>
+                        <li>等待AI优化您的提示词</li>
+                        <li>复制优化后的结果使用</li>
+                    </ol>
+                </section>
+
+                <section class="help-section">
+                    <h3>⭐ 提示词优化技巧</h3>
+                    <ul>
+                        <li>提供足够的上下文信息</li>
+                        <li>明确表达您的目标和需求</li>
+                        <li>可以指定回答的格式或风格</li>
+                        <li>针对不同模型调整表达方式</li>
+                    </ul>
+                </section>
+
+                <section class="help-section">
+                    <h3>💡 真实示例</h3>
+                    <div class="example-container">
+                        <div class="example">
+                            <h4>原始提示词：</h4>
+                            <p class="example-text">写一篇关于环保的文章</p>
+                            
+                            <h4>优化后：</h4>
+                            <p class="example-text">请撰写一篇1500字的环保主题文章，重点探讨塑料污染对海洋生态的影响。文章需包含以下几个方面：1)当前全球塑料污染的数据与现状；2)塑料对海洋生物的具体危害；3)国际上已采取的减塑措施及其效果；4)个人和企业可以采取的实际行动。文章风格要平实且有说服力，引用2-3个可靠的研究数据，并在结尾提出有创意的解决方案。</p>
+                        </div>
+                        
+                        <div class="example">
+                            <h4>原始提示词：</h4>
+                            <p class="example-text">如何提高英语口语</p>
+                            
+                            <h4>优化后：</h4>
+                            <p class="example-text">作为一名英语教育专家，请为一名中级水平（相当于雅思口语5分）的中国成年学习者提供详细的英语口语提升计划。该学习者每周可投入10小时学习时间，希望在3个月内提高到流利对话水平。请提供：1)每周具体的学习时间安排表；2)5个针对性的发音练习方法；3)如何克服口语焦虑的心理技巧；4)3个可提高语言流利度的日常练习活动；5)推荐3-5个适合自学的免费线上资源。回答需具体实用，避免笼统建议。</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
 
     <!-- 脚本文件 -->

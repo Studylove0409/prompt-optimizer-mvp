@@ -9,6 +9,11 @@ const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
 const loadingIndicator = document.getElementById('loadingIndicator');
 
+// 帮助弹框元素
+const helpLink = document.getElementById('helpLink');
+const helpModal = document.getElementById('helpModal');
+const closeHelpModal = document.getElementById('closeHelpModal');
+
 // 新增元素
 const charCountElement = document.querySelector('.char-count');
 
@@ -525,4 +530,53 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.transition = 'opacity 0.5s ease';
         document.body.style.opacity = '1';
     }, 100);
+
+    // 初始化帮助弹框
+    initHelpModal();
 });
+
+// 初始化帮助弹框功能
+function initHelpModal() {
+    if (helpLink && helpModal && closeHelpModal) {
+        // 点击帮助链接打开弹框
+        helpLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openHelpModal();
+        });
+        
+        // 点击关闭按钮关闭弹框
+        closeHelpModal.addEventListener('click', function() {
+            closeHelpModal();
+        });
+        
+        // 点击弹框外部区域关闭弹框
+        window.addEventListener('click', function(e) {
+            if (e.target === helpModal) {
+                closeHelpModal();
+            }
+        });
+        
+        // ESC键关闭弹框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && helpModal.style.display === 'block') {
+                closeHelpModal();
+            }
+        });
+    }
+}
+
+// 打开帮助弹框
+function openHelpModal() {
+    if (helpModal) {
+        helpModal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+    }
+}
+
+// 关闭帮助弹框
+function closeHelpModal() {
+    if (helpModal) {
+        helpModal.style.display = 'none';
+        document.body.style.overflow = ''; // 恢复背景滚动
+    }
+}
