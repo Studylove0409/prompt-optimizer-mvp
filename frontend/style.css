@@ -347,115 +347,163 @@ body {
 .textarea-wrapper {
     position: relative;
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%),
-        radial-gradient(circle at 20% 20%, rgba(0, 122, 255, 0.03) 0%, transparent 50%);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--radius-xl);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%),
+        radial-gradient(circle at 20% 20%, rgba(0, 122, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(88, 86, 214, 0.02) 0%, transparent 50%);
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
     box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.08),
-        0 4px 16px rgba(0, 0, 0, 0.04),
-        0 1px 0 rgba(255, 255, 255, 0.6) inset,
-        0 -1px 0 rgba(0, 122, 255, 0.05) inset;
+        0 15px 50px rgba(0, 0, 0, 0.1),
+        0 8px 25px rgba(0, 0, 0, 0.05),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset,
+        0 -1px 0 rgba(0, 122, 255, 0.08) inset,
+        0 0 0 1px rgba(0, 122, 255, 0.02);
     overflow: visible;
-    transition: all var(--transition-normal);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
 
 .textarea-wrapper::before {
     content: '';
     position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    bottom: -1px;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
     background: linear-gradient(135deg,
-        rgba(0, 122, 255, 0.1) 0%,
-        rgba(88, 86, 214, 0.05) 50%,
-        rgba(255, 149, 0, 0.03) 100%);
-    border-radius: var(--radius-xl);
+        rgba(0, 122, 255, 0.15) 0%,
+        rgba(88, 86, 214, 0.1) 30%,
+        rgba(255, 149, 0, 0.08) 70%,
+        rgba(175, 82, 222, 0.05) 100%);
+    border-radius: 22px;
     z-index: -1;
     opacity: 0;
-    transition: opacity var(--transition-normal);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.textarea-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 70% 70%, rgba(0, 122, 255, 0.02) 0%, transparent 50%);
+    border-radius: 20px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
 }
 
 .textarea-wrapper:hover {
     box-shadow:
-        0 16px 50px rgba(0, 0, 0, 0.12),
-        0 8px 24px rgba(0, 0, 0, 0.06),
-        0 1px 0 rgba(255, 255, 255, 0.7) inset,
-        0 -1px 0 rgba(0, 122, 255, 0.08) inset;
-    transform: translateY(-3px);
-    border-color: rgba(0, 122, 255, 0.2);
+        0 20px 60px rgba(0, 0, 0, 0.15),
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 -1px 0 rgba(0, 122, 255, 0.12) inset,
+        0 0 0 1px rgba(0, 122, 255, 0.08);
+    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(0, 122, 255, 0.25);
 }
 
 .textarea-wrapper:hover::before {
     opacity: 1;
 }
 
+.textarea-wrapper:hover::after {
+    opacity: 1;
+}
+
 .textarea-wrapper:focus-within {
     box-shadow:
-        0 0 0 4px rgba(0, 122, 255, 0.12),
-        0 20px 60px rgba(0, 0, 0, 0.15),
-        0 10px 30px rgba(0, 122, 255, 0.1),
-        0 1px 0 rgba(255, 255, 255, 0.8) inset,
-        0 -1px 0 rgba(0, 122, 255, 0.15) inset;
-    transform: translateY(-5px);
-    border-color: rgba(0, 122, 255, 0.3);
+        0 0 0 6px rgba(0, 122, 255, 0.15),
+        0 25px 80px rgba(0, 0, 0, 0.18),
+        0 15px 40px rgba(0, 122, 255, 0.12),
+        0 1px 0 rgba(255, 255, 255, 1) inset,
+        0 -1px 0 rgba(0, 122, 255, 0.2) inset,
+        0 0 0 1px rgba(0, 122, 255, 0.1);
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(0, 122, 255, 0.4);
 }
 
 .textarea-wrapper:focus-within::before {
     opacity: 1;
 }
 
+.textarea-wrapper:focus-within::after {
+    opacity: 1;
+}
+
 .prompt-textarea {
     width: 100%;
-    min-height: 180px;
-    padding: var(--spacing-xl);
-    padding-right: var(--spacing-xl);
-    padding-bottom: var(--spacing-xl);
+    min-height: 200px;
+    padding: 28px 32px;
+    padding-right: 32px;
+    padding-bottom: 32px;
     border: none;
     outline: none;
     font-family: var(--font-family);
     font-size: 16px;
     font-weight: var(--font-weight-regular);
-    line-height: 1.7;
+    line-height: 1.8;
     color: var(--color-gray-900);
     background: transparent;
     resize: vertical;
-    transition: all var(--transition-normal);
-    letter-spacing: 0.01em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+    position: relative;
+    z-index: 2;
 }
 
 .prompt-textarea::placeholder {
-    color: var(--color-gray-400);
+    color: transparent;
     font-weight: var(--font-weight-light);
-    transition: color var(--transition-normal);
-    background: linear-gradient(135deg, var(--color-gray-400) 0%, var(--color-gray-500) 100%);
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg,
+        rgba(107, 114, 128, 0.6) 0%,
+        rgba(156, 163, 175, 0.5) 50%,
+        rgba(107, 114, 128, 0.4) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: italic;
+    letter-spacing: 0.01em;
+}
+
+.prompt-textarea:focus::placeholder {
+    background: linear-gradient(135deg,
+        rgba(156, 163, 175, 0.4) 0%,
+        rgba(209, 213, 219, 0.3) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-.prompt-textarea:focus::placeholder {
-    color: var(--color-gray-300);
+.prompt-textarea:not(:placeholder-shown)::placeholder {
+    opacity: 0;
 }
 
 .textarea-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-xl);
+    padding: 18px 32px;
     background:
-        linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.9) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(226, 232, 240, 0.6);
-    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.98) 100%),
+        radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.02) 0%, transparent 50%);
+    backdrop-filter: blur(15px) saturate(150%);
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 0 0 20px 20px;
     font-size: 13px;
     color: var(--color-gray-500);
     position: relative;
+    z-index: 3;
 }
 
 .textarea-footer::before {
@@ -1164,16 +1212,104 @@ body {
 
 /* 输入时的微妙动画 */
 .prompt-textarea:focus {
-    animation: textareaFocus 0.3s ease-out;
+    animation: textareaFocus 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes textareaFocus {
     0% {
         opacity: 0.8;
+        transform: scale(1);
+    }
+    30% {
+        opacity: 0.9;
+        transform: scale(1.002);
     }
     100% {
         opacity: 1;
+        transform: scale(1);
     }
+}
+
+/* 输入框打字动画效果 */
+.textarea-wrapper.typing::after {
+    opacity: 0.6;
+    animation: typingGlow 2s ease-in-out infinite;
+}
+
+@keyframes typingGlow {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* 输入框内容变化时的微妙反馈 */
+.prompt-textarea:not(:empty) {
+    color: var(--color-gray-900);
+    font-weight: var(--font-weight-medium);
+}
+
+/* 字符计数器增强样式 */
+.char-count.warning {
+    color: var(--color-warning);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.char-count.danger {
+    color: var(--color-danger);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* 输入框聚焦状态增强 */
+.textarea-wrapper.focused {
+    border-color: rgba(0, 122, 255, 0.5);
+    box-shadow:
+        0 0 0 8px rgba(0, 122, 255, 0.08),
+        0 30px 90px rgba(0, 0, 0, 0.2),
+        0 20px 50px rgba(0, 122, 255, 0.15),
+        0 1px 0 rgba(255, 255, 255, 1) inset,
+        0 -1px 0 rgba(0, 122, 255, 0.25) inset;
+    transform: translateY(-8px) scale(1.03);
+}
+
+.textarea-wrapper.focused::before {
+    opacity: 1;
+    background: linear-gradient(135deg,
+        rgba(0, 122, 255, 0.2) 0%,
+        rgba(88, 86, 214, 0.15) 30%,
+        rgba(255, 149, 0, 0.1) 70%,
+        rgba(175, 82, 222, 0.08) 100%);
+}
+
+.textarea-wrapper.focused::after {
+    opacity: 1;
+}
+
+/* 输入框内容为空时的提示动画 */
+.prompt-textarea:placeholder-shown {
+    animation: placeholderPulse 3s ease-in-out infinite;
+}
+
+@keyframes placeholderPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 输入框自动调整高度的平滑过渡 */
+.prompt-textarea {
+    transition: height 0.2s ease, all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== 模型选择粒子效果 ===== */
