@@ -12,7 +12,7 @@ const loadingIndicator = document.getElementById('loadingIndicator');
 // 帮助弹框元素
 const helpLink = document.getElementById('helpLink');
 const helpModal = document.getElementById('helpModal');
-const closeHelpModal = document.getElementById('closeHelpModal');
+const closeHelpModalBtn = document.getElementById('closeHelpModal');
 
 // 新增元素
 const charCountElement = document.querySelector('.char-count');
@@ -537,7 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 初始化帮助弹框功能
 function initHelpModal() {
-    if (helpLink && helpModal && closeHelpModal) {
+    if (helpLink && helpModal && closeHelpModalBtn) {
+        console.log('帮助弹框初始化成功');
+        
         // 点击帮助链接打开弹框
         helpLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -545,22 +547,28 @@ function initHelpModal() {
         });
         
         // 点击关闭按钮关闭弹框
-        closeHelpModal.addEventListener('click', function() {
-            closeHelpModal();
+        closeHelpModalBtn.addEventListener('click', function() {
+            closeHelpModalFunction();
         });
         
         // 点击弹框外部区域关闭弹框
         window.addEventListener('click', function(e) {
             if (e.target === helpModal) {
-                closeHelpModal();
+                closeHelpModalFunction();
             }
         });
         
         // ESC键关闭弹框
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && helpModal.style.display === 'block') {
-                closeHelpModal();
+                closeHelpModalFunction();
             }
+        });
+    } else {
+        console.error('帮助弹框初始化失败', { 
+            helpLink: !!helpLink, 
+            helpModal: !!helpModal, 
+            closeHelpModalBtn: !!closeHelpModalBtn 
         });
     }
 }
@@ -568,14 +576,16 @@ function initHelpModal() {
 // 打开帮助弹框
 function openHelpModal() {
     if (helpModal) {
+        console.log('打开帮助弹框');
         helpModal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // 防止背景滚动
     }
 }
 
 // 关闭帮助弹框
-function closeHelpModal() {
+function closeHelpModalFunction() {
     if (helpModal) {
+        console.log('关闭帮助弹框');
         helpModal.style.display = 'none';
         document.body.style.overflow = ''; // 恢复背景滚动
     }
