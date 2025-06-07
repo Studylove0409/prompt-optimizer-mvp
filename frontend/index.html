@@ -25,6 +25,7 @@
                 <div class="nav-links">
                     <a href="#" class="nav-link active">优化器</a>
                     <a href="#" class="nav-link" id="helpLink">帮助</a>
+                    <a href="#" class="nav-link" id="businessLink">商业合作</a>
                 </div>
             </div>
         </nav>
@@ -269,7 +270,133 @@
         </div>
     </div>
 
+    <!-- 商业合作弹框 -->
+    <div class="help-modal" id="businessModal">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2>商业合作</h2>
+                <span class="close-modal" id="closeBusinessModal">&times;</span>
+            </div>
+            <div class="help-modal-body">
+                <section class="help-section">
+                    <h3>📧 联系方式</h3>
+                    <p>如需商业合作，请联系我们：</p>
+                    <p class="contact-email">song3286791241@gmail.com</p>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <!-- 脚本文件 -->
+    <style>
+        /* 商业合作弹窗样式 */
+        #businessModal .contact-email {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4285f4;
+            padding: 10px;
+            background: #f0f5ff;
+            border-radius: 6px;
+            text-align: center;
+            margin: 15px auto;
+            max-width: 90%;
+            user-select: all;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        #businessModal .contact-email:hover {
+            background: #e0eaff;
+            transform: scale(1.02);
+        }
+        
+        /* 复制提示样式 */
+        .copy-tooltip {
+            position: fixed;
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .copy-tooltip.show {
+            opacity: 1;
+        }
+    </style>
+    <script>
+        // 商业合作弹窗功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const businessLink = document.getElementById('businessLink');
+            const businessModal = document.getElementById('businessModal');
+            const closeBusinessModal = document.getElementById('closeBusinessModal');
+            
+            // 点击商业合作链接显示弹窗
+            businessLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                businessModal.style.display = 'flex';
+            });
+            
+            // 点击关闭按钮隐藏弹窗
+            closeBusinessModal.addEventListener('click', function() {
+                businessModal.style.display = 'none';
+            });
+            
+            // 点击弹窗外部区域关闭弹窗
+            window.addEventListener('click', function(e) {
+                if (e.target === businessModal) {
+                    businessModal.style.display = 'none';
+                }
+            });
+            
+            // 点击邮箱复制功能
+            const contactEmail = document.querySelector('.contact-email');
+            if (contactEmail) {
+                contactEmail.addEventListener('click', function() {
+                    // 创建复制提示元素
+                    let tooltip = document.createElement('div');
+                    tooltip.className = 'copy-tooltip';
+                    document.body.appendChild(tooltip);
+                    
+                    // 复制邮箱到剪贴板
+                    navigator.clipboard.writeText(this.textContent)
+                        .then(() => {
+                            // 显示成功提示
+                            tooltip.textContent = '已复制到剪贴板';
+                            tooltip.classList.add('show');
+                            
+                            // 计算提示位置
+                            const rect = this.getBoundingClientRect();
+                            tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
+                            tooltip.style.top = rect.bottom + 10 + 'px';
+                            
+                            // 设置提示消失
+                            setTimeout(() => {
+                                tooltip.classList.remove('show');
+                                setTimeout(() => {
+                                    document.body.removeChild(tooltip);
+                                }, 300);
+                            }, 1500);
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                            tooltip.textContent = '复制失败';
+                            tooltip.classList.add('show');
+                            
+                            setTimeout(() => {
+                                tooltip.classList.remove('show');
+                                setTimeout(() => {
+                                    document.body.removeChild(tooltip);
+                                }, 300);
+                            }, 1500);
+                        });
+                });
+            }
+        });
+    </script>
     <script src="script.js"></script>
     <script src="particles.js"></script>
 
