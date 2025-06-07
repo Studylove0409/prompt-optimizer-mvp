@@ -170,8 +170,8 @@ function getModelDisplayName(modelId) {
     const modelNames = {
         'deepseek-chat': '普通版',
         'gemini-2.0-flash': 'Pro版',
-        'gemini-2.5-flash-preview-05-20': 'ULTRA版',
-        'gemini-2.5-pro-preview-03-25': 'ULTRA版(旧)'
+        'gemini-2.5-pro-preview-03-25': 'ULTRA版',
+        'gemini-2.5-flash-preview-05-20': 'ULTRA版(旧)'
     };
     return modelNames[modelId] || modelId;
 }
@@ -233,7 +233,7 @@ async function optimizePrompt() {
 
         // 显示结果
         showResult(data.optimized_prompt, data.model_used);
-        
+
         // 显示成功提示
         showCustomAlert('提示词优化成功！', 'success', 2000);
 
@@ -242,6 +242,54 @@ async function optimizePrompt() {
     } catch (error) {
         console.error('优化失败:', error);
         showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
+        throw error; // 重新抛出错误以便调用者处理
+    } finally {
+        hideLoading();
+    }
+}
+
+// 快速优化提示词 (使用Gemini Flash模型)
+async function quickOptimizePrompt() {
+    const originalPrompt = originalPromptTextarea.value.trim();
+    const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
+
+    if (!originalPrompt) {
+        showCustomAlert('请输入要优化的提示词', 'warning', 3000);
+        throw new Error('没有输入提示词');
+    }
+
+    // 显示加载状态
+    showLoading();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/optimize`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                original_prompt: originalPrompt,
+                model: quickModel
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 显示结果
+        showResult(data.optimized_prompt, data.model_used);
+
+        // 显示成功提示（标明是快速优化）
+        showCustomAlert('快速优化成功！', 'success', 2000);
+
+        return data; // 返回结果数据
+
+    } catch (error) {
+        console.error('快速优化失败:', error);
+        showCustomAlert('快速优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
@@ -448,8 +496,15 @@ originalPromptTextarea.addEventListener('input', updateCharCount);
 
 // 键盘事件处理
 originalPromptTextarea.addEventListener('keydown', (e) => {
+    // Ctrl + Enter: 快速优化 (使用Gemini Flash模型)
+    if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        optimizeBtn.classList.remove('pulse-hint');
+        addButtonAnimation(optimizeBtn);
+        quickOptimizePrompt();
+    }
     // Enter: 普通优化 (使用当前选择的模型)
-    if (e.key === 'Enter' && !e.shiftKey) {
+    else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         optimizeBtn.classList.remove('pulse-hint');
         addButtonAnimation(optimizeBtn);
