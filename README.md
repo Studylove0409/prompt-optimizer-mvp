@@ -1,4 +1,4 @@
-# Prompt Optimizer MVP
+# 智优词 MVP
 
 一个基于FastAPI和DeepSeek API的AI提示词优化服务，提供完整的前后端解决方案，专门用于改进和优化AI提示词，使其更加清晰、具体、高效。
 
@@ -105,7 +105,7 @@ python -m http.server 3000
 - **响应**:
   ```json
   {
-    "message": "欢迎使用Prompt Optimizer API",
+    "message": "欢迎使用智优词 API",
     "version": "1.0.0"
   }
   ```
@@ -297,7 +297,7 @@ LLM_API_KEY = os.getenv("MY_LLM_API_KEY")
 **FastAPI应用配置**：
 ```python
 app = FastAPI(
-    title="Prompt Optimizer API",
+    title="智优词 API",
     description="一个用于优化提示词的API服务",
     version="1.0.0"
 )
@@ -367,7 +367,7 @@ response = client.chat.completions.create(
 ## 功能特性
 
 ### 🎯 核心功能
-- **智能提示词优化**: 基于专业模板的AI提示词改进
+- **智优词优化**: 基于专业模板的AI提示词改进
 - **双模型支持**: 快速响应 vs 深度推理，满足不同需求
 - **实时优化**: 即时获取优化结果
 - **一键复制**: 便捷的结果复制功能

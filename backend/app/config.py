@@ -20,7 +20,7 @@ class Settings:
         self.gemini_base_url = "https://www.chataiapi.com/v1"
 
         # 应用配置
-        self.app_title = "Prompt Optimizer API"
+        self.app_title = "智优词 API"
         self.app_description = "一个用于优化提示词的API服务"
         self.app_version = "1.0.0"
 
