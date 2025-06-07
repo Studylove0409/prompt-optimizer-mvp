@@ -9,10 +9,10 @@ const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
 const loadingIndicator = document.getElementById('loadingIndicator');
 
-// 帮助弹框元素
-const helpLink = document.getElementById('helpLink');
-const helpModal = document.getElementById('helpModal');
-const closeHelpModalBtn = document.getElementById('closeHelpModal');
+// 帮助弹框元素 - 在DOM完全加载后再获取
+let helpLink;
+let helpModal;
+let closeHelpModalBtn;
 
 // 新增元素
 const charCountElement = document.querySelector('.char-count');
@@ -520,6 +520,13 @@ originalPromptTextarea.addEventListener('keydown', (e) => {
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM 加载完成，初始化组件');
+    
+    // 获取帮助弹框元素
+    helpLink = document.getElementById('helpLink');
+    helpModal = document.getElementById('helpModal');
+    closeHelpModalBtn = document.getElementById('closeHelpModal');
+    
     originalPromptTextarea.focus();
     updateCharCount();
     addModelCardEffects();
@@ -537,23 +544,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 初始化帮助弹框功能
 function initHelpModal() {
+    console.log('尝试初始化帮助弹框', { helpLink, helpModal, closeHelpModalBtn });
+    
     if (helpLink && helpModal && closeHelpModalBtn) {
         console.log('帮助弹框初始化成功');
         
         // 点击帮助链接打开弹框
         helpLink.addEventListener('click', function(e) {
+            console.log('点击了帮助链接');
             e.preventDefault();
             openHelpModal();
         });
         
         // 点击关闭按钮关闭弹框
         closeHelpModalBtn.addEventListener('click', function() {
+            console.log('点击了关闭按钮');
             closeHelpModalFunction();
         });
         
         // 点击弹框外部区域关闭弹框
         window.addEventListener('click', function(e) {
             if (e.target === helpModal) {
+                console.log('点击了弹框外部');
                 closeHelpModalFunction();
             }
         });
@@ -561,32 +573,37 @@ function initHelpModal() {
         // ESC键关闭弹框
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && helpModal.style.display === 'block') {
+                console.log('按下了ESC键');
                 closeHelpModalFunction();
             }
         });
     } else {
         console.error('帮助弹框初始化失败', { 
-            helpLink: !!helpLink, 
-            helpModal: !!helpModal, 
-            closeHelpModalBtn: !!closeHelpModalBtn 
+            helpLink: helpLink ? '存在' : '不存在', 
+            helpModal: helpModal ? '存在' : '不存在', 
+            closeHelpModalBtn: closeHelpModalBtn ? '存在' : '不存在' 
         });
     }
 }
 
 // 打开帮助弹框
 function openHelpModal() {
+    console.log('打开帮助弹框');
     if (helpModal) {
-        console.log('打开帮助弹框');
         helpModal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // 防止背景滚动
+    } else {
+        console.error('无法打开帮助弹框，元素不存在');
     }
 }
 
 // 关闭帮助弹框
 function closeHelpModalFunction() {
+    console.log('关闭帮助弹框');
     if (helpModal) {
-        console.log('关闭帮助弹框');
         helpModal.style.display = 'none';
         document.body.style.overflow = ''; // 恢复背景滚动
+    } else {
+        console.error('无法关闭帮助弹框，元素不存在');
     }
 }
