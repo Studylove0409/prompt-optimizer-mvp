@@ -36,6 +36,18 @@ class ModelsResponse(BaseModel):
     default: str
 
 
+class ExecuteRequest(BaseModel):
+    """执行优化后提示词请求模型"""
+    optimized_prompt: str
+    model: str = DEFAULT_MODEL
+
+
+class ExecuteResponse(BaseModel):
+    """执行优化后提示词响应模型"""
+    ai_response: str
+    model_used: str
+
+
 class APIResponse(BaseModel):
     """通用API响应模型"""
     message: str

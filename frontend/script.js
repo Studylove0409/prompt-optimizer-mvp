@@ -5,9 +5,17 @@ const outputSection = document.getElementById('outputSection');
 const optimizedPromptDiv = document.getElementById('optimizedPrompt');
 const modelUsedDiv = document.getElementById('modelUsed');
 const copyBtn = document.getElementById('copyBtn');
+const executeBtn = document.getElementById('executeBtn');
 const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
 const loadingIndicator = document.getElementById('loadingIndicator');
+
+// AI回答相关元素
+const aiResponseSection = document.getElementById('aiResponseSection');
+const aiResponseDiv = document.getElementById('aiResponse');
+const aiModelUsedDiv = document.getElementById('aiModelUsed');
+const copyAiBtn = document.getElementById('copyAiBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
 
 // 帮助弹框元素 - 在DOM完全加载后再获取
 let helpLink;
@@ -301,6 +309,54 @@ async function quickOptimizePrompt() {
     }
 }
 
+// 执行优化后的提示词，获取AI回答
+async function executePrompt() {
+    const optimizedPrompt = optimizedPromptDiv.textContent.trim();
+    const selectedModel = getSelectedModel();
+
+    if (!optimizedPrompt) {
+        showCustomAlert('请先优化提示词', 'warning', 3000);
+        return;
+    }
+
+    // 显示加载状态
+    showLoading();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/execute`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                optimized_prompt: optimizedPrompt,
+                model: selectedModel
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 显示AI回答结果
+        showAiResponse(data.ai_response, data.model_used);
+
+        // 显示成功提示
+        showCustomAlert('AI回答获取成功！', 'success', 2000);
+
+        return data; // 返回结果数据
+
+    } catch (error) {
+        console.error('获取AI回答失败:', error);
+        showCustomAlert('获取AI回答失败，请检查网络连接或稍后重试', 'error', 3500);
+        throw error; // 重新抛出错误以便调用者处理
+    } finally {
+        hideLoading();
+    }
+}
+
 // 显示加载状态
 function showLoading() {
     // 使用紧凑型加载指示器
@@ -327,6 +383,19 @@ function showResult(optimizedPrompt, modelUsed) {
 
     // 滚动到结果区域
     outputSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+// 显示AI回答结果
+function showAiResponse(aiResponse, modelUsed) {
+    aiResponseDiv.textContent = aiResponse;
+    aiModelUsedDiv.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
+    aiResponseSection.style.display = 'block';
+
+    // 滚动到AI回答区域
+    aiResponseSection.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
     });
@@ -381,7 +450,7 @@ async function copyToClipboard() {
     }
 }
 
-// 清空所有内容
+// 清空优化结果
 function clearAll() {
     addButtonAnimation(clearBtn);
 
@@ -393,9 +462,12 @@ function clearAll() {
             optimizedPromptDiv.textContent = '';
             modelUsedDiv.textContent = '';
             outputSection.style.display = 'none';
+            aiResponseDiv.textContent = '';
+            aiModelUsedDiv.textContent = '';
+            aiResponseSection.style.display = 'none';
             updateCharCount();
             originalPromptTextarea.focus();
-            
+
             // 显示成功提示
             showCustomAlert('已清空所有内容', 'success', 2000);
 
@@ -405,6 +477,85 @@ function clearAll() {
     } else {
         // 如果没有内容，直接获取焦点
         originalPromptTextarea.focus();
+    }
+}
+
+// 清空所有内容（包括AI回答）
+function clearAllContent() {
+    addButtonAnimation(clearAllBtn);
+
+    // 添加确认对话框
+    if (originalPromptTextarea.value.trim() || optimizedPromptDiv.textContent.trim() || aiResponseDiv.textContent.trim()) {
+        showCustomConfirm('确定要清空所有内容吗？', () => {
+            // 确认后清空所有内容
+            originalPromptTextarea.value = '';
+            optimizedPromptDiv.textContent = '';
+            modelUsedDiv.textContent = '';
+            outputSection.style.display = 'none';
+            aiResponseDiv.textContent = '';
+            aiModelUsedDiv.textContent = '';
+            aiResponseSection.style.display = 'none';
+            updateCharCount();
+            originalPromptTextarea.focus();
+
+            // 显示成功提示
+            showCustomAlert('已清空所有内容', 'success', 2000);
+
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, null, '🧹');
+    } else {
+        // 如果没有内容，直接获取焦点
+        originalPromptTextarea.focus();
+    }
+}
+
+// 复制AI回答到剪贴板
+async function copyAiResponse() {
+    addButtonAnimation(copyAiBtn);
+
+    try {
+        await navigator.clipboard.writeText(aiResponseDiv.textContent);
+
+        // 临时改变按钮文本以显示成功
+        const originalIcon = copyAiBtn.querySelector('.button-icon').textContent;
+        const originalText = copyAiBtn.querySelector('.button-text').textContent;
+
+        copyAiBtn.querySelector('.button-icon').textContent = '✅';
+        copyAiBtn.querySelector('.button-text').textContent = '已复制!';
+        copyAiBtn.style.background = 'var(--color-success)';
+        copyAiBtn.style.borderColor = 'var(--color-success)';
+        copyAiBtn.style.color = 'white';
+
+        // 显示复制成功提示框
+        showCustomAlert('AI回答已成功复制到剪贴板', 'success', 2000);
+
+        setTimeout(() => {
+            copyAiBtn.querySelector('.button-icon').textContent = originalIcon;
+            copyAiBtn.querySelector('.button-text').textContent = originalText;
+            copyAiBtn.style.background = '';
+            copyAiBtn.style.borderColor = '';
+            copyAiBtn.style.color = '';
+        }, 2000);
+
+    } catch (error) {
+        console.error('复制失败:', error);
+
+        // 显示错误状态
+        const originalIcon = copyAiBtn.querySelector('.button-icon').textContent;
+        copyAiBtn.querySelector('.button-icon').textContent = '❌';
+        copyAiBtn.style.background = 'var(--color-error)';
+        copyAiBtn.style.borderColor = 'var(--color-error)';
+        copyAiBtn.style.color = 'white';
+
+        setTimeout(() => {
+            copyAiBtn.querySelector('.button-icon').textContent = originalIcon;
+            copyAiBtn.style.background = '';
+            copyAiBtn.style.borderColor = '';
+            copyAiBtn.style.color = '';
+        }, 2000);
+
+        showCustomAlert('复制失败，请手动选择文本复制', 'error', 3500);
     }
 }
 
@@ -494,7 +645,15 @@ optimizeBtn.addEventListener('click', () => {
 });
 
 copyBtn.addEventListener('click', copyToClipboard);
+executeBtn.addEventListener('click', () => {
+    addButtonAnimation(executeBtn);
+    executePrompt();
+});
 clearBtn.addEventListener('click', clearAll);
+
+// AI回答相关事件监听器
+copyAiBtn.addEventListener('click', copyAiResponse);
+clearAllBtn.addEventListener('click', clearAllContent);
 
 // 字符计数更新
 originalPromptTextarea.addEventListener('input', updateCharCount);
