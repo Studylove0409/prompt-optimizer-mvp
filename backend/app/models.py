@@ -1,13 +1,13 @@
 """
 Pydantic数据模型定义
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from .constants import DEFAULT_MODEL
 
 
 class PromptRequest(BaseModel):
     """提示词优化请求模型"""
-    original_prompt: str
+    original_prompt: str = Field(..., max_length=1000)
     model: str = DEFAULT_MODEL
 
 
