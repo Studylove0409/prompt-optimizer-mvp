@@ -25,7 +25,7 @@
                 <div class="nav-links">
                     <a href="#" class="nav-link active">优化器</a>
                     <a href="#" class="nav-link" id="helpLink">帮助</a>
-                    <a href="#" class="nav-link" id="businessLink">商业合作</a>
+                    <a href="#" class="nav-link" id="businessLink">问题反馈</a>
                 </div>
             </div>
         </nav>
@@ -279,17 +279,17 @@
         </div>
     </div>
 
-    <!-- 商业合作弹框 -->
+    <!-- 问题反馈弹框 -->
     <div class="business-modal" id="businessModal">
         <div class="business-modal-content">
             <div class="business-modal-header">
-                <h2>商业合作</h2>
+                <h2>问题反馈</h2>
                 <span class="close-modal" id="closeBusinessModal">&times;</span>
             </div>
             <div class="business-modal-body">
                 <div class="contact-section">
                     <div class="contact-icon">📧</div>
-                    <p class="contact-text">如需商业合作，请联系我们：</p>
+                    <p class="contact-text">如有问题或建议，请联系我们：</p>
                     <p class="contact-email">song3286791241@gmail.com</p>
                     <p class="contact-hint">点击邮箱地址即可复制</p>
                 </div>
@@ -299,7 +299,7 @@
 
     <!-- 脚本文件 -->
     <style>
-        /* 商业合作弹窗样式 */
+        /* 问题反馈弹窗样式 */
         .business-modal {
             display: none;
             position: fixed;
@@ -509,13 +509,13 @@
         }
     </style>
     <script>
-        // 商业合作弹窗功能
+        // 问题反馈弹窗功能
         document.addEventListener('DOMContentLoaded', function() {
             const businessLink = document.getElementById('businessLink');
             const businessModal = document.getElementById('businessModal');
             const closeBusinessModal = document.getElementById('closeBusinessModal');
             
-            // 点击商业合作链接显示弹窗
+            // 点击问题反馈链接显示弹窗
             businessLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 businessModal.style.display = 'flex';
