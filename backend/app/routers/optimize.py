@@ -20,7 +20,7 @@ async def optimize_prompt(
 ):
     """优化提示词的API端点"""
     # 在后端硬编码模型，不再由前端指定
-    model_to_use = "deepseek-v2"
+    model_to_use = "deepseek-chat"
     
     prompt_service = PromptService(settings)
     return await prompt_service.optimize_prompt(
