@@ -521,16 +521,7 @@ function showAnswerResult(answer, modelUsed) {
     const answerContent = document.getElementById('answerContent');
     const answerModelUsed = document.getElementById('answerModelUsed');
 
-    // 使用Markdown解析器将答案转换为HTML
-    if (typeof marked !== 'undefined') {
-        answerContent.innerHTML = marked.parse(answer);
-        answerContent.classList.add('markdown-content');
-        // 保存原始文本用于复制功能
-        answerContent.setAttribute('data-original-text', answer);
-    } else {
-        // 如果Markdown库未加载，则使用纯文本
-        answerContent.textContent = answer;
-    }
+    answerContent.textContent = answer;
     answerModelUsed.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
     answerSection.style.display = 'block';
 
@@ -548,9 +539,7 @@ async function copyAnswerToClipboard() {
 
     try {
         const answerContent = document.getElementById('answerContent');
-        // 优先使用原始Markdown文本，如果没有则使用显示的文本
-        const textToCopy = answerContent.getAttribute('data-original-text') || answerContent.textContent;
-        await navigator.clipboard.writeText(textToCopy);
+        await navigator.clipboard.writeText(answerContent.textContent);
 
         // 临时改变按钮文本以显示成功
         const originalIcon = copyAnswerBtn.querySelector('.button-icon').textContent;
