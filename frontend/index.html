@@ -166,7 +166,7 @@
                         <div class="result-content">
                             <div id="optimizedPrompt" class="result-text"></div>
                             <div id="quick-jump-container">
-                                <div class="quick-jump-title">一键复制并跳转至:</div>
+                                <div class="quick-jump-title">前往：</div>
                                 <a href="https://chat.deepseek.com/" target="_blank" data-target="deepseek" class="quick-jump-btn">DeepSeek</a>
                                 <a href="https://chat.openai.com/" target="_blank" data-target="chatgpt" class="quick-jump-btn">ChatGPT</a>
                                 <a href="https://yiyan.baidu.com/" target="_blank" data-target="ernie" class="quick-jump-btn">文心一言</a>
@@ -315,10 +315,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-wrap: wrap; /* 允许按钮在小屏幕上换行 */
-            gap: 10px; /* 按钮之间的间距 */
+            flex-wrap: wrap;
+            gap: 12px;
             margin-top: 20px;
-            padding: 10px 0;
+            padding: 12px 0;
             border-top: 1px solid #eaeaea;
         }
 
@@ -326,40 +326,41 @@
             font-size: 14px;
             color: #666;
             margin-right: 5px;
+            font-weight: 500;
         }
 
         /* 文本按钮的基础样式 */
         .quick-jump-btn {
             display: inline-block;
-            padding: 6px 12px; /* 内边距，上下6px，左右12px */
-            border: 1px solid #dcdfe6; /* 边框颜色 */
-            border-radius: 15px; /* 圆角大小，使其成为胶囊形状 */
-            background-color: #f4f4f5; /* 按钮背景色 */
-            color: #606266; /* 文字颜色 */
-            font-size: 13px; /* 字体大小 */
-            font-weight: 500; /* 字体粗细 */
-            text-decoration: none; /* 移除下划线 */
-            transition: all 0.2s ease-in-out; /* 平滑过渡效果 */
-            cursor: pointer; /* 鼠标样式为手型 */
+            padding: 7px 14px;
+            border-radius: 18px;
+            background-color: #f6f8fa;
+            color: #444;
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         /* 鼠标悬停时的样式 */
         .quick-jump-btn:hover {
-            background-color: #4A90E2; /* 悬停时的背景色 */
-            color: #ffffff; /* 悬停时的文字颜色 */
-            border-color: #4A90E2; /* 悬停时的边框颜色 */
-            transform: translateY(-2px); /* 轻微上浮效果 */
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 添加轻微阴影 */
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.25);
         }
 
         /* 移动端适配 */
         @media (max-width: 480px) {
             #quick-jump-container {
-                gap: 8px;
+                gap: 10px;
             }
             
             .quick-jump-btn {
-                padding: 5px 10px;
+                padding: 6px 12px;
                 font-size: 12px;
             }
             
