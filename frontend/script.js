@@ -5,7 +5,6 @@ const outputSection = document.getElementById('outputSection');
 const optimizedPromptDiv = document.getElementById('optimizedPrompt');
 const modelUsedDiv = document.getElementById('modelUsed');
 const copyBtn = document.getElementById('copyBtn');
-const getAnswerBtn = document.getElementById('getAnswerBtn');
 const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
 const loadingIndicator = document.getElementById('loadingIndicator');
@@ -326,6 +325,17 @@ function showResult(optimizedPrompt, modelUsed) {
     modelUsedDiv.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
     outputSection.style.display = 'block';
 
+    // 为获取答案按钮添加事件监听器（如果还没有添加的话）
+    const getAnswerBtn = document.getElementById('getAnswerBtn');
+    console.log('showResult: 查找获取答案按钮', getAnswerBtn ? '找到' : '未找到');
+    if (getAnswerBtn && !getAnswerBtn.hasAttribute('data-listener-added')) {
+        console.log('为获取答案按钮添加事件监听器');
+        getAnswerBtn.addEventListener('click', getAnswer);
+        getAnswerBtn.setAttribute('data-listener-added', 'true');
+    } else if (getAnswerBtn) {
+        console.log('获取答案按钮已经有事件监听器了');
+    }
+
     // 滚动到结果区域
     outputSection.scrollIntoView({
         behavior: 'smooth',
@@ -426,7 +436,14 @@ function clearAll() {
 
 // 获取答案功能
 async function getAnswer() {
-    addButtonAnimation(getAnswerBtn);
+    console.log('getAnswer 函数被调用');
+    const getAnswerBtn = document.getElementById('getAnswerBtn');
+    if (getAnswerBtn) {
+        console.log('找到获取答案按钮，添加动画');
+        addButtonAnimation(getAnswerBtn);
+    } else {
+        console.log('未找到获取答案按钮');
+    }
 
     // 检查是否有优化后的提示词
     const optimizedPrompt = optimizedPromptDiv.textContent.trim();
@@ -645,7 +662,6 @@ optimizeBtn.addEventListener('click', () => {
 });
 
 copyBtn.addEventListener('click', copyToClipboard);
-getAnswerBtn.addEventListener('click', getAnswer);
 clearBtn.addEventListener('click', clearAll);
 
 // 字符计数更新
@@ -682,6 +698,12 @@ document.addEventListener('DOMContentLoaded', () => {
     originalPromptTextarea.focus();
     updateCharCount();
     addModelCardEffects();
+
+    // 为现有的获取答案按钮添加事件监听器（如果存在）
+    const existingGetAnswerBtn = document.getElementById('getAnswerBtn');
+    if (existingGetAnswerBtn) {
+        existingGetAnswerBtn.addEventListener('click', getAnswer);
+    }
 
     // 添加页面加载动画
     document.body.style.opacity = '0';
