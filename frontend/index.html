@@ -166,11 +166,11 @@
                         <div class="result-content">
                             <div id="optimizedPrompt" class="result-text"></div>
                             <div id="quick-jump-container">
-                                <div class="quick-jump-title">一键复制到</div>
-                                <a href="https://chat.deepseek.com/" target="_blank" data-target="deepseek"><img src="img/deepseek-logo.png" alt="DeepSeek"></a>
-                                <a href="https://chat.openai.com/" target="_blank" data-target="chatgpt"><img src="img/chatgpt-logo.png" alt="ChatGPT"></a>
-                                <a href="https://yiyan.baidu.com/" target="_blank" data-target="ernie"><img src="img/ernie-logo.png" alt="文心一言"></a>
-                                <a href="https://kimi.moonshot.cn/" target="_blank" data-target="kimi"><img src="img/kimi-logo.png" alt="Kimi"></a>
+                                <div class="quick-jump-title">一键复制并跳转至:</div>
+                                <a href="https://chat.deepseek.com/" target="_blank" data-target="deepseek" class="quick-jump-btn">DeepSeek</a>
+                                <a href="https://chat.openai.com/" target="_blank" data-target="chatgpt" class="quick-jump-btn">ChatGPT</a>
+                                <a href="https://yiyan.baidu.com/" target="_blank" data-target="ernie" class="quick-jump-btn">文心一言</a>
+                                <a href="https://kimi.moonshot.cn/" target="_blank" data-target="kimi" class="quick-jump-btn">Kimi</a>
                             </div>
                         </div>
 
@@ -315,7 +315,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 15px;
+            flex-wrap: wrap; /* 允许按钮在小屏幕上换行 */
+            gap: 10px; /* 按钮之间的间距 */
             margin-top: 20px;
             padding: 10px 0;
             border-top: 1px solid #eaeaea;
@@ -327,44 +328,39 @@
             margin-right: 5px;
         }
 
-        #quick-jump-container a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #f5f5f5;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
+        /* 文本按钮的基础样式 */
+        .quick-jump-btn {
+            display: inline-block;
+            padding: 6px 12px; /* 内边距，上下6px，左右12px */
+            border: 1px solid #dcdfe6; /* 边框颜色 */
+            border-radius: 15px; /* 圆角大小，使其成为胶囊形状 */
+            background-color: #f4f4f5; /* 按钮背景色 */
+            color: #606266; /* 文字颜色 */
+            font-size: 13px; /* 字体大小 */
+            font-weight: 500; /* 字体粗细 */
+            text-decoration: none; /* 移除下划线 */
+            transition: all 0.2s ease-in-out; /* 平滑过渡效果 */
+            cursor: pointer; /* 鼠标样式为手型 */
         }
 
-        #quick-jump-container a:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
-            border-color: #ddd;
-        }
-
-        #quick-jump-container img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
+        /* 鼠标悬停时的样式 */
+        .quick-jump-btn:hover {
+            background-color: #4A90E2; /* 悬停时的背景色 */
+            color: #ffffff; /* 悬停时的文字颜色 */
+            border-color: #4A90E2; /* 悬停时的边框颜色 */
+            transform: translateY(-2px); /* 轻微上浮效果 */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 添加轻微阴影 */
         }
 
         /* 移动端适配 */
         @media (max-width: 480px) {
             #quick-jump-container {
-                gap: 10px;
+                gap: 8px;
             }
             
-            #quick-jump-container a {
-                width: 36px;
-                height: 36px;
-            }
-            
-            #quick-jump-container img {
-                width: 20px;
-                height: 20px;
+            .quick-jump-btn {
+                padding: 5px 10px;
+                font-size: 12px;
             }
             
             .business-modal-content {
