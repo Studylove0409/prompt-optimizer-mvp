@@ -29,6 +29,9 @@ class Settings:
         self.cors_methods = ["*"]
         self.cors_headers = ["*"]
 
+        # 频率限制配置
+        self.rate_limit = os.getenv("RATE_LIMIT", "10/minute")
+
 
 @lru_cache()
 def get_settings() -> Settings:
