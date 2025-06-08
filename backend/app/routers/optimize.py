@@ -3,7 +3,7 @@
 """
 from fastapi import APIRouter, Depends, Request
 
-from ..main import limiter
+from ..limiter import limiter
 from ..config import get_settings, Settings
 from ..models import PromptRequest, PromptResponse
 from ..services.prompt_service import PromptService

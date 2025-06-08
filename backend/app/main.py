@@ -1,22 +1,12 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from .config import get_settings
+from .limiter import limiter  # 导入limiter实例
 from .routers import health, models, optimize
-
-# 根据 Vercel 和 Cloudflare 的文档，从 "x-forwarded-for" 获取真实 IP
-def get_real_ip(request: Request) -> str:
-    # 'x-forwarded-for' 报头是一个逗号分隔的 IP 列表，第一个是原始客户端 IP
-    if "x-forwarded-for" in request.headers:
-        return request.headers["x-forwarded-for"].split(',')[0].strip()
-    return request.client.host
-
-# 初始化 Limiter
-limiter = Limiter(key_func=get_real_ip)
-
 
 # 获取配置
 settings = get_settings()
