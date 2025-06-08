@@ -208,6 +208,7 @@ function addButtonAnimation(button) {
 // 优化提示词
 async function optimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
+    const selectedModel = getSelectedModel();
 
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
@@ -224,7 +225,8 @@ async function optimizePrompt() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                original_prompt: originalPrompt
+                original_prompt: originalPrompt,
+                model: selectedModel
             })
         });
 
@@ -319,20 +321,17 @@ function hideLoading() {
 
 // 显示结果
 function showResult(optimizedPrompt, modelUsed) {
-    // 隐藏加载
-    hideLoading();
-    
-    // 显示结果
     optimizedPromptDiv.textContent = optimizedPrompt;
-    
-    // 隐藏模型信息
-    modelUsedDiv.style.display = 'none';
-    
-    // 显示输出区域
+    modelUsedDiv.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
     outputSection.style.display = 'block';
-    
+
+
+
     // 滚动到结果区域
-    outputSection.scrollIntoView({ behavior: 'smooth' });
+    outputSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
 }
 
 // 复制结果到剪贴板
@@ -411,6 +410,12 @@ function clearAll() {
         originalPromptTextarea.focus();
     }
 }
+
+
+
+
+
+
 
 // 模型卡片点击效果
 function addModelCardEffects() {
@@ -534,6 +539,8 @@ document.addEventListener('DOMContentLoaded', () => {
     originalPromptTextarea.focus();
     updateCharCount();
     addModelCardEffects();
+
+
 
     // 添加页面加载动画
     document.body.style.opacity = '0';

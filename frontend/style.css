@@ -679,7 +679,7 @@ body {
 
 /* ===== 模型选择 ===== */
 .model-selection {
-    display: none !important;
+    margin-bottom: var(--spacing-2xl);
 }
 
 .model-title {

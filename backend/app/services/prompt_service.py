@@ -5,7 +5,7 @@
 from fastapi import HTTPException
 
 from ..config import Settings
-from ..constants import SUPPORTED_MODELS, get_meta_prompt_template, DEFAULT_MODEL
+from ..constants import SUPPORTED_MODELS, get_meta_prompt_template
 from ..models import PromptRequest, PromptResponse
 from .llm_service import LLMService
 
@@ -33,25 +33,22 @@ class PromptService:
     async def optimize_prompt(self, request: PromptRequest) -> PromptResponse:
         """优化提示词"""
         try:
-            # 使用固定模型
-            model = DEFAULT_MODEL
-
             # 验证模型
-            self.validate_model(model)
+            self.validate_model(request.model)
 
             # 根据模型类型格式化对应的元提示词模板
-            formatted_content = self.format_prompt_template(request.original_prompt, model)
+            formatted_content = self.format_prompt_template(request.original_prompt, request.model)
             
             # 创建消息列表
             messages = self.llm_service.create_messages(formatted_content)
             
             # 调用LLM API
-            optimized_prompt = await self.llm_service.call_llm_api(model, messages)
+            optimized_prompt = await self.llm_service.call_llm_api(request.model, messages)
             
             # 返回优化结果
             return PromptResponse(
                 optimized_prompt=optimized_prompt,
-                model_used=model
+                model_used=request.model
             )
             
         except HTTPException:
@@ -60,7 +57,7 @@ class PromptService:
         except Exception as e:
             # 处理其他未知错误
             error_detail = f"未知错误: {str(e)}"
-            if model.startswith("gemini-"):
+            if request.model.startswith("gemini-"):
                 error_detail = f"Gemini模型调用失败: {str(e)}"
             print(f"错误详情: {error_detail}")
             raise HTTPException(status_code=500, detail=error_detail)
