@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .routers import health, models, optimize, execute
+from .routers import health, models, optimize
 
 # 获取配置
 settings = get_settings()
@@ -27,7 +27,6 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(models.router)
 app.include_router(optimize.router)
-app.include_router(execute.router)
 
 
 @app.get("/")

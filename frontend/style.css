@@ -956,42 +956,6 @@ body {
     border-color: var(--color-primary-dark);
 }
 
-.action-button.execute {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    color: var(--color-white);
-    border-color: #ff6b6b;
-    position: relative;
-    overflow: hidden;
-}
-
-.action-button.execute:hover {
-    background: linear-gradient(135deg, #ee5a24, #d63031);
-    border-color: #ee5a24;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-}
-
-.action-button.execute:active {
-    transform: translateY(0);
-}
-
-/* AI回答区域样式 */
-.ai-response-section {
-    margin-top: var(--spacing-xl);
-}
-
-.ai-response-text {
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f5ff 100%);
-    border: 1px solid #e0eaff;
-    border-radius: var(--radius-md);
-    padding: var(--spacing-lg);
-    line-height: 1.7;
-    color: var(--color-gray-800);
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-size: 15px;
-}
-
 /* ===== 加载状态 ===== */
 .loading-overlay {
     position: fixed;
