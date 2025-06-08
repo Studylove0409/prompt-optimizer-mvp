@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from ..config import Settings
 from ..constants import SUPPORTED_MODELS, get_meta_prompt_template
-from ..models import PromptRequest, PromptResponse, AnswerRequest, AnswerResponse
+from ..models import PromptRequest, PromptResponse
 from .llm_service import LLMService
 
 
@@ -62,32 +62,4 @@ class PromptService:
             print(f"错误详情: {error_detail}")
             raise HTTPException(status_code=500, detail=error_detail)
 
-    async def get_answer(self, request: AnswerRequest) -> AnswerResponse:
-        """获取AI答案"""
-        try:
-            # 验证模型
-            self.validate_model(request.model)
 
-            # 直接使用用户提供的优化后的提示词作为问题，不使用元提示词模板
-            # 创建纯用户消息列表（不包含系统消息）
-            messages = self.llm_service.create_user_messages(request.prompt)
-
-            # 调用LLM API
-            answer = await self.llm_service.call_llm_api(request.model, messages)
-
-            # 返回答案结果
-            return AnswerResponse(
-                answer=answer,
-                model_used=request.model
-            )
-
-        except HTTPException:
-            # 重新抛出HTTP异常
-            raise
-        except Exception as e:
-            # 处理其他未知错误
-            error_detail = f"获取答案失败: {str(e)}"
-            if request.model.startswith("gemini-"):
-                error_detail = f"Gemini模型调用失败: {str(e)}"
-            print(f"错误详情: {error_detail}")
-            raise HTTPException(status_code=500, detail=error_detail)

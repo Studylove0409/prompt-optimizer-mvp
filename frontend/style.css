@@ -956,19 +956,6 @@ body {
     border-color: var(--color-primary-dark);
 }
 
-.action-button.answer {
-    background: var(--color-success);
-    color: var(--color-white);
-    border-color: var(--color-success);
-}
-
-.action-button.answer:hover {
-    background: #30D158;
-    border-color: #30D158;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
-}
-
 /* ===== 加载状态 ===== */
 .loading-overlay {
     position: fixed;

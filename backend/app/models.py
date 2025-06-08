@@ -17,18 +17,6 @@ class PromptResponse(BaseModel):
     model_used: str
 
 
-class AnswerRequest(BaseModel):
-    """获取答案请求模型"""
-    prompt: str
-    model: str = DEFAULT_MODEL
-
-
-class AnswerResponse(BaseModel):
-    """获取答案响应模型"""
-    answer: str
-    model_used: str
-
-
 class HealthResponse(BaseModel):
     """健康检查响应模型"""
     status: str

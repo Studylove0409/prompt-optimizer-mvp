@@ -164,11 +164,3 @@ class LLMService:
             }
         ]
 
-    def create_user_messages(self, user_content: str) -> list:
-        """创建用户消息列表（用于获取答案，不包含系统消息）"""
-        return [
-            {
-                "role": "user",
-                "content": user_content
-            }
-        ]

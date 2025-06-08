@@ -325,12 +325,7 @@ function showResult(optimizedPrompt, modelUsed) {
     modelUsedDiv.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
     outputSection.style.display = 'block';
 
-    // 为获取答案按钮添加事件监听器（如果还没有添加的话）
-    const getAnswerBtn = document.getElementById('getAnswerBtn');
-    if (getAnswerBtn && !getAnswerBtn.hasAttribute('data-listener-added')) {
-        getAnswerBtn.addEventListener('click', getAnswer);
-        getAnswerBtn.setAttribute('data-listener-added', 'true');
-    }
+
 
     // 滚动到结果区域
     outputSection.scrollIntoView({
@@ -393,27 +388,13 @@ function clearAll() {
     addButtonAnimation(clearBtn);
 
     // 添加确认对话框
-    const answerSection = document.getElementById('answerSection');
-    const hasContent = originalPromptTextarea.value.trim() ||
-                      optimizedPromptDiv.textContent.trim() ||
-                      (answerSection && answerSection.style.display !== 'none');
-
-    if (hasContent) {
+    if (originalPromptTextarea.value.trim() || optimizedPromptDiv.textContent.trim()) {
         showCustomConfirm('确定要清空所有内容吗？', () => {
             // 确认后清空内容
             originalPromptTextarea.value = '';
             optimizedPromptDiv.textContent = '';
             modelUsedDiv.textContent = '';
             outputSection.style.display = 'none';
-
-            // 清空答案区域
-            if (answerSection) {
-                answerSection.style.display = 'none';
-                const answerContent = document.getElementById('answerContent');
-                const answerModelUsed = document.getElementById('answerModelUsed');
-                if (answerContent) answerContent.textContent = '';
-                if (answerModelUsed) answerModelUsed.textContent = '';
-            }
 
             updateCharCount();
             originalPromptTextarea.focus();
@@ -430,143 +411,11 @@ function clearAll() {
     }
 }
 
-// 获取答案功能
-async function getAnswer() {
-    const getAnswerBtn = document.getElementById('getAnswerBtn');
-    if (getAnswerBtn) {
-        addButtonAnimation(getAnswerBtn);
-    }
 
-    // 检查是否有优化后的提示词
-    const optimizedPrompt = optimizedPromptDiv.textContent.trim();
-    if (!optimizedPrompt) {
-        showCustomAlert('请先优化提示词，然后再获取答案', 'warning', 3000);
-        return;
-    }
 
-    // 获取当前选中的模型
-    const selectedModel = getSelectedModel();
 
-    // 显示加载状态
-    showLoading();
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/get-answer`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                prompt: optimizedPrompt,
-                model: selectedModel
-            })
-        });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // 显示答案结果
-        showAnswerResult(data.answer, data.model_used);
-
-        // 显示成功提示
-        showCustomAlert('答案获取成功！', 'success', 2000);
-
-    } catch (error) {
-        console.error('获取答案失败:', error);
-        showCustomAlert('获取答案失败，请检查网络连接或稍后重试', 'error', 3500);
-    } finally {
-        hideLoading();
-    }
-}
-
-// 显示答案结果
-function showAnswerResult(answer, modelUsed) {
-    // 创建答案显示区域（如果不存在）
-    let answerSection = document.getElementById('answerSection');
-    if (!answerSection) {
-        answerSection = document.createElement('section');
-        answerSection.id = 'answerSection';
-        answerSection.className = 'output-section';
-        answerSection.innerHTML = `
-            <div class="section-header">
-                <h2 class="section-title">AI答案</h2>
-                <div class="model-used" id="answerModelUsed"></div>
-            </div>
-            <div class="result-container">
-                <div class="result-content">
-                    <div id="answerContent" class="result-text"></div>
-                </div>
-                <div class="result-actions">
-                    <button id="copyAnswerBtn" class="action-button primary">
-                        <span class="button-icon">📋</span>
-                        <span class="button-text">复制答案</span>
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // 插入到输出区域后面
-        const outputSection = document.getElementById('outputSection');
-        outputSection.parentNode.insertBefore(answerSection, outputSection.nextSibling);
-
-        // 为复制答案按钮添加事件监听器
-        const copyAnswerBtn = document.getElementById('copyAnswerBtn');
-        copyAnswerBtn.addEventListener('click', copyAnswerToClipboard);
-    }
-
-    // 更新答案内容
-    const answerContent = document.getElementById('answerContent');
-    const answerModelUsed = document.getElementById('answerModelUsed');
-
-    answerContent.textContent = answer;
-    answerModelUsed.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
-    answerSection.style.display = 'block';
-
-    // 滚动到答案区域
-    answerSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
-}
-
-// 复制答案到剪贴板
-async function copyAnswerToClipboard() {
-    const copyAnswerBtn = document.getElementById('copyAnswerBtn');
-    addButtonAnimation(copyAnswerBtn);
-
-    try {
-        const answerContent = document.getElementById('answerContent');
-        await navigator.clipboard.writeText(answerContent.textContent);
-
-        // 临时改变按钮文本以显示成功
-        const originalIcon = copyAnswerBtn.querySelector('.button-icon').textContent;
-        const originalText = copyAnswerBtn.querySelector('.button-text').textContent;
-
-        copyAnswerBtn.querySelector('.button-icon').textContent = '✅';
-        copyAnswerBtn.querySelector('.button-text').textContent = '已复制!';
-        copyAnswerBtn.style.background = 'var(--color-success)';
-        copyAnswerBtn.style.borderColor = 'var(--color-success)';
-        copyAnswerBtn.style.color = 'white';
-
-        // 显示复制成功提示框
-        showCustomAlert('答案已成功复制到剪贴板', 'success', 2000);
-
-        setTimeout(() => {
-            copyAnswerBtn.querySelector('.button-icon').textContent = originalIcon;
-            copyAnswerBtn.querySelector('.button-text').textContent = originalText;
-            copyAnswerBtn.style.background = '';
-            copyAnswerBtn.style.borderColor = '';
-            copyAnswerBtn.style.color = '';
-        }, 2000);
-
-    } catch (error) {
-        console.error('复制失败:', error);
-        showCustomAlert('复制失败，请手动选择文本复制', 'error', 3500);
-    }
-}
 
 // 模型卡片点击效果
 function addModelCardEffects() {
@@ -691,11 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCharCount();
     addModelCardEffects();
 
-    // 为现有的获取答案按钮添加事件监听器（如果存在）
-    const existingGetAnswerBtn = document.getElementById('getAnswerBtn');
-    if (existingGetAnswerBtn) {
-        existingGetAnswerBtn.addEventListener('click', getAnswer);
-    }
+
 
     // 添加页面加载动画
     document.body.style.opacity = '0';
