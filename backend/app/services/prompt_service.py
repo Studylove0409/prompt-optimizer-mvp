@@ -68,9 +68,9 @@ class PromptService:
             # 验证模型
             self.validate_model(request.model)
 
-            # 直接使用用户提供的提示词，不进行优化处理
-            # 创建消息列表
-            messages = self.llm_service.create_messages(request.prompt)
+            # 直接使用用户提供的优化后的提示词作为问题，不使用元提示词模板
+            # 创建纯用户消息列表（不包含系统消息）
+            messages = self.llm_service.create_user_messages(request.prompt)
 
             # 调用LLM API
             answer = await self.llm_service.call_llm_api(request.model, messages)

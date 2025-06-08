@@ -152,7 +152,7 @@ class LLMService:
             return await self.call_deepseek_api(model, messages)
     
     def create_messages(self, formatted_content: str) -> list:
-        """创建消息列表"""
+        """创建消息列表（用于提示词优化，包含系统消息）"""
         return [
             {
                 "role": "system",
@@ -161,5 +161,14 @@ class LLMService:
             {
                 "role": "user",
                 "content": formatted_content
+            }
+        ]
+
+    def create_user_messages(self, user_content: str) -> list:
+        """创建用户消息列表（用于获取答案，不包含系统消息）"""
+        return [
+            {
+                "role": "user",
+                "content": user_content
             }
         ]
