@@ -297,6 +297,29 @@
         </div>
     </div>
 
+    <!-- 公告弹框 -->
+    <div class="announcement-modal" id="announcementModal">
+        <div class="announcement-modal-content">
+            <div class="announcement-modal-header">
+                <div class="announcement-icon">🎉</div>
+                <h2>欢迎使用智优词</h2>
+                <span class="close-modal" id="closeAnnouncementModal">&times;</span>
+            </div>
+            <div class="announcement-modal-body">
+                <div class="announcement-section">
+                    <div class="announcement-highlight">
+                        <div class="highlight-icon">✨</div>
+                        <p class="highlight-text">无需登录，可以直接免费使用</p>
+                    </div>
+                    <p class="announcement-desc">立即开始优化您的提示词，体验AI的强大能力！</p>
+                </div>
+            </div>
+            <div class="announcement-modal-footer">
+                <button class="announcement-btn" id="startUsingBtn">开始使用</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 脚本文件 -->
     <style>
         /* 问题反馈弹窗样式 */
@@ -507,13 +530,254 @@
                 opacity: 1;
             }
         }
+
+        /* 公告弹窗样式 */
+        .announcement-modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .announcement-modal-content {
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            margin: 12% auto;
+            width: 90%;
+            max-width: 480px;
+            border-radius: 20px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                0 8px 24px rgba(0, 0, 0, 0.1),
+                0 1px 0 rgba(255, 255, 255, 0.8) inset;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .announcement-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 25px 30px 20px;
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
+            position: relative;
+        }
+
+        .announcement-modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 100%);
+        }
+
+        .announcement-icon {
+            font-size: 2rem;
+            margin-right: 12px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .announcement-modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .announcement-modal-header .close-modal {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            line-height: 1;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .announcement-modal-header .close-modal:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .announcement-modal-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .announcement-highlight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #007AFF;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .announcement-highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(0, 122, 255, 0.1) 50%,
+                transparent 100%);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        .highlight-icon {
+            font-size: 1.8rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .highlight-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #007AFF;
+            margin: 0;
+        }
+
+        .announcement-desc {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .announcement-modal-footer {
+            padding: 0 30px 30px;
+            text-align: center;
+        }
+
+        .announcement-btn {
+            background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            min-width: 140px;
+        }
+
+        .announcement-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
+            background: linear-gradient(135deg, #0056CC 0%, #4A4A9F 100%);
+        }
+
+        .announcement-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        /* 动画效果 */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 480px) {
+            .announcement-modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+
+            .announcement-modal-header {
+                padding: 20px 25px 15px;
+            }
+
+            .announcement-modal-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .announcement-icon {
+                font-size: 1.5rem;
+            }
+
+            .announcement-modal-body {
+                padding: 25px 20px;
+            }
+
+            .highlight-text {
+                font-size: 1.1rem;
+            }
+
+            .announcement-modal-footer {
+                padding: 0 20px 25px;
+            }
+
+            .announcement-btn {
+                padding: 12px 28px;
+                font-size: 0.95rem;
+            }
+        }
     </style>
     <script>
-        // 问题反馈弹窗功能
+        // 问题反馈弹窗功能和公告弹窗功能
         document.addEventListener('DOMContentLoaded', function() {
             const businessLink = document.getElementById('businessLink');
             const businessModal = document.getElementById('businessModal');
             const closeBusinessModal = document.getElementById('closeBusinessModal');
+
+            // 公告弹窗元素
+            const announcementModal = document.getElementById('announcementModal');
+            const closeAnnouncementModal = document.getElementById('closeAnnouncementModal');
+            const startUsingBtn = document.getElementById('startUsingBtn');
             
             // 点击问题反馈链接显示弹窗
             businessLink.addEventListener('click', function(e) {
@@ -576,6 +840,61 @@
                         });
                 });
             }
+
+            // 公告弹窗功能
+            // 检查是否已经显示过公告（使用localStorage记录）
+            const hasSeenAnnouncement = localStorage.getItem('hasSeenAnnouncement');
+
+            // 如果没有看过公告，则在页面加载后显示
+            if (!hasSeenAnnouncement) {
+                setTimeout(() => {
+                    announcementModal.style.display = 'flex';
+                }, 800); // 延迟800ms显示，让页面先加载完成
+            }
+
+            // 关闭公告弹窗
+            function closeAnnouncement() {
+                announcementModal.style.display = 'none';
+                // 记录用户已经看过公告
+                localStorage.setItem('hasSeenAnnouncement', 'true');
+            }
+
+            // 点击关闭按钮
+            closeAnnouncementModal.addEventListener('click', closeAnnouncement);
+
+            // 点击开始使用按钮
+            startUsingBtn.addEventListener('click', function() {
+                closeAnnouncement();
+                // 滚动到输入区域
+                const inputSection = document.querySelector('.input-section');
+                if (inputSection) {
+                    inputSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                // 聚焦到输入框
+                setTimeout(() => {
+                    const textarea = document.getElementById('originalPrompt');
+                    if (textarea) {
+                        textarea.focus();
+                    }
+                }, 500);
+            });
+
+            // 点击弹窗外部区域关闭公告
+            window.addEventListener('click', function(e) {
+                if (e.target === announcementModal) {
+                    closeAnnouncement();
+                }
+            });
+
+            // ESC键关闭公告
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && announcementModal.style.display === 'flex') {
+                    closeAnnouncement();
+                }
+            });
         });
     </script>
     <script src="script.js"></script>
