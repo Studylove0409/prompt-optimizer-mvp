@@ -9,6 +9,7 @@ class PromptRequest(BaseModel):
     """提示词优化请求模型"""
     original_prompt: str = Field(..., max_length=1000, description="原始提示词，最大长度1000")
     model: str = DEFAULT_MODEL
+    mode: str = "general"  # 可选值: general, business, drawing, academic
 
 
 class PromptResponse(BaseModel):

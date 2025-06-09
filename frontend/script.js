@@ -170,6 +170,12 @@ function getSelectedModel() {
     return selectedRadio ? selectedRadio.value : 'deepseek-chat';
 }
 
+// 获取当前选择的模式
+function getSelectedMode() {
+    const activeModeBtn = document.querySelector('.mode-btn.active');
+    return activeModeBtn ? activeModeBtn.dataset.mode : 'general';
+}
+
 // 获取模型显示名称
 function getModelDisplayName(modelId) {
     const modelNames = {
@@ -219,6 +225,9 @@ async function optimizePrompt() {
     showLoading();
 
     try {
+        // 获取当前选择的模式
+        const selectedMode = getSelectedMode();
+        
         const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
             headers: {
@@ -226,7 +235,8 @@ async function optimizePrompt() {
             },
             body: JSON.stringify({
                 original_prompt: originalPrompt,
-                model: selectedModel
+                model: selectedModel,
+                mode: selectedMode  // 添加模式参数
             })
         });
 
@@ -257,6 +267,7 @@ async function optimizePrompt() {
 async function quickOptimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
     const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
+    const selectedMode = getSelectedMode(); // 获取当前模式
 
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
@@ -274,7 +285,8 @@ async function quickOptimizePrompt() {
             },
             body: JSON.stringify({
                 original_prompt: originalPrompt,
-                model: quickModel
+                model: quickModel,
+                mode: selectedMode // 添加模式参数
             })
         });
 

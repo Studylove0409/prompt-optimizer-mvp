@@ -76,6 +76,30 @@
                             
                             <div class="textarea-footer">
                                 <span class="char-count">0 字符</span>
+                                
+                                <!-- 模式选择 -->
+                                <div class="mode-selector">
+                                    <span class="mode-title">模式：</span>
+                                    <div class="mode-options">
+                                        <button class="mode-btn active" data-mode="general">
+                                            <span class="mode-icon">🌟</span>
+                                            <span class="mode-name">通用</span>
+                                        </button>
+                                        <button class="mode-btn" data-mode="business">
+                                            <span class="mode-icon">💼</span>
+                                            <span class="mode-name">商业</span>
+                                        </button>
+                                        <button class="mode-btn" data-mode="drawing">
+                                            <span class="mode-icon">🎨</span>
+                                            <span class="mode-name">绘画</span>
+                                        </button>
+                                        <button class="mode-btn" data-mode="academic">
+                                            <span class="mode-icon">📚</span>
+                                            <span class="mode-name">学术</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <span class="shortcut-hint">Enter 优化 | Ctrl + Enter 快速优化 | Shift + Enter 换行</span>
                                 
                                 <!-- 优化按钮放在输入框右下角 -->
@@ -337,6 +361,144 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s ease-out;
+        }
+
+        /* 模式选择器样式 */
+        .mode-selector {
+            display: flex;
+            align-items: center;
+            margin: 0 8px;
+            position: relative;
+        }
+        
+        .mode-title {
+            font-size: 12px;
+            color: #666;
+            margin-right: 8px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        
+        .mode-options {
+            display: flex;
+            gap: 5px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 18px;
+            padding: 3px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        
+        .mode-btn {
+            display: flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 15px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            font-size: 12px;
+            color: #666;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            border-radius: 15px;
+        }
+        
+        .mode-btn.active {
+            color: #fff;
+            box-shadow: 0 3px 8px rgba(110, 142, 251, 0.35);
+            transform: translateY(-1px);
+        }
+        
+        .mode-btn.active::before {
+            opacity: 1;
+        }
+        
+        .mode-icon {
+            margin-right: 4px;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        
+        .mode-btn:hover .mode-icon,
+        .mode-btn.active .mode-icon {
+            transform: scale(1.2);
+        }
+        
+        .mode-name {
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: letter-spacing 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .mode-btn.active .mode-name {
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        
+        .mode-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        /* 添加一个微妙的光晕效果在激活的按钮周围 */
+        .mode-btn.active::after {
+            content: '';
+            position: absolute;
+            top: -15%;
+            left: -15%;
+            width: 130%;
+            height: 130%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0.5;
+            animation: glow-pulse 2s ease-in-out infinite;
+            z-index: -2;
+            pointer-events: none;
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.6; }
+        }
+        
+        @media (max-width: 768px) {
+            .mode-selector {
+                order: -1;
+                margin-bottom: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .textarea-footer {
+                flex-wrap: wrap;
+            }
+            
+            .mode-options {
+                padding: 4px;
+                gap: 8px;
+            }
+            
+            .mode-btn {
+                padding: 5px 12px;
+            }
         }
 
         /* 快速跳转容器样式 */
@@ -846,6 +1008,14 @@
                 font-size: 0.95rem;
             }
         }
+
+        /* 文本框底部区域样式 */
+        .textarea-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 8px;
+        }
     </style>
     <script>
         // 问题反馈弹窗功能和公告弹窗功能
@@ -853,6 +1023,52 @@
             const businessLink = document.getElementById('businessLink');
             const businessModal = document.getElementById('businessModal');
             const closeBusinessModal = document.getElementById('closeBusinessModal');
+
+            // 模式选择功能
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            let currentMode = 'general'; // 默认模式改为通用模式
+            
+            // 处理模式按钮点击
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    // 给当前点击的按钮添加active类
+                    this.classList.add('active');
+                    // 更新当前模式
+                    currentMode = this.dataset.mode;
+                    console.log('模式已切换为:', currentMode);
+                    
+                    // 这里可以根据不同模式修改提示文本或其他UI元素
+                    updatePlaceholderByMode(currentMode);
+                });
+            });
+            
+            // 根据模式更新输入框提示文本
+            function updatePlaceholderByMode(mode) {
+                const textarea = document.getElementById('originalPrompt');
+                if (!textarea) return;
+                
+                switch(mode) {
+                    case 'general':
+                        textarea.placeholder = "在这里输入您想要优化的提示词...例如：我想学习一门新技能";
+                        break;
+                    case 'business':
+                        textarea.placeholder = "在这里输入您想要优化的商业提示词...例如：写一份产品推广方案";
+                        break;
+                    case 'drawing':
+                        textarea.placeholder = "在这里输入您想要优化的绘画提示词...例如：画一个在森林中的小屋";
+                        break;
+                    case 'academic':
+                        textarea.placeholder = "在这里输入您想要优化的学术提示词...例如：解释量子力学的基本原理";
+                        break;
+                    default:
+                        textarea.placeholder = "在这里输入您想要优化的提示词...";
+                }
+            }
+            
+            // 初始化设置默认模式的提示文本
+            updatePlaceholderByMode(currentMode);
 
             // 公告弹窗元素
             const announcementModal = document.getElementById('announcementModal');

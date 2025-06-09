@@ -5,7 +5,7 @@
 from fastapi import HTTPException
 
 from ..config import Settings
-from ..constants import SUPPORTED_MODELS, get_meta_prompt_template
+from ..constants import SUPPORTED_MODELS, get_meta_prompt_template, get_prompt_template_by_mode
 from ..models import PromptRequest, PromptResponse
 from .llm_service import LLMService
 
@@ -25,9 +25,19 @@ class PromptService:
                 detail=f"无效的模型选择。支持的模型: {', '.join(SUPPORTED_MODELS)}"
             )
     
-    def format_prompt_template(self, original_prompt: str, model: str) -> str:
-        """根据模型类型格式化对应的元提示词模板"""
-        template = get_meta_prompt_template(model)
+    def format_prompt_template(self, original_prompt: str, model: str, mode: str = "general") -> str:
+        """根据模型类型和模式格式化对应的元提示词模板
+        
+        Args:
+            original_prompt: 用户原始提示词
+            model: 使用的模型名称
+            mode: 模式名称，可选值: general, business, drawing, academic
+            
+        Returns:
+            格式化后的提示词模板
+        """
+        # 根据模式获取对应的提示词模板
+        template = get_prompt_template_by_mode(mode)
         return template.format(user_input_prompt=original_prompt)
     
     async def optimize_prompt(self, request: PromptRequest) -> PromptResponse:
@@ -36,8 +46,12 @@ class PromptService:
             # 验证模型
             self.validate_model(request.model)
 
-            # 根据模型类型格式化对应的元提示词模板
-            formatted_content = self.format_prompt_template(request.original_prompt, request.model)
+            # 根据模型类型和模式格式化对应的元提示词模板
+            formatted_content = self.format_prompt_template(
+                request.original_prompt, 
+                request.model,
+                request.mode
+            )
             
             # 创建消息列表
             messages = self.llm_service.create_messages(formatted_content)
