@@ -221,23 +221,29 @@ async function optimizePrompt() {
         throw new Error('没有输入提示词');
     }
 
+    // 获取当前选择的模式
+    const selectedMode = getSelectedMode();
+    console.log('当前选择的模式:', selectedMode);
+    
     // 显示加载状态
     showLoading();
 
     try {
-        // 获取当前选择的模式
-        const selectedMode = getSelectedMode();
+        // 构建请求体
+        const requestBody = {
+            original_prompt: originalPrompt,
+            model: selectedModel,
+            mode: selectedMode  // 添加模式参数
+        };
+        
+        console.log('发送的请求体:', requestBody);
         
         const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                original_prompt: originalPrompt,
-                model: selectedModel,
-                mode: selectedMode  // 添加模式参数
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -268,6 +274,7 @@ async function quickOptimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
     const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
     const selectedMode = getSelectedMode(); // 获取当前模式
+    console.log('快速优化 - 当前选择的模式:', selectedMode);
 
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
@@ -278,16 +285,21 @@ async function quickOptimizePrompt() {
     showLoading();
 
     try {
+        // 构建请求体
+        const requestBody = {
+            original_prompt: originalPrompt,
+            model: quickModel,
+            mode: selectedMode // 添加模式参数
+        };
+        
+        console.log('快速优化 - 发送的请求体:', requestBody);
+        
         const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                original_prompt: originalPrompt,
-                model: quickModel,
-                mode: selectedMode // 添加模式参数
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -336,8 +348,6 @@ function showResult(optimizedPrompt, modelUsed) {
     optimizedPromptDiv.textContent = optimizedPrompt;
     modelUsedDiv.textContent = `使用模型: ${getModelDisplayName(modelUsed)}`;
     outputSection.style.display = 'block';
-
-
 
     // 滚动到结果区域
     outputSection.scrollIntoView({
@@ -422,12 +432,6 @@ function clearAll() {
         originalPromptTextarea.focus();
     }
 }
-
-
-
-
-
-
 
 // 模型卡片点击效果
 function addModelCardEffects() {
@@ -551,8 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
     originalPromptTextarea.focus();
     updateCharCount();
     addModelCardEffects();
-
-
 
     // 添加页面加载动画
     document.body.style.opacity = '0';
