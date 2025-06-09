@@ -335,17 +335,9 @@
                         <div class="highlight-icon">✨</div>
                         <p class="highlight-text">无需登录，可以直接免费使用</p>
                     </div>
-                    <div class="announcement-update">
-                        <div class="update-icon">🆕</div>
-                        <p class="update-text">现已支持<span class="update-badge">多种模式</span>: 通用、商业、绘画和学术模式</p>
-                    </div>
                     <div class="announcement-recommendation">
                         <div class="recommendation-icon">🧠</div>
                         <p class="recommendation-text">推荐使用 <span class="pro-badge">Pro版</span>，速度快质量好</p>
-                    </div>
-                    <div class="announcement-upgrade">
-                        <div class="upgrade-icon">⚡</div>
-                        <p class="upgrade-text"><span class="ultra-badge">Ultra版</span> 已全面升级，速度更快质量更好</p>
                     </div>
                     <p class="announcement-desc">立即开始优化您的提示词，体验AI的强大能力！</p>
                 </div>
@@ -997,15 +989,11 @@
             .highlight-text {
                 font-size: 1.1rem;
             }
-            
-            .update-text,
-            .upgrade-text,
+
             .recommendation-text {
                 font-size: 0.95rem;
             }
-            
-            .update-badge,
-            .ultra-badge,
+
             .pro-badge {
                 font-size: 0.8rem;
                 padding: 2px 6px;
@@ -1027,142 +1015,6 @@
             align-items: center;
             justify-content: space-between;
             padding-top: 8px;
-        }
-
-        /* 更新通知样式 */
-        .announcement-update {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: linear-gradient(135deg, #f0fff4 0%, #e0ffe0 100%);
-            border: 2px solid #34c759;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .announcement-update::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                rgba(52, 199, 89, 0.1) 50%,
-                transparent 100%);
-            animation: shimmer 3s ease-in-out infinite;
-            animation-delay: 0.5s;
-        }
-
-        .update-icon {
-            font-size: 1.5rem;
-            animation: pulse 2.5s ease-in-out infinite;
-            animation-delay: 0.3s;
-        }
-
-        .update-text {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #26913f;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .update-badge {
-            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
-            animation: glow-green 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow-green {
-            0% {
-                box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
-            }
-            100% {
-                box-shadow: 0 4px 12px rgba(52, 199, 89, 0.5);
-            }
-        }
-
-        /* Ultra版升级通知样式 */
-        .announcement-upgrade {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: linear-gradient(135deg, #f8f0ff 0%, #f0e0ff 100%);
-            border: 2px solid #af52de;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .announcement-upgrade::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                rgba(175, 82, 222, 0.1) 50%,
-                transparent 100%);
-            animation: shimmer 3s ease-in-out infinite;
-            animation-delay: 0.7s;
-        }
-
-        .upgrade-icon {
-            font-size: 1.5rem;
-            animation: bounce 2.5s ease-in-out infinite;
-            animation-delay: 0.4s;
-        }
-
-        .upgrade-text {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #9f40ce;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .ultra-badge {
-            background: linear-gradient(135deg, #af52de 0%, #d161ff 100%);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 6px rgba(175, 82, 222, 0.3);
-            animation: glow-purple 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow-purple {
-            0% {
-                box-shadow: 0 2px 6px rgba(175, 82, 222, 0.3);
-            }
-            100% {
-                box-shadow: 0 4px 12px rgba(175, 82, 222, 0.5);
-            }
         }
     </style>
     <script>
@@ -1286,12 +1138,11 @@
             }
 
             // 公告弹窗功能
-            // 检查是否有新版本公告（使用localStorage记录）
-            const announcementVersion = '1.1.0'; // 更新版本号，强制显示新公告
-            const lastSeenVersion = localStorage.getItem('announcementVersion');
+            // 检查是否已经显示过公告（使用localStorage记录）
+            const hasSeenAnnouncement = localStorage.getItem('hasSeenAnnouncement');
 
-            // 如果是第一次访问或者有新版本，则显示公告
-            if (!lastSeenVersion || lastSeenVersion !== announcementVersion) {
+            // 如果没有看过公告，则在页面加载后显示
+            if (!hasSeenAnnouncement) {
                 setTimeout(() => {
                     announcementModal.style.display = 'flex';
                 }, 800); // 延迟800ms显示，让页面先加载完成
@@ -1300,8 +1151,8 @@
             // 关闭公告弹窗
             function closeAnnouncement() {
                 announcementModal.style.display = 'none';
-                // 记录用户已经看过当前版本的公告
-                localStorage.setItem('announcementVersion', announcementVersion);
+                // 记录用户已经看过公告
+                localStorage.setItem('hasSeenAnnouncement', 'true');
             }
 
             // 点击关闭按钮
