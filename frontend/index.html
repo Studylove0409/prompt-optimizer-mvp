@@ -311,6 +311,10 @@
                         <div class="highlight-icon">✨</div>
                         <p class="highlight-text">无需登录，可以直接免费使用</p>
                     </div>
+                    <div class="announcement-recommendation">
+                        <div class="recommendation-icon">🧠</div>
+                        <p class="recommendation-text">推荐使用 <span class="pro-badge">Pro版</span>，速度快质量好</p>
+                    </div>
                     <p class="announcement-desc">立即开始优化您的提示词，体验AI的强大能力！</p>
                 </div>
             </div>
@@ -662,6 +666,73 @@
             margin: 0;
         }
 
+        .announcement-recommendation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #f8f4ff 0%, #f0e6ff 100%);
+            border: 2px solid #5856D6;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .announcement-recommendation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(88, 86, 214, 0.1) 50%,
+                transparent 100%);
+            animation: shimmer 3s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .recommendation-icon {
+            font-size: 1.5rem;
+            animation: pulse 2.5s ease-in-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        .recommendation-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #5856D6;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pro-badge {
+            background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(88, 86, 214, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 2px 6px rgba(88, 86, 214, 0.3);
+            }
+            100% {
+                box-shadow: 0 4px 12px rgba(88, 86, 214, 0.5);
+            }
+        }
+
         .announcement-desc {
             color: #666;
             font-size: 1rem;
@@ -755,6 +826,15 @@
 
             .highlight-text {
                 font-size: 1.1rem;
+            }
+
+            .recommendation-text {
+                font-size: 0.95rem;
+            }
+
+            .pro-badge {
+                font-size: 0.8rem;
+                padding: 2px 6px;
             }
 
             .announcement-modal-footer {
