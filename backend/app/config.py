@@ -30,7 +30,7 @@ class Settings:
         self.cors_headers = ["*"]
 
         # 频率限制配置
-        self.rate_limit = os.getenv("RATE_LIMIT", "10/minute")
+        self.rate_limit = os.getenv("RATE_LIMIT", "5/minute")
 
 
 @lru_cache()
