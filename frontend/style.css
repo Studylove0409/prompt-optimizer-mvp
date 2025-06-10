@@ -2625,6 +2625,8 @@ body {
     cursor: pointer;
     color: #666;
     font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 .checkbox-wrapper input[type="checkbox"] {
