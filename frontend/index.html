@@ -12,6 +12,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- Vercel Analytics -->
     <script>
         window.va = function() { (window.vaq = window.vaq || []).push(arguments); };
@@ -36,6 +39,16 @@
                     <a href="#" class="nav-link" id="helpLink">帮助</a>
                     <a href="#" class="nav-link" id="businessLink">问题反馈</a>
                     <a href="#" class="nav-link" id="announcementLink">公告</a>
+                    <!-- 用户认证按钮 -->
+                    <div class="auth-section" id="authSection">
+                        <button class="auth-btn login-btn" id="loginBtn">登录/注册</button>
+                        <div class="user-menu" id="userMenu" style="display: none;">
+                            <div class="user-info">
+                                <span class="user-email" id="userEmail"></span>
+                            </div>
+                            <button class="auth-btn logout-btn" id="logoutBtn">退出登录</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -368,6 +381,59 @@
             </div>
             <div class="announcement-modal-footer">
                 <button class="announcement-btn" id="startUsingBtn">开始使用</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录/注册弹框 -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2 id="authModalTitle">登录/注册</h2>
+                <span class="close-modal" id="closeAuthModal">&times;</span>
+            </div>
+            <div class="auth-modal-body">
+                <!-- 登录表单 -->
+                <div class="auth-form" id="loginForm">
+                    <h3>登录</h3>
+                    <form id="loginFormElement">
+                        <div class="form-group">
+                            <label for="loginEmail">邮箱</label>
+                            <input type="email" id="loginEmail" required placeholder="请输入您的邮箱">
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">密码</label>
+                            <input type="password" id="loginPassword" required placeholder="请输入您的密码">
+                        </div>
+                        <button type="submit" class="auth-submit-btn">登录</button>
+                    </form>
+                    <p class="auth-switch">
+                        还没有账号？<a href="#" id="showRegisterForm">立即注册</a>
+                    </p>
+                </div>
+
+                <!-- 注册表单 -->
+                <div class="auth-form" id="registerForm" style="display: none;">
+                    <h3>注册</h3>
+                    <form id="registerFormElement">
+                        <div class="form-group">
+                            <label for="registerEmail">邮箱</label>
+                            <input type="email" id="registerEmail" required placeholder="请输入您的邮箱">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">密码</label>
+                            <input type="password" id="registerPassword" required placeholder="请输入密码（至少6位）" minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">确认密码</label>
+                            <input type="password" id="confirmPassword" required placeholder="请再次输入密码" minlength="6">
+                        </div>
+                        <button type="submit" class="auth-submit-btn">注册</button>
+                    </form>
+                    <p class="auth-switch">
+                        已有账号？<a href="#" id="showLoginForm">立即登录</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -1397,6 +1463,7 @@
             });
         });
     </script>
+    <script src="supabaseClient.js"></script>
     <script src="script.js"></script>
     <script src="particles.js"></script>
 
