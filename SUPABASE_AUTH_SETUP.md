@@ -16,13 +16,14 @@
 
 ## 第三步：配置前端项目
 
-1. 打开 `frontend/supabaseClient.js` 文件
-2. 将以下占位符替换为你的实际配置：
+1. 打开 `frontend/index.html` 文件
+2. 找到 Supabase 客户端初始化部分（在文件底部的 `<script>` 标签中）
+3. 将以下占位符替换为你的实际配置：
 
 ```javascript
 // 替换这两行
-const SUPABASE_URL = 'https://你的项目ID.supabase.co'; // 替换成你的项目URL
-const SUPABASE_ANON_KEY = '你的anon_public密钥'; // 替换成你的anon public密钥
+const SUPABASE_URL = 'https://你的项目ID.supabase.co';
+const SUPABASE_ANON_KEY = '你的anon_public密钥';
 
 // 替换为实际值，例如：
 const SUPABASE_URL = 'https://abcdefghijklmnop.supabase.co';
@@ -96,14 +97,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 
 ### 常见问题
 
-1. **Supabase客户端未初始化**
-   - 检查 `supabaseClient.js` 中的配置是否正确
+1. **认证功能不可用**
+   - 检查 `index.html` 中的 Supabase 配置是否正确
    - 确保 Supabase CDN 库正确加载
+   - 验证网络连接是否正常
 
 2. **登录失败**
    - 检查邮箱是否已验证
    - 确认密码是否正确
-   - 查看浏览器控制台错误信息
+   - 确保邮箱格式正确
 
 3. **注册失败**
    - 检查邮箱格式是否正确
@@ -118,9 +120,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 ### 调试技巧
 
 1. 打开浏览器开发者工具
-2. 查看 Console 选项卡的错误信息
-3. 检查 Network 选项卡的网络请求
-4. 在 Supabase 仪表板查看认证日志
+2. 检查 Network 选项卡的网络请求
+3. 在 Supabase 仪表板查看认证日志
+4. 确认项目配置正确
 
 ## 下一步扩展
 

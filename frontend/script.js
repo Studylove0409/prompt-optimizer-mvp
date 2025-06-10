@@ -594,8 +594,6 @@ originalPromptTextarea.addEventListener('keydown', (e) => {
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM 加载完成，初始化组件');
-
     // 获取帮助弹框元素
     helpLink = document.getElementById('helpLink');
     helpModal = document.getElementById('helpModal');
@@ -616,23 +614,18 @@ document.addEventListener('DOMContentLoaded', () => {
     initHelpModal();
 
     // 监听Supabase准备就绪事件
-    window.addEventListener('supabaseReady', function(event) {
-        console.log('收到Supabase准备就绪事件，开始初始化认证功能');
+    window.addEventListener('supabaseReady', function() {
         initAuth();
     });
 
     // 如果Supabase已经准备好，立即初始化
     if (window.supabaseClient) {
-        console.log('Supabase客户端已存在，立即初始化认证功能');
         initAuth();
     } else {
         // 备用方案：延迟初始化
         setTimeout(() => {
             if (window.supabaseClient) {
-                console.log('延迟检查发现Supabase客户端已准备好');
                 initAuth();
-            } else {
-                console.warn('Supabase客户端仍未准备好，请检查网络连接');
             }
         }, 2000);
     }
@@ -640,67 +633,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 初始化帮助弹框功能
 function initHelpModal() {
-    console.log('尝试初始化帮助弹框', { helpLink, helpModal, closeHelpModalBtn });
-    
     if (helpLink && helpModal && closeHelpModalBtn) {
-        console.log('帮助弹框初始化成功');
-        
         // 点击帮助链接打开弹框
         helpLink.addEventListener('click', function(e) {
-            console.log('点击了帮助链接');
             e.preventDefault();
             openHelpModal();
         });
-        
+
         // 点击关闭按钮关闭弹框
         closeHelpModalBtn.addEventListener('click', function() {
-            console.log('点击了关闭按钮');
             closeHelpModalFunction();
         });
-        
+
         // 点击弹框外部区域关闭弹框
         window.addEventListener('click', function(e) {
             if (e.target === helpModal) {
-                console.log('点击了弹框外部');
                 closeHelpModalFunction();
             }
         });
-        
+
         // ESC键关闭弹框
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && helpModal.style.display === 'block') {
-                console.log('按下了ESC键');
                 closeHelpModalFunction();
             }
-        });
-    } else {
-        console.error('帮助弹框初始化失败', { 
-            helpLink: helpLink ? '存在' : '不存在', 
-            helpModal: helpModal ? '存在' : '不存在', 
-            closeHelpModalBtn: closeHelpModalBtn ? '存在' : '不存在' 
         });
     }
 }
 
 // 打开帮助弹框
 function openHelpModal() {
-    console.log('打开帮助弹框');
     if (helpModal) {
         helpModal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // 防止背景滚动
-    } else {
-        console.error('无法打开帮助弹框，元素不存在');
     }
 }
 
 // 关闭帮助弹框
 function closeHelpModalFunction() {
-    console.log('关闭帮助弹框');
     if (helpModal) {
         helpModal.style.display = 'none';
         document.body.style.overflow = ''; // 恢复背景滚动
-    } else {
-        console.error('无法关闭帮助弹框，元素不存在');
     }
 }
 
@@ -725,10 +698,6 @@ let currentUser = null;
 
 // 初始化认证功能
 function initAuth() {
-    console.log('初始化认证功能');
-    console.log('window.supabase:', typeof window.supabase);
-    console.log('window.supabaseClient:', typeof window.supabaseClient);
-
     // 获取DOM元素
     authModal = document.getElementById('authModal');
     loginBtn = document.getElementById('loginBtn');
@@ -745,7 +714,6 @@ function initAuth() {
 
     // 检查Supabase是否可用
     if (!window.supabaseClient) {
-        console.error('Supabase客户端未初始化，认证功能将不可用');
         return;
     }
 
@@ -755,7 +723,6 @@ function initAuth() {
     // 监听认证状态变化
     if (window.supabaseClient) {
         window.supabaseClient.auth.onAuthStateChange((event, session) => {
-            console.log('认证状态变化:', event, session);
             handleAuthStateChange(event, session);
         });
     }
@@ -869,7 +836,6 @@ function showRegisterFormFunction() {
 // 检查Supabase客户端是否可用
 function checkSupabaseClient() {
     if (!window.supabaseClient) {
-        console.error('Supabase客户端未初始化');
         showCustomAlert('认证服务暂时不可用，请刷新页面重试', 'error');
         return false;
     }
@@ -897,7 +863,7 @@ async function handleLogin(e) {
     submitBtn.textContent = '登录中...';
 
     try {
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        const { error } = await window.supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -959,7 +925,7 @@ async function handleRegister(e) {
     submitBtn.textContent = '注册中...';
 
     try {
-        const { data, error } = await window.supabaseClient.auth.signUp({
+        const { error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password
         });
@@ -1009,9 +975,7 @@ async function handleLogout() {
 }
 
 // 处理认证状态变化
-function handleAuthStateChange(event, session) {
-    console.log('认证状态变化事件:', event);
-
+function handleAuthStateChange(_, session) {
     if (session && session.user) {
         // 用户已登录
         currentUser = session.user;
@@ -1025,8 +989,6 @@ function handleAuthStateChange(event, session) {
 
 // 更新已登录用户的UI
 function updateUIForLoggedInUser(user) {
-    console.log('更新UI - 用户已登录:', user.email);
-
     // 隐藏登录按钮，显示用户菜单
     if (loginBtn) loginBtn.style.display = 'none';
     if (userMenu) userMenu.style.display = 'block';
@@ -1035,8 +997,6 @@ function updateUIForLoggedInUser(user) {
 
 // 更新未登录用户的UI
 function updateUIForLoggedOutUser() {
-    console.log('更新UI - 用户未登录');
-
     // 显示登录按钮，隐藏用户菜单
     if (loginBtn) loginBtn.style.display = 'block';
     if (userMenu) userMenu.style.display = 'none';
@@ -1046,7 +1006,6 @@ function updateUIForLoggedOutUser() {
 // 检查当前用户状态
 async function checkCurrentUser() {
     if (!window.supabaseClient) {
-        console.log('Supabase客户端未初始化，跳过用户状态检查');
         return;
     }
 
@@ -1054,7 +1013,6 @@ async function checkCurrentUser() {
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
 
         if (error) {
-            console.error('获取用户会话失败:', error);
             return;
         }
 
@@ -1067,7 +1025,7 @@ async function checkCurrentUser() {
         }
 
     } catch (error) {
-        console.error('检查用户状态失败:', error);
+        // 静默处理错误
     }
 }
 
