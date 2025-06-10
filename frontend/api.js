@@ -65,8 +65,17 @@ async function healthCheckAPI() {
     return await apiCall('/health');
 }
 
+// 防重复调用标志
+let isOptimizing = false;
+
 // 优化提示词的主要函数
 async function optimizePrompt() {
+    // 防止重复调用
+    if (isOptimizing) {
+        console.log('正在优化中，跳过重复调用');
+        return;
+    }
+
     const originalPromptTextarea = document.getElementById('originalPrompt');
     const originalPrompt = originalPromptTextarea.value.trim();
     const selectedModel = getSelectedModel();
@@ -79,7 +88,10 @@ async function optimizePrompt() {
     // 获取当前选择的模式
     const selectedMode = getSelectedMode();
     console.log('当前选择的模式:', selectedMode);
-    
+
+    // 设置优化状态
+    isOptimizing = true;
+
     // 显示加载状态
     showLoading();
 
@@ -100,11 +112,19 @@ async function optimizePrompt() {
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
+        // 重置优化状态
+        isOptimizing = false;
     }
 }
 
 // 快速优化提示词 (使用Gemini Flash模型)
 async function quickOptimizePrompt() {
+    // 防止重复调用
+    if (isOptimizing) {
+        console.log('正在优化中，跳过重复调用');
+        return;
+    }
+
     const originalPromptTextarea = document.getElementById('originalPrompt');
     const originalPrompt = originalPromptTextarea.value.trim();
     const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
@@ -115,6 +135,9 @@ async function quickOptimizePrompt() {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
         throw new Error('没有输入提示词');
     }
+
+    // 设置优化状态
+    isOptimizing = true;
 
     // 显示加载状态
     showLoading();
@@ -136,6 +159,8 @@ async function quickOptimizePrompt() {
         throw error; // 重新抛出错误以便调用者处理
     } finally {
         hideLoading();
+        // 重置优化状态
+        isOptimizing = false;
     }
 }
 

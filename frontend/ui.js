@@ -1,5 +1,8 @@
 // UI交互模块
 
+// 防重复初始化标志
+let uiInitialized = false;
+
 // DOM 元素引用
 let originalPromptTextarea;
 let optimizeBtn;
@@ -19,17 +22,27 @@ let startUsingBtn;
 
 // 初始化UI功能
 function initUI() {
+    // 防止重复初始化
+    if (uiInitialized) {
+        console.log('UI已经初始化，跳过重复初始化');
+        return;
+    }
+
     // 获取DOM元素
     getDOMElements();
-    
+
     // 绑定事件监听器
     bindEventListeners();
-    
+
     // 初始化其他功能
     initOtherFeatures();
-    
+
     // 页面加载动画
     initPageAnimation();
+
+    // 标记为已初始化
+    uiInitialized = true;
+    console.log('UI初始化完成');
 }
 
 // 获取DOM元素
@@ -313,30 +326,7 @@ function initPageAnimation() {
     }, 100);
 }
 
-// 页面加载完成后的初始化
-document.addEventListener('DOMContentLoaded', () => {
-    // 初始化UI
-    initUI();
-
-    // 监听Supabase准备就绪事件
-    window.addEventListener('supabaseReady', function() {
-        if (window.initAuth) {
-            window.initAuth();
-        }
-    });
-
-    // 如果Supabase已经准备好，立即初始化
-    if (window.supabaseClient && window.initAuth) {
-        window.initAuth();
-    } else {
-        // 备用方案：延迟初始化
-        setTimeout(() => {
-            if (window.supabaseClient && window.initAuth) {
-                window.initAuth();
-            }
-        }, 2000);
-    }
-});
+// 注意：UI初始化已移至script.js中统一管理，避免重复初始化
 
 // 导出函数到全局作用域
 window.updateCharCount = updateCharCount;
