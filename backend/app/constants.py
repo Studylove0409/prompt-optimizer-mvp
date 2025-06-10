@@ -255,7 +255,7 @@ F. **细节与参数 (Details & Parameters):**
    * **优化前:**
      画一个女孩和一只龙。
 
-   * **优化后:**
+   * **优化后（参考）:**
      **Prompt:** A beautiful, epic fantasy portrait of a young elven princess with long, flowing silver hair and glowing blue eyes, gently touching the snout of a colossal, ancient dragon. The dragon's scales shimmer with iridescent colors, and wise, old smoke curls from its nostrils. They are in a hidden, mossy cavern illuminated by magical crystals and faint sunlight filtering from above.
 
      **Style & Medium:** Digital painting, concept art, hyper-detailed, intricate details, cinematic lighting, volumetric lighting, in the style of fantasy artists Greg Rutkowski and Charlie Bowater.
@@ -271,7 +271,7 @@ F. **细节与参数 (Details & Parameters):**
 {user_input_prompt}
 
 6. [CRITICAL] 输出规则
-警告：你的回复必须且只能是优化后的提示词文本本身。严禁包含任何解释、对话、前言或对优化行为的评论。严禁使用任何形式的封装或引用（如代码块标记 ```）。你的全部输出就是一个可以直接复制并投入使用的高质量提示词。
+警告：你的回复必须且只能是中文以及优化后的提示词文本本身。严禁包含任何解释、对话、前言或对优化行为的评论。严禁使用任何形式的封装或引用（如代码块标记 ```）。你的全部输出就是一个可以直接复制并投入使用的高质量提示词。
 """
 
 # 学术提示词模板
