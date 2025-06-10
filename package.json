@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@vercel/analytics": "^1.5.0"
+  },
+  "name": "prompt-optimizer-mvp",
+  "version": "1.0.0",
+  "description": "一个基于FastAPI和DeepSeek API的AI提示词优化服务，提供完整的前后端解决方案，专门用于改进和优化AI提示词，使其更加清晰、具体、高效。",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
