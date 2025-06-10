@@ -565,6 +565,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化帮助弹框
     initHelpModal();
+
+    // 模式选择器下拉功能
+    const modeDropdownBtn = document.getElementById('modeDropdownBtn');
+    const modeDropdownContent = document.getElementById('modeDropdownContent');
+    const modeOptions = document.querySelectorAll('.mode-option');
+    const selectedModeIcon = document.querySelector('.selected-mode-icon');
+    const selectedModeName = document.querySelector('.selected-mode-name');
+    
+    // 点击下拉按钮显示/隐藏下拉内容
+    if (modeDropdownBtn) {
+        modeDropdownBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('active');
+            modeDropdownContent.classList.toggle('show');
+        });
+    }
+    
+    // 点击选项切换模式
+    modeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const mode = this.getAttribute('data-mode');
+            const icon = this.querySelector('.mode-icon').textContent;
+            const name = this.querySelector('.mode-name').textContent;
+            
+            // 更新选中状态
+            modeOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 更新下拉按钮显示
+            selectedModeIcon.textContent = icon;
+            selectedModeName.textContent = name;
+            
+            // 更新当前选中模式
+            currentMode = mode;
+            console.log('模式已切换为:', currentMode);
+            
+            // 这里可以根据不同模式修改提示文本或其他UI元素
+            updatePlaceholderByMode(currentMode);
+            
+            // 隐藏下拉菜单
+            modeDropdownContent.classList.remove('show');
+            modeDropdownBtn.classList.remove('active');
+        });
+    });
+    
+    // 点击页面其他区域关闭下拉菜单
+    document.addEventListener('click', function(e) {
+        if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
+            modeDropdownContent.classList.remove('show');
+            modeDropdownBtn.classList.remove('active');
+        }
+    });
+    
+    // 防止点击下拉内容时关闭
+    if (modeDropdownContent) {
+        modeDropdownContent.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
 });
 
 // 初始化帮助弹框功能

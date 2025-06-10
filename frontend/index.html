@@ -81,23 +81,30 @@
                                 <!-- 模式选择 -->
                                 <div class="mode-selector">
                                     <span class="mode-title">模式：</span>
-                                    <div class="mode-options">
-                                        <button class="mode-btn active" data-mode="general">
-                                            <span class="mode-icon">🌟</span>
-                                            <span class="mode-name">通用</span>
+                                    <div class="mode-dropdown">
+                                        <button class="mode-dropdown-btn" id="modeDropdownBtn">
+                                            <span class="selected-mode-icon">🌟</span>
+                                            <span class="selected-mode-name">通用</span>
+                                            <span class="dropdown-arrow">▼</span>
                                         </button>
-                                        <button class="mode-btn" data-mode="business">
-                                            <span class="mode-icon">💼</span>
-                                            <span class="mode-name">商业</span>
-                                        </button>
-                                        <button class="mode-btn" data-mode="drawing">
-                                            <span class="mode-icon">🎨</span>
-                                            <span class="mode-name">绘画</span>
-                                        </button>
-                                        <button class="mode-btn" data-mode="academic">
-                                            <span class="mode-icon">📚</span>
-                                            <span class="mode-name">学术</span>
-                                        </button>
+                                        <div class="mode-dropdown-content" id="modeDropdownContent">
+                                            <div class="mode-option active" data-mode="general">
+                                                <span class="mode-icon">🌟</span>
+                                                <span class="mode-name">通用</span>
+                                            </div>
+                                            <div class="mode-option" data-mode="business">
+                                                <span class="mode-icon">💼</span>
+                                                <span class="mode-name">商业</span>
+                                            </div>
+                                            <div class="mode-option" data-mode="drawing">
+                                                <span class="mode-icon">🎨</span>
+                                                <span class="mode-name">绘画</span>
+                                            </div>
+                                            <div class="mode-option" data-mode="academic">
+                                                <span class="mode-icon">📚</span>
+                                                <span class="mode-name">学术</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 

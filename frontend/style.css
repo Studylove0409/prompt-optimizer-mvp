@@ -2272,3 +2272,133 @@ body {
         font-size: 1rem;
     }
 }
+
+/* 模式选择器下拉框样式 */
+.mode-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.mode-dropdown-btn {
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.03);
+    border-radius: 18px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: var(--color-gray-700);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    min-width: 100px;
+}
+
+.mode-dropdown-btn:hover {
+    background: rgba(0,0,0,0.06);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.selected-mode-icon {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+.dropdown-arrow {
+    margin-left: 8px;
+    font-size: 10px;
+    transition: transform 0.3s ease;
+}
+
+.mode-dropdown-btn.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.mode-dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 160px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    z-index: 10;
+    margin-top: 8px;
+    padding: 8px 0;
+    display: none;
+    animation: fadeIn 0.2s ease;
+}
+
+.mode-dropdown-content.show {
+    display: block;
+}
+
+.mode-option {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.mode-option:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.mode-option.active {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.mode-option .mode-icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* 覆盖旧的模式按钮样式 */
+.mode-options {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .mode-dropdown {
+        width: auto;
+    }
+    
+    .mode-dropdown-btn {
+        padding: 5px 10px;
+        min-width: 90px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mode-selector {
+        margin: 0;
+    }
+    
+    .mode-dropdown {
+        width: auto;
+    }
+    
+    .mode-dropdown-btn {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+    
+    .selected-mode-icon {
+        margin-right: 4px;
+        font-size: 14px;
+    }
+    
+    .dropdown-arrow {
+        margin-left: 4px;
+    }
+    
+    .mode-dropdown-content {
+        left: 0;
+        right: 0;
+        width: 160px;
+    }
+}
