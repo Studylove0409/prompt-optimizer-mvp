@@ -456,6 +456,7 @@ body {
     font-size: 13px;
     color: var(--color-gray-500);
     position: relative;
+    z-index: 10002;
 }
 
 .textarea-footer::before {

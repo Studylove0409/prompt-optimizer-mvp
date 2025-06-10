@@ -639,7 +639,18 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('点击了模式下拉按钮');
             e.stopPropagation();
             this.classList.toggle('active');
-            modeDropdownContent.classList.toggle('show');
+
+            if (modeDropdownContent.classList.contains('show')) {
+                // 隐藏下拉框
+                modeDropdownContent.classList.remove('show');
+                console.log('隐藏下拉框');
+            } else {
+                // 显示下拉框并调整位置
+                positionDropdown();
+                modeDropdownContent.classList.add('show');
+                console.log('显示下拉框');
+            }
+
             console.log('下拉框状态:', modeDropdownContent.classList.contains('show') ? '显示' : '隐藏');
         });
     } else {
@@ -669,8 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePlaceholderByMode(currentMode);
             
             // 隐藏下拉菜单
-            modeDropdownContent.classList.remove('show');
-            modeDropdownBtn.classList.remove('active');
+            hideDropdown();
         });
     });
     
@@ -678,10 +688,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', function(e) {
         if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
             console.log('点击页面其他区域，关闭下拉菜单');
-            modeDropdownContent.classList.remove('show');
-            if (modeDropdownBtn) {
-                modeDropdownBtn.classList.remove('active');
-            }
+            hideDropdown();
+        }
+    });
+
+    // 窗口大小改变时重新调整位置
+    window.addEventListener('resize', function() {
+        if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
+            positionDropdown();
         }
     });
 
@@ -818,4 +832,68 @@ function initBasicEventListeners() {
     }
 
     console.log('基本事件监听器初始化完成');
+}
+
+// 调整下拉框位置，确保不被遮挡
+function positionDropdown() {
+    if (!modeDropdownBtn || !modeDropdownContent) return;
+
+    // 获取按钮的位置信息
+    const btnRect = modeDropdownBtn.getBoundingClientRect();
+    const dropdownRect = modeDropdownContent.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // 重置样式
+    modeDropdownContent.style.position = 'fixed';
+    modeDropdownContent.style.top = '';
+    modeDropdownContent.style.left = '';
+    modeDropdownContent.style.right = '';
+    modeDropdownContent.style.bottom = '';
+    modeDropdownContent.style.zIndex = '99999';
+
+    // 计算最佳位置
+    let top = btnRect.bottom + 4; // 按钮下方4px
+    let left = btnRect.left;
+
+    // 检查是否超出视口底部
+    if (top + dropdownRect.height > viewportHeight) {
+        // 显示在按钮上方
+        top = btnRect.top - dropdownRect.height - 4;
+    }
+
+    // 检查是否超出视口右侧
+    if (left + dropdownRect.width > viewportWidth) {
+        // 右对齐
+        left = btnRect.right - dropdownRect.width;
+    }
+
+    // 确保不超出视口左侧
+    if (left < 0) {
+        left = 4;
+    }
+
+    // 应用位置
+    modeDropdownContent.style.top = top + 'px';
+    modeDropdownContent.style.left = left + 'px';
+
+    console.log('下拉框位置调整:', { top, left, btnRect, dropdownRect });
+}
+
+// 隐藏下拉框并重置样式
+function hideDropdown() {
+    if (!modeDropdownContent || !modeDropdownBtn) return;
+
+    modeDropdownContent.classList.remove('show');
+    modeDropdownBtn.classList.remove('active');
+
+    // 重置为相对定位
+    modeDropdownContent.style.position = '';
+    modeDropdownContent.style.top = '';
+    modeDropdownContent.style.left = '';
+    modeDropdownContent.style.right = '';
+    modeDropdownContent.style.bottom = '';
+    modeDropdownContent.style.zIndex = '';
+
+    console.log('下拉框已隐藏并重置样式');
 }
