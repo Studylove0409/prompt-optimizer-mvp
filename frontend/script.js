@@ -1,21 +1,19 @@
-// DOM 元素
-const originalPromptTextarea = document.getElementById('originalPrompt');
-const optimizeBtn = document.getElementById('optimizeBtn');
-const outputSection = document.getElementById('outputSection');
-const optimizedPromptDiv = document.getElementById('optimizedPrompt');
-const modelUsedDiv = document.getElementById('modelUsed');
-const copyBtn = document.getElementById('copyBtn');
-const clearBtn = document.getElementById('clearBtn');
-const loading = document.getElementById('loading');
-const loadingIndicator = document.getElementById('loadingIndicator');
+// DOM 元素 - 将在DOMContentLoaded中初始化
+let originalPromptTextarea;
+let optimizeBtn;
+let outputSection;
+let optimizedPromptDiv;
+let modelUsedDiv;
+let copyBtn;
+let clearBtn;
+let loading;
+let loadingIndicator;
+let charCountElement;
 
 // 帮助弹框元素 - 在DOM完全加载后再获取
 let helpLink;
 let helpModal;
 let closeHelpModalBtn;
-
-// 新增元素
-const charCountElement = document.querySelector('.char-count');
 
 // API 基础URL - 根据环境自动选择
 const API_BASE_URL = window.location.protocol === 'file:'
@@ -549,47 +547,45 @@ function createTemporaryParticles(x, y) {
     }
 }
 
-// 事件监听器
-optimizeBtn.addEventListener('click', () => {
-    optimizeBtn.classList.remove('pulse-hint');
-    addButtonAnimation(optimizeBtn);
-    optimizePrompt();
-});
-
-copyBtn.addEventListener('click', copyToClipboard);
-clearBtn.addEventListener('click', clearAll);
-
-// 字符计数更新
-originalPromptTextarea.addEventListener('input', updateCharCount);
-
-// 键盘事件处理
-originalPromptTextarea.addEventListener('keydown', (e) => {
-    // Ctrl + Enter: 快速优化 (使用Gemini Flash模型)
-    if (e.key === 'Enter' && e.ctrlKey) {
-        e.preventDefault();
-        optimizeBtn.classList.remove('pulse-hint');
-        addButtonAnimation(optimizeBtn);
-        quickOptimizePrompt();
-    }
-    // Enter: 普通优化 (使用当前选择的模型)
-    else if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        optimizeBtn.classList.remove('pulse-hint');
-        addButtonAnimation(optimizeBtn);
-        optimizePrompt();
-    }
-    // Shift + Enter: 换行 (默认行为)
-});
+// 事件监听器将在DOMContentLoaded中初始化
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM 加载完成，初始化组件');
-    
+
+    // 初始化所有DOM元素
+    originalPromptTextarea = document.getElementById('originalPrompt');
+    optimizeBtn = document.getElementById('optimizeBtn');
+    outputSection = document.getElementById('outputSection');
+    optimizedPromptDiv = document.getElementById('optimizedPrompt');
+    modelUsedDiv = document.getElementById('modelUsed');
+    copyBtn = document.getElementById('copyBtn');
+    clearBtn = document.getElementById('clearBtn');
+    loading = document.getElementById('loading');
+    loadingIndicator = document.getElementById('loadingIndicator');
+    charCountElement = document.querySelector('.char-count');
+
     // 获取帮助弹框元素
     helpLink = document.getElementById('helpLink');
     helpModal = document.getElementById('helpModal');
     closeHelpModalBtn = document.getElementById('closeHelpModal');
-    
+
+    // 检查关键元素是否存在
+    console.log('关键元素检查:', {
+        originalPromptTextarea: originalPromptTextarea ? '存在' : '不存在',
+        optimizeBtn: optimizeBtn ? '存在' : '不存在',
+        charCountElement: charCountElement ? '存在' : '不存在'
+    });
+
+    // 如果关键元素不存在，停止初始化
+    if (!originalPromptTextarea || !optimizeBtn) {
+        console.error('关键DOM元素缺失，停止初始化');
+        return;
+    }
+
+    // 添加基本事件监听器
+    initBasicEventListeners();
+
     // 初始化当前模式
     const activeOption = document.querySelector('.mode-option.active');
     if (activeOption) {
@@ -762,4 +758,64 @@ function closeHelpModalFunction() {
     } else {
         console.error('无法关闭帮助弹框，元素不存在');
     }
+}
+
+// 初始化基本事件监听器
+function initBasicEventListeners() {
+    console.log('初始化基本事件监听器');
+
+    // 优化按钮点击事件
+    if (optimizeBtn) {
+        optimizeBtn.addEventListener('click', async () => {
+            optimizeBtn.classList.remove('pulse-hint');
+            addButtonAnimation(optimizeBtn);
+            try {
+                await optimizePrompt();
+            } catch (error) {
+                console.error('优化失败:', error);
+            }
+        });
+    }
+
+    // 复制按钮点击事件
+    if (copyBtn) {
+        copyBtn.addEventListener('click', copyToClipboard);
+    }
+
+    // 清空按钮点击事件
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAll);
+    }
+
+    // 输入框字符计数
+    if (originalPromptTextarea && charCountElement) {
+        originalPromptTextarea.addEventListener('input', updateCharCount);
+    }
+
+    // 键盘快捷键
+    if (originalPromptTextarea) {
+        originalPromptTextarea.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                e.preventDefault();
+                optimizeBtn.classList.remove('pulse-hint');
+                addButtonAnimation(optimizeBtn);
+                try {
+                    await optimizePrompt();
+                } catch (error) {
+                    console.error('优化失败:', error);
+                }
+            } else if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                optimizeBtn.classList.remove('pulse-hint');
+                addButtonAnimation(optimizeBtn);
+                try {
+                    await quickOptimizePrompt();
+                } catch (error) {
+                    console.error('快速优化失败:', error);
+                }
+            }
+        });
+    }
+
+    console.log('基本事件监听器初始化完成');
 }
