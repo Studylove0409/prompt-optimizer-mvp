@@ -32,6 +32,10 @@
       "dest": "frontend/particles.js"
     },
     {
+      "src": "/img/(.*)",
+      "dest": "frontend/img/$1"
+    },
+    {
       "handle": "filesystem"
     },
     {
