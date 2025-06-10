@@ -9,6 +9,21 @@ const clearBtn = document.getElementById('clearBtn');
 const loading = document.getElementById('loading');
 const loadingIndicator = document.getElementById('loadingIndicator');
 
+// 认证相关DOM元素
+let authButton;
+let authModal;
+let closeAuthModal;
+let loginForm;
+let registerForm;
+let loginButton;
+let registerButton;
+let logoutButton;
+let userInfo;
+let userEmail;
+let authTabs;
+let loginMessage;
+let registerMessage;
+
 // 帮助弹框元素 - 在DOM完全加载后再获取
 let helpLink;
 let helpModal;
@@ -614,6 +629,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化帮助弹框
     initHelpModal();
+
+    // 初始化认证UI和状态监听
+    initAuthUI();
+    setupAuthListener();
 });
 
 // 初始化帮助弹框功能
@@ -680,4 +699,232 @@ function closeHelpModalFunction() {
     } else {
         console.error('无法关闭帮助弹框，元素不存在');
     }
+}
+
+// 初始化Auth模态窗口和用户界面
+function initAuthUI() {
+    // 获取DOM元素
+    authButton = document.getElementById('authButton');
+    authModal = document.getElementById('authModal');
+    closeAuthModal = document.getElementById('closeAuthModal');
+    loginForm = document.getElementById('loginForm');
+    registerForm = document.getElementById('registerForm');
+    loginButton = document.getElementById('loginButton');
+    registerButton = document.getElementById('registerButton');
+    logoutButton = document.getElementById('logoutButton');
+    userInfo = document.getElementById('userInfo');
+    userEmail = document.getElementById('userEmail');
+    authTabs = document.querySelectorAll('.auth-tab-btn');
+    loginMessage = document.getElementById('loginMessage');
+    registerMessage = document.getElementById('registerMessage');
+
+    // 打开模态窗口
+    authButton.addEventListener('click', () => {
+        authModal.style.display = 'flex';
+    });
+
+    // 关闭模态窗口
+    closeAuthModal.addEventListener('click', () => {
+        authModal.style.display = 'none';
+        clearAuthMessages();
+    });
+
+    // 点击窗口外部关闭
+    window.addEventListener('click', (e) => {
+        if (e.target === authModal) {
+            authModal.style.display = 'none';
+            clearAuthMessages();
+        }
+    });
+
+    // 切换表单
+    authTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            authTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            if (tabName === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+            clearAuthMessages();
+        });
+    });
+
+    // 登录功能
+    loginButton.addEventListener('click', async () => {
+        await handleLogin();
+    });
+
+    // 注册功能
+    registerButton.addEventListener('click', async () => {
+        await handleRegister();
+    });
+
+    // 登出功能
+    logoutButton.addEventListener('click', async () => {
+        await handleLogout();
+    });
+
+    // 键盘事件 - 回车提交表单
+    document.getElementById('loginEmail').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+    });
+    
+    document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    
+    document.getElementById('registerEmail').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('registerPassword').focus();
+    });
+    
+    document.getElementById('registerPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleRegister();
+    });
+
+    // 检查当前登录状态
+    checkAuthState();
+}
+
+// 清除认证消息
+function clearAuthMessages() {
+    if (loginMessage) loginMessage.textContent = '';
+    if (loginMessage) loginMessage.className = 'auth-message';
+    if (registerMessage) registerMessage.textContent = '';
+    if (registerMessage) registerMessage.className = 'auth-message';
+}
+
+// 显示认证消息
+function showAuthMessage(element, message, type) {
+    if (!element) return;
+    element.textContent = message;
+    element.className = `auth-message ${type}`;
+}
+
+// 处理登录
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showAuthMessage(loginMessage, '请填写邮箱和密码', 'error');
+        return;
+    }
+    
+    try {
+        loginButton.disabled = true;
+        loginButton.textContent = '登录中...';
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+        
+        if (error) throw error;
+        
+        showAuthMessage(loginMessage, '登录成功!', 'success');
+        setTimeout(() => {
+            authModal.style.display = 'none';
+            updateUIForAuthState(data.user);
+        }, 1000);
+    } catch (error) {
+        console.error('登录失败:', error);
+        showAuthMessage(loginMessage, `登录失败: ${error.message}`, 'error');
+    } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = '登录';
+    }
+}
+
+// 处理注册
+async function handleRegister() {
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    
+    if (!email || !password) {
+        showAuthMessage(registerMessage, '请填写邮箱和密码', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAuthMessage(registerMessage, '密码长度至少为6位', 'error');
+        return;
+    }
+    
+    try {
+        registerButton.disabled = true;
+        registerButton.textContent = '注册中...';
+        
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password
+        });
+        
+        if (error) throw error;
+        
+        showAuthMessage(registerMessage, '注册成功！我们已经向您的邮箱发送了一封确认邮件，请点击邮件中的链接来激活您的账户。', 'success');
+        
+        // 清空表单
+        document.getElementById('registerEmail').value = '';
+        document.getElementById('registerPassword').value = '';
+    } catch (error) {
+        console.error('注册失败:', error);
+        showAuthMessage(registerMessage, `注册失败: ${error.message}`, 'error');
+    } finally {
+        registerButton.disabled = false;
+        registerButton.textContent = '注册';
+    }
+}
+
+// 处理登出
+async function handleLogout() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        
+        showCustomAlert('您已成功登出', 'info', 2000);
+        updateUIForAuthState(null);
+    } catch (error) {
+        console.error('登出失败:', error);
+        showCustomAlert(`登出失败: ${error.message}`, 'error', 3000);
+    }
+}
+
+// 更新UI以反映认证状态
+function updateUIForAuthState(user) {
+    if (user) {
+        // 用户已登录
+        authButton.style.display = 'none';
+        userInfo.style.display = 'flex';
+        userEmail.textContent = user.email;
+    } else {
+        // 用户未登录
+        authButton.style.display = 'block';
+        userInfo.style.display = 'none';
+        userEmail.textContent = '';
+    }
+}
+
+// 检查当前认证状态
+async function checkAuthState() {
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        updateUIForAuthState(user);
+    } catch (error) {
+        console.error('获取用户状态失败:', error);
+        updateUIForAuthState(null);
+    }
+}
+
+// 监听认证状态变化
+function setupAuthListener() {
+    supabase.auth.onAuthStateChange((event, session) => {
+        console.log('认证状态变化:', event);
+        updateUIForAuthState(session?.user || null);
+    });
 }

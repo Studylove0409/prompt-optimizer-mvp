@@ -17,6 +17,9 @@
         window.va = function() { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- 粒子背景画布 -->
@@ -36,6 +39,13 @@
                     <a href="#" class="nav-link" id="helpLink">帮助</a>
                     <a href="#" class="nav-link" id="businessLink">问题反馈</a>
                     <a href="#" class="nav-link" id="announcementLink">公告</a>
+                </div>
+                <div class="auth-buttons">
+                    <button id="authButton" class="auth-btn">登录/注册</button>
+                    <div id="userInfo" class="user-info" style="display: none;">
+                        <span id="userEmail"></span>
+                        <button id="logoutButton" class="logout-btn">登出</button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -372,8 +382,270 @@
         </div>
     </div>
 
+    <!-- 用户认证模态窗口 -->
+    <div class="auth-modal" id="authModal" style="display: none;">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2 id="authModalTitle">登录 / 注册</h2>
+                <span class="close-modal" id="closeAuthModal">&times;</span>
+            </div>
+            <div class="auth-modal-body">
+                <!-- 切换按钮 -->
+                <div class="auth-tabs">
+                    <button class="auth-tab-btn active" data-tab="login">登录</button>
+                    <button class="auth-tab-btn" data-tab="register">注册</button>
+                </div>
+                
+                <!-- 登录表单 -->
+                <div class="auth-form-container" id="loginForm">
+                    <div class="auth-form">
+                        <div class="form-group">
+                            <label for="loginEmail">邮箱</label>
+                            <input type="email" id="loginEmail" placeholder="请输入您的邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">密码</label>
+                            <input type="password" id="loginPassword" placeholder="请输入您的密码" required>
+                        </div>
+                        <div class="form-submit">
+                            <button id="loginButton" class="auth-submit-btn">登录</button>
+                        </div>
+                        <div class="auth-message" id="loginMessage"></div>
+                    </div>
+                </div>
+                
+                <!-- 注册表单 -->
+                <div class="auth-form-container" id="registerForm" style="display: none;">
+                    <div class="auth-form">
+                        <div class="form-group">
+                            <label for="registerEmail">邮箱</label>
+                            <input type="email" id="registerEmail" placeholder="请输入您的邮箱" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">密码</label>
+                            <input type="password" id="registerPassword" placeholder="请输入密码（至少6位）" required>
+                        </div>
+                        <div class="form-submit">
+                            <button id="registerButton" class="auth-submit-btn">注册</button>
+                        </div>
+                        <div class="auth-message" id="registerMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 脚本文件 -->
     <style>
+        /* 认证按钮样式 */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+        
+        .auth-btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(110, 142, 251, 0.3);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #userEmail {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .logout-btn {
+            background: #f0f0f0;
+            color: #555;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* 认证模态窗口样式 */
+        .auth-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .auth-modal-content {
+            background: white;
+            margin: 10% auto;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .auth-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px 15px;
+            background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
+            color: white;
+        }
+        
+        .auth-modal-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .auth-modal-body {
+            padding: 25px;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .auth-tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-tab-btn.active {
+            color: #6e8efb;
+            border-bottom: 2px solid #6e8efb;
+        }
+        
+        .auth-form-container {
+            transition: all 0.3s ease;
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: #6e8efb;
+        }
+        
+        .form-submit {
+            margin-top: 10px;
+        }
+        
+        .auth-submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .auth-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(110, 142, 251, 0.3);
+        }
+        
+        .auth-message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+        
+        .auth-message.error {
+            background-color: #ffe0e0;
+            color: #d00;
+        }
+        
+        .auth-message.success {
+            background-color: #e0ffe0;
+            color: #0a0;
+        }
+        
+        @media (max-width: 768px) {
+            .auth-modal-content {
+                width: 95%;
+                margin: 15% auto;
+            }
+            
+            .auth-buttons {
+                margin-left: 10px;
+            }
+            
+            .auth-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+        
         /* 问题反馈弹窗样式 */
         .business-modal {
             display: none;
@@ -1397,6 +1669,7 @@
             });
         });
     </script>
+    <script src="supabaseClient.js"></script>
     <script src="script.js"></script>
     <script src="particles.js"></script>
 
