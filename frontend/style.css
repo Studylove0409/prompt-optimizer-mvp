@@ -2325,12 +2325,12 @@ body {
     z-index: 100; /* 提高z-index确保显示在其他元素之上 */
     margin-top: 8px;
     padding: 8px 0;
-    display: none;
+    display: none !important; /* 强制隐藏 */
     animation: fadeIn 0.2s ease;
 }
 
 .mode-dropdown-content.show {
-    display: block;
+    display: block !important; /* 强制显示 */
 }
 
 .mode-option {

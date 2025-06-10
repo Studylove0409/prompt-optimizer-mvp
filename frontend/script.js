@@ -590,6 +590,19 @@ document.addEventListener('DOMContentLoaded', () => {
     helpModal = document.getElementById('helpModal');
     closeHelpModalBtn = document.getElementById('closeHelpModal');
     
+    // 模式选择相关元素
+    const modeDropdownBtn = document.getElementById('modeDropdownBtn');
+    const modeDropdownContent = document.getElementById('modeDropdownContent');
+    const modeOptions = document.querySelectorAll('.mode-option');
+    const selectedModeIcon = document.querySelector('.selected-mode-icon');
+    const selectedModeName = document.querySelector('.selected-mode-name');
+    
+    // 确保模式下拉内容初始状态为隐藏
+    if (modeDropdownContent) {
+        modeDropdownContent.classList.remove('show');
+        console.log('确保模式选择下拉内容初始为隐藏状态');
+    }
+    
     // 初始化当前模式
     const activeOption = document.querySelector('.mode-option.active');
     if (activeOption) {
@@ -623,12 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initHelpModal();
 
     // 模式选择器下拉功能
-    const modeDropdownBtn = document.getElementById('modeDropdownBtn');
-    const modeDropdownContent = document.getElementById('modeDropdownContent');
-    const modeOptions = document.querySelectorAll('.mode-option');
-    const selectedModeIcon = document.querySelector('.selected-mode-icon');
-    const selectedModeName = document.querySelector('.selected-mode-name');
-    
     // 点击下拉按钮显示/隐藏下拉内容
     if (modeDropdownBtn) {
         modeDropdownBtn.addEventListener('click', function(e) {
