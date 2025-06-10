@@ -361,48 +361,97 @@ async function copyToClipboard() {
     addButtonAnimation(copyBtn);
 
     try {
+        // 尝试使用现代Clipboard API
         await navigator.clipboard.writeText(optimizedPromptDiv.textContent);
 
-        // 临时改变按钮文本以显示成功
-        const originalIcon = copyBtn.querySelector('.button-icon').textContent;
-        const originalText = copyBtn.querySelector('.button-text').textContent;
-
-        copyBtn.querySelector('.button-icon').textContent = '✅';
-        copyBtn.querySelector('.button-text').textContent = '已复制!';
-        copyBtn.style.background = 'var(--color-success)';
-        copyBtn.style.borderColor = 'var(--color-success)';
-        copyBtn.style.color = 'white';
-
-        // 显示复制成功提示框
-        showCustomAlert('提示词已成功复制到剪贴板', 'success', 2000);
-
-        setTimeout(() => {
-            copyBtn.querySelector('.button-icon').textContent = originalIcon;
-            copyBtn.querySelector('.button-text').textContent = originalText;
-            copyBtn.style.background = '';
-            copyBtn.style.borderColor = '';
-            copyBtn.style.color = '';
-        }, 2000);
-
+        // 成功复制后的处理
+        showCopySuccess();
     } catch (error) {
-        console.error('复制失败:', error);
-
-        // 显示错误状态
-        const originalIcon = copyBtn.querySelector('.button-icon').textContent;
-        copyBtn.querySelector('.button-icon').textContent = '❌';
-        copyBtn.style.background = 'var(--color-error)';
-        copyBtn.style.borderColor = 'var(--color-error)';
-        copyBtn.style.color = 'white';
-
-        setTimeout(() => {
-            copyBtn.querySelector('.button-icon').textContent = originalIcon;
-            copyBtn.style.background = '';
-            copyBtn.style.borderColor = '';
-            copyBtn.style.color = '';
-        }, 2000);
-
-        showCustomAlert('复制失败，请手动选择文本复制', 'error', 3500);
+        console.error('Clipboard API 失败:', error);
+        
+        // 尝试使用备用方法 - execCommand
+        try {
+            // 创建临时选区和输入元素
+            const textArea = document.createElement('textarea');
+            textArea.value = optimizedPromptDiv.textContent;
+            
+            // 设置样式使其不可见
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = '0';
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            textArea.style.opacity = '0';
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            // 尝试执行复制命令
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (successful) {
+                showCopySuccess();
+                return;
+            } else {
+                throw new Error('execCommand 复制失败');
+            }
+        } catch (fallbackError) {
+            console.error('备用复制方法失败:', fallbackError);
+            
+            // 两种方法都失败了，显示错误信息
+            showCopyError();
+        }
     }
+}
+
+// 显示复制成功的UI更新
+function showCopySuccess() {
+    // 临时改变按钮文本以显示成功
+    const originalIcon = copyBtn.querySelector('.button-icon').textContent;
+    const originalText = copyBtn.querySelector('.button-text').textContent;
+
+    copyBtn.querySelector('.button-icon').textContent = '✅';
+    copyBtn.querySelector('.button-text').textContent = '已复制!';
+    copyBtn.style.background = 'var(--color-success)';
+    copyBtn.style.borderColor = 'var(--color-success)';
+    copyBtn.style.color = 'white';
+
+    // 显示复制成功提示框
+    showCustomAlert('提示词已成功复制到剪贴板', 'success', 2000);
+
+    setTimeout(() => {
+        copyBtn.querySelector('.button-icon').textContent = originalIcon;
+        copyBtn.querySelector('.button-text').textContent = originalText;
+        copyBtn.style.background = '';
+        copyBtn.style.borderColor = '';
+        copyBtn.style.color = '';
+    }, 2000);
+}
+
+// 显示复制失败的UI更新
+function showCopyError() {
+    // 显示错误状态
+    const originalIcon = copyBtn.querySelector('.button-icon').textContent;
+    copyBtn.querySelector('.button-icon').textContent = '❌';
+    copyBtn.style.background = 'var(--color-error)';
+    copyBtn.style.borderColor = 'var(--color-error)';
+    copyBtn.style.color = 'white';
+
+    setTimeout(() => {
+        copyBtn.querySelector('.button-icon').textContent = originalIcon;
+        copyBtn.style.background = '';
+        copyBtn.style.borderColor = '';
+        copyBtn.style.color = '';
+    }, 2000);
+
+    showCustomAlert('复制失败，请手动选择文本复制', 'error', 3500);
 }
 
 // 清空所有内容
