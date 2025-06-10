@@ -2202,30 +2202,7 @@ body {
         border-radius: 18px;
     }
     
-    /* 改进公告弹窗 */
-    .announcement-item {
-        font-size: 0.9rem;
-        padding: 8px 5px;
-        margin-bottom: 12px;
-    }
-    
-    .announcement-welcome {
-        font-size: 1.15rem;
-    }
-    
-    .announcement-footer {
-        margin-top: 15px;
-        font-size: 0.9rem;
-    }
-    
-    .announcement-recommendation {
-        padding: 12px;
-        margin: 15px 0;
-    }
-    
-    .announcement-modal-footer {
-        padding: 15px 20px 20px;
-    }
+
     
     /* 改进问题反馈弹窗 */
     .contact-email {
