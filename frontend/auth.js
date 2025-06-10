@@ -154,26 +154,47 @@ function initAuthUI() {
     initFloatingLabels();
 }
 
-// 初始化密码显示切换
+// 初始化密码显示切换（认证模块专用）
 function initPasswordToggles() {
+    // 检查是否已经在ui.js中初始化过了
+    if (window.initPasswordToggles && typeof window.initPasswordToggles === 'function') {
+        // 使用ui.js中的实现
+        window.initPasswordToggles();
+        return;
+    }
+
+    // 备用实现（如果ui.js未加载）
     const passwordToggles = document.querySelectorAll('.password-toggle');
 
     passwordToggles.forEach(toggle => {
-        toggle.addEventListener('click', () => {
+        // 检查是否已经绑定过事件
+        if (toggle.dataset.initialized === 'true') {
+            return;
+        }
+
+        toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
             const input = toggle.parentElement.querySelector('input[type="password"], input[type="text"]');
             const eyeOpen = toggle.querySelector('.eye-open');
             const eyeClosed = toggle.querySelector('.eye-closed');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeOpen.style.display = 'none';
-                eyeClosed.style.display = 'block';
-            } else {
-                input.type = 'password';
-                eyeOpen.style.display = 'block';
-                eyeClosed.style.display = 'none';
+            if (input && eyeOpen && eyeClosed) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
+                } else {
+                    input.type = 'password';
+                    eyeOpen.style.display = 'block';
+                    eyeClosed.style.display = 'none';
+                }
             }
         });
+
+        // 标记为已初始化
+        toggle.dataset.initialized = 'true';
     });
 }
 
@@ -327,7 +348,12 @@ function showAuthModal(mode = 'login') {
 
     // 重新初始化UI功能（确保动态内容正常工作）
     setTimeout(() => {
-        initPasswordToggles();
+        // 优先使用ui.js中的密码切换初始化
+        if (window.initPasswordToggles && typeof window.initPasswordToggles === 'function') {
+            window.initPasswordToggles();
+        } else {
+            initPasswordToggles();
+        }
         initFloatingLabels();
     }, 100);
 }

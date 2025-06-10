@@ -311,9 +311,33 @@ function initOtherFeatures() {
     if (originalPromptTextarea) {
         originalPromptTextarea.focus();
     }
-    
+
     // 更新字符计数
     updateCharCount();
+
+    // 初始化密码切换功能（独立于认证模块）
+    initPasswordToggles();
+
+    // 监听认证弹窗的显示，重新初始化密码切换
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const authModal = document.getElementById('authModal');
+                if (authModal && authModal.style.display === 'flex') {
+                    console.log('检测到认证弹窗显示，重新初始化密码切换');
+                    setTimeout(() => {
+                        initPasswordToggles();
+                    }, 200);
+                }
+            }
+        });
+    });
+
+    // 观察认证弹窗的变化
+    const authModal = document.getElementById('authModal');
+    if (authModal) {
+        observer.observe(authModal, { attributes: true, attributeFilter: ['style'] });
+    }
 }
 
 // 页面加载动画
@@ -326,9 +350,64 @@ function initPageAnimation() {
     }, 100);
 }
 
+// 初始化密码显示切换功能
+function initPasswordToggles() {
+    console.log('初始化密码切换功能');
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+    console.log('找到密码切换按钮数量:', passwordToggles.length);
+
+    passwordToggles.forEach((toggle, index) => {
+        console.log(`处理第${index + 1}个密码切换按钮:`, toggle.id || 'no-id');
+
+        // 检查是否已经绑定过事件
+        if (toggle.dataset.uiInitialized === 'true') {
+            console.log('按钮已初始化，跳过');
+            return;
+        }
+
+        toggle.addEventListener('click', (e) => {
+            console.log('密码切换按钮被点击');
+            e.preventDefault();
+            e.stopPropagation();
+
+            const input = toggle.parentElement.querySelector('input[type="password"], input[type="text"]');
+            const eyeOpen = toggle.querySelector('.eye-open');
+            const eyeClosed = toggle.querySelector('.eye-closed');
+
+            console.log('找到的元素:', {
+                input: !!input,
+                eyeOpen: !!eyeOpen,
+                eyeClosed: !!eyeClosed,
+                currentType: input?.type
+            });
+
+            if (input && eyeOpen && eyeClosed) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
+                    console.log('密码已显示');
+                } else {
+                    input.type = 'password';
+                    eyeOpen.style.display = 'block';
+                    eyeClosed.style.display = 'none';
+                    console.log('密码已隐藏');
+                }
+            } else {
+                console.error('密码切换功能缺少必要元素');
+            }
+        });
+
+        // 标记为已初始化
+        toggle.dataset.uiInitialized = 'true';
+        console.log('密码切换按钮初始化完成');
+    });
+}
+
 // 注意：UI初始化已移至script.js中统一管理，避免重复初始化
 
 // 导出函数到全局作用域
 window.updateCharCount = updateCharCount;
 window.openModal = openModal;
 window.closeModal = closeModal;
+window.initPasswordToggles = initPasswordToggles;
