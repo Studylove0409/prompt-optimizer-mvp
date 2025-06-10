@@ -22,6 +22,32 @@ const API_BASE_URL = window.location.protocol === 'file:'
     ? 'http://localhost:8000/api'  // 本地开发环境
     : '/api';                      // 部署环境（相对路径）
 
+// 确保currentMode和updatePlaceholderByMode在全局作用域中可用
+let currentMode = 'general'; // 默认模式
+
+// 根据模式更新输入框提示文本
+function updatePlaceholderByMode(mode) {
+    const textarea = document.getElementById('originalPrompt');
+    if (!textarea) return;
+    
+    switch(mode) {
+        case 'general':
+            textarea.placeholder = "在这里输入您想要优化的提示词...例如：我想学习一门新技能";
+            break;
+        case 'business':
+            textarea.placeholder = "在这里输入您想要优化的商业提示词...例如：写一份产品推广方案";
+            break;
+        case 'drawing':
+            textarea.placeholder = "在这里输入您想要优化的绘画提示词...例如：画一个在森林中的小屋";
+            break;
+        case 'academic':
+            textarea.placeholder = "在这里输入您想要优化的学术提示词...例如：解释量子力学的基本原理";
+            break;
+        default:
+            textarea.placeholder = "在这里输入您想要优化的提示词...";
+    }
+}
+
 // 创建自定义提示框
 function showCustomAlert(message, type = 'info', duration = 3000) {
     // 移除现有的提示框
@@ -172,8 +198,20 @@ function getSelectedModel() {
 
 // 获取当前选择的模式
 function getSelectedMode() {
+    // 检查新的下拉模式选择器
+    const activeOption = document.querySelector('.mode-option.active');
+    if (activeOption) {
+        return activeOption.dataset.mode;
+    }
+    
+    // 兼容旧的按钮式模式选择器
     const activeModeBtn = document.querySelector('.mode-btn.active');
-    return activeModeBtn ? activeModeBtn.dataset.mode : 'general';
+    if (activeModeBtn) {
+        return activeModeBtn.dataset.mode;
+    }
+    
+    // 默认返回通用模式
+    return 'general';
 }
 
 // 获取模型显示名称
@@ -551,6 +589,24 @@ document.addEventListener('DOMContentLoaded', () => {
     helpLink = document.getElementById('helpLink');
     helpModal = document.getElementById('helpModal');
     closeHelpModalBtn = document.getElementById('closeHelpModal');
+    
+    // 初始化当前模式
+    const activeOption = document.querySelector('.mode-option.active');
+    if (activeOption) {
+        currentMode = activeOption.getAttribute('data-mode');
+        console.log('初始化当前模式:', currentMode);
+    } else {
+        // 如果没有找到激活的选项，将第一个选项激活
+        const firstOption = document.querySelector('.mode-option');
+        if (firstOption) {
+            firstOption.classList.add('active');
+            currentMode = firstOption.getAttribute('data-mode');
+            console.log('初始化并激活第一个模式:', currentMode);
+        }
+    }
+    
+    // 初始化输入框提示文本
+    updatePlaceholderByMode(currentMode);
     
     originalPromptTextarea.focus();
     updateCharCount();
