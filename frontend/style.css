@@ -1375,13 +1375,16 @@ body {
     
     .mode-selector {
         order: -1;
-        margin-bottom: 10px;
+        margin: var(--spacing-sm) 0;
         width: 100%;
         justify-content: center;
+        position: relative;
     }
     
     .textarea-footer {
         flex-wrap: wrap;
+        justify-content: space-between;
+        padding: var(--spacing-sm) var(--spacing-md);
     }
     
     .mode-options {
@@ -1423,7 +1426,67 @@ body {
     .feature-item {
         padding: var(--spacing-sm) var(--spacing-md);
     }
-
+    
+    /* 重新设计模式选择器在移动端的布局 */
+    .textarea-footer {
+        position: relative;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .char-count {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+    }
+    
+    .mode-selector {
+        width: 100%;
+        margin: 0 0 8px 0;
+        order: 0;
+    }
+    
+    .mode-title {
+        display: none; /* 在极小屏幕上隐藏"模式："文字 */
+    }
+    
+    .mode-options {
+        width: 100%;
+        justify-content: space-between;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+    
+    .mode-btn {
+        flex: 1;
+        font-size: 11px;
+        padding: 5px 2px;
+        justify-content: center;
+        border-radius: 12px;
+        background-color: rgba(0,0,0,0.04);
+        margin: 0 2px;
+    }
+    
+    .mode-icon {
+        margin-right: 2px;
+        font-size: 11px;
+    }
+    
+    /* 优化按钮位置，确保不会被模式选择器挤出 */
+    .optimize-button-inline {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .shortcut-hint {
+        display: none; /* 移动端隐藏快捷键提示 */
+    }
+    
     /* 优化模型选择卡片在移动端的样式 */
     .model-selection {
         margin-top: 15px;
@@ -1533,71 +1596,17 @@ body {
         box-shadow: 0 5px 20px rgba(0, 122, 255, 0.3);
         border: 2px solid var(--color-primary);
     }
-
+    
     .prompt-textarea {
         padding: var(--spacing-md);
         min-height: 120px;
         font-size: 16px; /* 防止iOS缩放 */
         line-height: 1.5;
     }
-
-    .optimize-button-inline {
-        width: 42px;
-        height: 42px;
-        bottom: 6px; /* 在footer底部靠近位置 */
-        right: 8px;
-        box-shadow:
-            0 4px 16px rgba(0, 122, 255, 0.3),
-            0 2px 6px rgba(0, 0, 0, 0.1),
-            0 1px 0 rgba(255, 255, 255, 0.3) inset;
-    }
-
-    .optimize-button-inline:hover {
-        transform: translateY(-2px) scale(1.05);
-        box-shadow:
-            0 8px 24px rgba(0, 122, 255, 0.35),
-            0 4px 12px rgba(0, 0, 0, 0.15),
-            0 1px 0 rgba(255, 255, 255, 0.4) inset;
-    }
-
+    
     .enter-icon {
         width: 20px;
         height: 20px;
-    }
-
-    .textarea-footer {
-        padding: var(--spacing-xs) var(--spacing-md);
-        font-size: 12px;
-    }
-
-    .shortcut-hint {
-        display: none; /* 移动端隐藏快捷键提示 */
-    }
-    
-    .char-count {
-        font-size: 0.8rem;
-    }
-    
-    /* 优化模式选择器在移动端的显示 */
-    .mode-selector {
-        margin: var(--spacing-sm) 0;
-    }
-    
-    .mode-options {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .mode-btn {
-        flex: 1;
-        font-size: 11px;
-        padding: 4px 6px;
-        justify-content: center;
-    }
-    
-    .mode-icon {
-        margin-right: 2px;
-        font-size: 12px;
     }
     
     /* 改善输出区域在移动端的显示 */
@@ -1632,33 +1641,20 @@ body {
         font-size: 12px;
     }
     
-    /* 优化弹窗在移动端的显示 */
-    .help-modal-content,
-    .business-modal-content,
-    .announcement-modal-content {
-        width: 95%;
-        max-height: 85vh;
-        margin: 30px auto;
-    }
-    
-    .help-modal-header,
-    .business-modal-header,
-    .announcement-modal-header {
-        padding: 15px;
-    }
-    
-    .help-modal-body,
-    .business-modal-body,
-    .announcement-modal-body {
-        padding: 15px;
-    }
-    
-    .help-section h3 {
-        font-size: 1.2rem;
-    }
-    
-    .example {
-        padding: 12px;
+    /* 手机竖屏状态特殊优化 */
+    @media (max-width: 380px) {
+        .mode-name {
+            font-size: 10px;
+        }
+        
+        .mode-btn {
+            padding: 4px 1px;
+        }
+        
+        .mode-icon {
+            font-size: 10px;
+            margin-right: 1px;
+        }
     }
 }
 
