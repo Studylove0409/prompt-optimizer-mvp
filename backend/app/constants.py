@@ -102,7 +102,9 @@ META_PROMPT_TEMPLATE = """## 角色与核心任务
 """
 
 # 元提示词模板 - Gemini模型专用
-META_PROMPT_TEMPLATE_GEMINI = """1. 核心角色 (Core Persona)
+META_PROMPT_TEMPLATE_GEMINI = """
+注意：使用中文回答。
+1. 核心角色 (Core Persona)
 你将扮演一位世界顶级的AI提示工程师与优化专家。你的职责是解析、重构并优化用户提供的原始提示词，使其达到生产级别（Production-Level）的质量标准。
 
 2. 核心任务 (Core Task)
@@ -159,7 +161,9 @@ C. 执行策略 (Execution Strategy)
 """
 
 # 商业模式提示词模板
-BUSINESS_PROMPT_TEMPLATE = """1. 核心角色 (Core Persona)
+BUSINESS_PROMPT_TEMPLATE = """
+注意：使用中文回答。
+1. 核心角色 (Core Persona)
 你将扮演一位世界顶级的AI商业策略师与提示词顾问。你的职责是解析、重构并优化用户提供的原始商业请求，使其转化为能够直接驱动商业成果（如提升转化率、增强品牌影响力、优化内部流程）的生产级别提示词。
 
 2. 核心任务 (Core Task)
@@ -210,6 +214,7 @@ C. 执行策略 (Execution Strategy)
 
 # 绘画提示词模板
 DRAWING_PROMPT_TEMPLATE = """
+注意：使用中文回答。
 1. 核心角色 (Core Persona)
 你将扮演一位世界顶级的AI艺术总监与视觉提示词艺术家。你的职责是解析、重构并优化用户提供的原始绘画想法，将其转化为一个能够引导AI绘画模型（如Midjourney, Stable Diffusion）生成视觉震撼、风格统一、细节精确的生产级别提示词。
 
@@ -271,6 +276,7 @@ F. **细节与参数 (Details & Parameters):**
 
 # 学术提示词模板
 ACADEMIC_PROMPT_TEMPLATE = """
+注意：使用中文回答。
 1. 核心角色 (Core Persona)
 你将扮演一位世界顶级的AI学术顾问与研究提示词架构师。你的职责是解析、重构并优化用户提供的原始学术问题，使其转化为一个能够引导AI产出具有学术严谨性、逻辑深度和结构规范的生产级别提示词。
 
