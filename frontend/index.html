@@ -1272,7 +1272,8 @@
                     this.classList.add('active');
                     // 更新当前模式
                     currentMode = this.dataset.mode;
-
+                    console.log('模式已切换为:', currentMode);
+                    
                     // 同步更新下拉框的值
                     const modeSelect = document.getElementById('modeSelect');
                     if (modeSelect) {
@@ -1290,7 +1291,8 @@
                 modeSelect.addEventListener('change', function() {
                     // 更新当前模式
                     currentMode = this.value;
-
+                    console.log('模式已切换为:', currentMode);
+                    
                     // 同步更新按钮状态
                     modeButtons.forEach(btn => {
                         if (btn.dataset.mode === currentMode) {
@@ -1391,6 +1393,7 @@
                             }, 1500);
                         })
                         .catch(err => {
+                            console.error('复制失败:', err);
                             tooltip.textContent = '复制失败';
                             tooltip.classList.add('show');
                             
@@ -1518,12 +1521,14 @@
         // 确保粒子系统能够加载
         window.addEventListener('load', function() {
             if (!window.particleSystem) {
+                console.log('备用粒子系统初始化...');
                 setTimeout(function() {
                     if (typeof ParticleSystem !== 'undefined' && !window.particleSystem) {
                         try {
                             window.particleSystem = new ParticleSystem();
+                            console.log('备用粒子系统初始化成功');
                         } catch (error) {
-                            // 静默处理粒子系统初始化失败
+                            console.error('备用粒子系统初始化失败:', error);
                         }
                     }
                 }, 500);

@@ -223,7 +223,8 @@ async function optimizePrompt() {
 
     // 获取当前选择的模式
     const selectedMode = getSelectedMode();
-
+    console.log('当前选择的模式:', selectedMode);
+    
     // 显示加载状态
     showLoading();
 
@@ -234,6 +235,8 @@ async function optimizePrompt() {
             model: selectedModel,
             mode: selectedMode  // 添加模式参数
         };
+        
+        console.log('发送的请求体:', requestBody);
         
         const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
@@ -258,6 +261,7 @@ async function optimizePrompt() {
         return data; // 返回结果数据
 
     } catch (error) {
+        console.error('优化失败:', error);
         showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
@@ -270,6 +274,7 @@ async function quickOptimizePrompt() {
     const originalPrompt = originalPromptTextarea.value.trim();
     const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
     const selectedMode = getSelectedMode(); // 获取当前模式
+    console.log('快速优化 - 当前选择的模式:', selectedMode);
 
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
@@ -286,6 +291,8 @@ async function quickOptimizePrompt() {
             model: quickModel,
             mode: selectedMode // 添加模式参数
         };
+        
+        console.log('快速优化 - 发送的请求体:', requestBody);
         
         const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
@@ -310,6 +317,7 @@ async function quickOptimizePrompt() {
         return data; // 返回结果数据
 
     } catch (error) {
+        console.error('快速优化失败:', error);
         showCustomAlert('快速优化失败，请检查网络连接或稍后重试', 'error', 3500);
         throw error; // 重新抛出错误以便调用者处理
     } finally {
@@ -359,6 +367,8 @@ async function copyToClipboard() {
         // 成功复制后的处理
         showCopySuccess();
     } catch (error) {
+        console.error('Clipboard API 失败:', error);
+        
         // 尝试使用备用方法 - execCommand
         try {
             // 创建临时选区和输入元素
@@ -393,6 +403,8 @@ async function copyToClipboard() {
                 throw new Error('execCommand 复制失败');
             }
         } catch (fallbackError) {
+            console.error('备用复制方法失败:', fallbackError);
+            
             // 两种方法都失败了，显示错误信息
             showCopyError();
         }
@@ -864,6 +876,7 @@ async function handleLogin(e) {
         closeAuthModal();
 
     } catch (error) {
+        console.error('登录失败:', error);
         let errorMessage = '登录失败，请检查邮箱和密码';
 
         if (error.message.includes('Invalid login credentials')) {
@@ -925,6 +938,7 @@ async function handleRegister(e) {
         closeAuthModal();
 
     } catch (error) {
+        console.error('注册失败:', error);
         let errorMessage = '注册失败，请重试';
 
         if (error.message.includes('User already registered')) {
@@ -955,12 +969,13 @@ async function handleLogout() {
         showCustomAlert('已成功退出登录', 'success');
 
     } catch (error) {
+        console.error('登出失败:', error);
         showCustomAlert('登出失败，请重试', 'error');
     }
 }
 
 // 处理认证状态变化
-function handleAuthStateChange(_, session) {
+function handleAuthStateChange(event, session) {
     if (session && session.user) {
         // 用户已登录
         currentUser = session.user;

@@ -246,14 +246,18 @@ class Particle {
 // 初始化粒子系统
 function initParticleSystem() {
     try {
+        console.log('正在初始化粒子系统...');
+
         // 检查Canvas支持
         const canvas = document.getElementById('particleCanvas');
         if (!canvas) {
+            console.error('找不到粒子画布元素');
             return;
         }
 
         const ctx = canvas.getContext('2d');
         if (!ctx) {
+            console.error('浏览器不支持Canvas 2D');
             return;
         }
 
@@ -266,11 +270,13 @@ function initParticleSystem() {
             window.particleSystem.config.particleCount = 25;
             window.particleSystem.config.connectionDistance = 80;
             window.particleSystem.createParticles();
+            console.log('移动设备粒子系统初始化完成 (25个粒子)');
         } else {
             window.particleSystem = new ParticleSystem();
+            console.log('桌面设备粒子系统初始化完成 (50个粒子)');
         }
     } catch (error) {
-        // 静默处理粒子系统初始化失败
+        console.error('粒子系统初始化失败:', error);
     }
 }
 
