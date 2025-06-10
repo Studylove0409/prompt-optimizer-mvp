@@ -1,50 +1,26 @@
-// DOM 元素 - 将在DOMContentLoaded中初始化
-let originalPromptTextarea;
-let optimizeBtn;
-let outputSection;
-let optimizedPromptDiv;
-let modelUsedDiv;
-let copyBtn;
-let clearBtn;
-let loading;
-let loadingIndicator;
-let charCountElement;
+// DOM 元素
+const originalPromptTextarea = document.getElementById('originalPrompt');
+const optimizeBtn = document.getElementById('optimizeBtn');
+const outputSection = document.getElementById('outputSection');
+const optimizedPromptDiv = document.getElementById('optimizedPrompt');
+const modelUsedDiv = document.getElementById('modelUsed');
+const copyBtn = document.getElementById('copyBtn');
+const clearBtn = document.getElementById('clearBtn');
+const loading = document.getElementById('loading');
+const loadingIndicator = document.getElementById('loadingIndicator');
 
 // 帮助弹框元素 - 在DOM完全加载后再获取
 let helpLink;
 let helpModal;
 let closeHelpModalBtn;
 
+// 新增元素
+const charCountElement = document.querySelector('.char-count');
+
 // API 基础URL - 根据环境自动选择
 const API_BASE_URL = window.location.protocol === 'file:'
     ? 'http://localhost:8000/api'  // 本地开发环境
     : '/api';                      // 部署环境（相对路径）
-
-// 确保currentMode和updatePlaceholderByMode在全局作用域中可用
-let currentMode = 'general'; // 默认模式
-
-// 根据模式更新输入框提示文本
-function updatePlaceholderByMode(mode) {
-    const textarea = document.getElementById('originalPrompt');
-    if (!textarea) return;
-    
-    switch(mode) {
-        case 'general':
-            textarea.placeholder = "在这里输入您想要优化的提示词...例如：我想学习一门新技能";
-            break;
-        case 'business':
-            textarea.placeholder = "在这里输入您想要优化的商业提示词...例如：写一份产品推广方案";
-            break;
-        case 'drawing':
-            textarea.placeholder = "在这里输入您想要优化的绘画提示词...例如：画一个在森林中的小屋";
-            break;
-        case 'academic':
-            textarea.placeholder = "在这里输入您想要优化的学术提示词...例如：解释量子力学的基本原理";
-            break;
-        default:
-            textarea.placeholder = "在这里输入您想要优化的提示词...";
-    }
-}
 
 // 创建自定义提示框
 function showCustomAlert(message, type = 'info', duration = 3000) {
@@ -196,20 +172,8 @@ function getSelectedModel() {
 
 // 获取当前选择的模式
 function getSelectedMode() {
-    // 检查新的下拉模式选择器
-    const activeOption = document.querySelector('.mode-option.active');
-    if (activeOption) {
-        return activeOption.dataset.mode;
-    }
-    
-    // 兼容旧的按钮式模式选择器
     const activeModeBtn = document.querySelector('.mode-btn.active');
-    if (activeModeBtn) {
-        return activeModeBtn.dataset.mode;
-    }
-    
-    // 默认返回通用模式
-    return 'general';
+    return activeModeBtn ? activeModeBtn.dataset.mode : 'general';
 }
 
 // 获取模型显示名称
@@ -547,62 +511,46 @@ function createTemporaryParticles(x, y) {
     }
 }
 
-// 事件监听器将在DOMContentLoaded中初始化
+// 事件监听器
+optimizeBtn.addEventListener('click', () => {
+    optimizeBtn.classList.remove('pulse-hint');
+    addButtonAnimation(optimizeBtn);
+    optimizePrompt();
+});
+
+copyBtn.addEventListener('click', copyToClipboard);
+clearBtn.addEventListener('click', clearAll);
+
+// 字符计数更新
+originalPromptTextarea.addEventListener('input', updateCharCount);
+
+// 键盘事件处理
+originalPromptTextarea.addEventListener('keydown', (e) => {
+    // Ctrl + Enter: 快速优化 (使用Gemini Flash模型)
+    if (e.key === 'Enter' && e.ctrlKey) {
+        e.preventDefault();
+        optimizeBtn.classList.remove('pulse-hint');
+        addButtonAnimation(optimizeBtn);
+        quickOptimizePrompt();
+    }
+    // Enter: 普通优化 (使用当前选择的模型)
+    else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        optimizeBtn.classList.remove('pulse-hint');
+        addButtonAnimation(optimizeBtn);
+        optimizePrompt();
+    }
+    // Shift + Enter: 换行 (默认行为)
+});
 
 // 页面加载完成后的初始化
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM 加载完成，初始化组件');
-
-    // 初始化所有DOM元素
-    originalPromptTextarea = document.getElementById('originalPrompt');
-    optimizeBtn = document.getElementById('optimizeBtn');
-    outputSection = document.getElementById('outputSection');
-    optimizedPromptDiv = document.getElementById('optimizedPrompt');
-    modelUsedDiv = document.getElementById('modelUsed');
-    copyBtn = document.getElementById('copyBtn');
-    clearBtn = document.getElementById('clearBtn');
-    loading = document.getElementById('loading');
-    loadingIndicator = document.getElementById('loadingIndicator');
-    charCountElement = document.querySelector('.char-count');
-
+    
     // 获取帮助弹框元素
     helpLink = document.getElementById('helpLink');
     helpModal = document.getElementById('helpModal');
     closeHelpModalBtn = document.getElementById('closeHelpModal');
-
-    // 检查关键元素是否存在
-    console.log('关键元素检查:', {
-        originalPromptTextarea: originalPromptTextarea ? '存在' : '不存在',
-        optimizeBtn: optimizeBtn ? '存在' : '不存在',
-        charCountElement: charCountElement ? '存在' : '不存在'
-    });
-
-    // 如果关键元素不存在，停止初始化
-    if (!originalPromptTextarea || !optimizeBtn) {
-        console.error('关键DOM元素缺失，停止初始化');
-        return;
-    }
-
-    // 添加基本事件监听器
-    initBasicEventListeners();
-
-    // 初始化当前模式
-    const activeOption = document.querySelector('.mode-option.active');
-    if (activeOption) {
-        currentMode = activeOption.getAttribute('data-mode');
-        console.log('初始化当前模式:', currentMode);
-    } else {
-        // 如果没有找到激活的选项，将第一个选项激活
-        const firstOption = document.querySelector('.mode-option');
-        if (firstOption) {
-            firstOption.classList.add('active');
-            currentMode = firstOption.getAttribute('data-mode');
-            console.log('初始化并激活第一个模式:', currentMode);
-        }
-    }
-    
-    // 初始化输入框提示文本
-    updatePlaceholderByMode(currentMode);
     
     originalPromptTextarea.focus();
     updateCharCount();
@@ -617,95 +565,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化帮助弹框
     initHelpModal();
-
-    // 模式选择器下拉功能
-    const modeDropdownBtn = document.getElementById('modeDropdownBtn');
-    const modeDropdownContent = document.getElementById('modeDropdownContent');
-    const modeOptions = document.querySelectorAll('.mode-option');
-    const selectedModeIcon = document.querySelector('.selected-mode-icon');
-    const selectedModeName = document.querySelector('.selected-mode-name');
-
-    console.log('模式选择器元素检查:', {
-        modeDropdownBtn: modeDropdownBtn ? '存在' : '不存在',
-        modeDropdownContent: modeDropdownContent ? '存在' : '不存在',
-        modeOptions: modeOptions.length + '个选项',
-        selectedModeIcon: selectedModeIcon ? '存在' : '不存在',
-        selectedModeName: selectedModeName ? '存在' : '不存在'
-    });
-
-    // 点击下拉按钮显示/隐藏下拉内容
-    if (modeDropdownBtn && modeDropdownContent) {
-        modeDropdownBtn.addEventListener('click', function(e) {
-            console.log('点击了模式下拉按钮');
-            e.stopPropagation();
-            this.classList.toggle('active');
-
-            if (modeDropdownContent.classList.contains('show')) {
-                // 隐藏下拉框
-                modeDropdownContent.classList.remove('show');
-                console.log('隐藏下拉框');
-            } else {
-                // 显示下拉框并调整位置
-                positionDropdown();
-                modeDropdownContent.classList.add('show');
-                console.log('显示下拉框');
-            }
-
-            console.log('下拉框状态:', modeDropdownContent.classList.contains('show') ? '显示' : '隐藏');
-        });
-    } else {
-        console.error('模式下拉按钮或内容元素不存在');
-    }
-    
-    // 点击选项切换模式
-    modeOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            const mode = this.getAttribute('data-mode');
-            const icon = this.querySelector('.mode-icon').textContent;
-            const name = this.querySelector('.mode-name').textContent;
-            
-            // 更新选中状态
-            modeOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            
-            // 更新下拉按钮显示
-            selectedModeIcon.textContent = icon;
-            selectedModeName.textContent = name;
-            
-            // 更新当前选中模式
-            currentMode = mode;
-            console.log('模式已切换为:', currentMode);
-            
-            // 这里可以根据不同模式修改提示文本或其他UI元素
-            updatePlaceholderByMode(currentMode);
-            
-            // 隐藏下拉菜单
-            hideDropdown();
-        });
-    });
-    
-    // 点击页面其他区域关闭下拉菜单
-    document.addEventListener('click', function(e) {
-        if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
-            console.log('点击页面其他区域，关闭下拉菜单');
-            hideDropdown();
-        }
-    });
-
-    // 窗口大小改变时重新调整位置
-    window.addEventListener('resize', function() {
-        if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
-            positionDropdown();
-        }
-    });
-
-    // 防止点击下拉内容时关闭
-    if (modeDropdownContent) {
-        modeDropdownContent.addEventListener('click', function(e) {
-            console.log('点击了下拉内容，阻止冒泡');
-            e.stopPropagation();
-        });
-    }
 });
 
 // 初始化帮助弹框功能
@@ -772,128 +631,4 @@ function closeHelpModalFunction() {
     } else {
         console.error('无法关闭帮助弹框，元素不存在');
     }
-}
-
-// 初始化基本事件监听器
-function initBasicEventListeners() {
-    console.log('初始化基本事件监听器');
-
-    // 优化按钮点击事件
-    if (optimizeBtn) {
-        optimizeBtn.addEventListener('click', async () => {
-            optimizeBtn.classList.remove('pulse-hint');
-            addButtonAnimation(optimizeBtn);
-            try {
-                await optimizePrompt();
-            } catch (error) {
-                console.error('优化失败:', error);
-            }
-        });
-    }
-
-    // 复制按钮点击事件
-    if (copyBtn) {
-        copyBtn.addEventListener('click', copyToClipboard);
-    }
-
-    // 清空按钮点击事件
-    if (clearBtn) {
-        clearBtn.addEventListener('click', clearAll);
-    }
-
-    // 输入框字符计数
-    if (originalPromptTextarea && charCountElement) {
-        originalPromptTextarea.addEventListener('input', updateCharCount);
-    }
-
-    // 键盘快捷键
-    if (originalPromptTextarea) {
-        originalPromptTextarea.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
-                e.preventDefault();
-                optimizeBtn.classList.remove('pulse-hint');
-                addButtonAnimation(optimizeBtn);
-                try {
-                    await optimizePrompt();
-                } catch (error) {
-                    console.error('优化失败:', error);
-                }
-            } else if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                optimizeBtn.classList.remove('pulse-hint');
-                addButtonAnimation(optimizeBtn);
-                try {
-                    await quickOptimizePrompt();
-                } catch (error) {
-                    console.error('快速优化失败:', error);
-                }
-            }
-        });
-    }
-
-    console.log('基本事件监听器初始化完成');
-}
-
-// 调整下拉框位置，确保不被遮挡
-function positionDropdown() {
-    if (!modeDropdownBtn || !modeDropdownContent) return;
-
-    // 获取按钮的位置信息
-    const btnRect = modeDropdownBtn.getBoundingClientRect();
-    const dropdownRect = modeDropdownContent.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-
-    // 重置样式
-    modeDropdownContent.style.position = 'fixed';
-    modeDropdownContent.style.top = '';
-    modeDropdownContent.style.left = '';
-    modeDropdownContent.style.right = '';
-    modeDropdownContent.style.bottom = '';
-    modeDropdownContent.style.zIndex = '99999';
-
-    // 计算最佳位置
-    let top = btnRect.bottom + 4; // 按钮下方4px
-    let left = btnRect.left;
-
-    // 检查是否超出视口底部
-    if (top + dropdownRect.height > viewportHeight) {
-        // 显示在按钮上方
-        top = btnRect.top - dropdownRect.height - 4;
-    }
-
-    // 检查是否超出视口右侧
-    if (left + dropdownRect.width > viewportWidth) {
-        // 右对齐
-        left = btnRect.right - dropdownRect.width;
-    }
-
-    // 确保不超出视口左侧
-    if (left < 0) {
-        left = 4;
-    }
-
-    // 应用位置
-    modeDropdownContent.style.top = top + 'px';
-    modeDropdownContent.style.left = left + 'px';
-
-    console.log('下拉框位置调整:', { top, left, btnRect, dropdownRect });
-}
-
-// 隐藏下拉框并重置样式
-function hideDropdown() {
-    if (!modeDropdownContent || !modeDropdownBtn) return;
-
-    modeDropdownContent.classList.remove('show');
-    modeDropdownBtn.classList.remove('active');
-
-    // 重置为相对定位
-    modeDropdownContent.style.position = '';
-    modeDropdownContent.style.top = '';
-    modeDropdownContent.style.left = '';
-    modeDropdownContent.style.right = '';
-    modeDropdownContent.style.bottom = '';
-    modeDropdownContent.style.zIndex = '';
-
-    console.log('下拉框已隐藏并重置样式');
 }
