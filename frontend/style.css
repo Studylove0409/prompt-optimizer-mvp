@@ -2277,6 +2277,7 @@ body {
 .mode-dropdown {
     position: relative;
     display: inline-block;
+    z-index: 10001;
 }
 
 .mode-dropdown-btn {
@@ -2323,7 +2324,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     border: 1px solid rgba(0,0,0,0.05);
-    z-index: 1000;
+    z-index: 10000;
     padding: 8px 0;
     display: none;
     animation: fadeIn 0.2s ease;
