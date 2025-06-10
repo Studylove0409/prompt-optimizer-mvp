@@ -24,8 +24,32 @@
       "dest": "frontend/style.css"
     },
     {
+      "src": "/modal-styles.css",
+      "dest": "frontend/modal-styles.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
+    },
+    {
+      "src": "/utils.js",
+      "dest": "frontend/utils.js"
+    },
+    {
+      "src": "/api.js",
+      "dest": "frontend/api.js"
+    },
+    {
+      "src": "/ui.js",
+      "dest": "frontend/ui.js"
+    },
+    {
+      "src": "/auth.js",
+      "dest": "frontend/auth.js"
+    },
+    {
+      "src": "/modals.js",
+      "dest": "frontend/modals.js"
     },
     {
       "src": "/particles.js",
