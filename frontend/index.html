@@ -18,26 +18,8 @@
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
     
-    <!-- Supabase JS -->
+    <!-- Supabase JS - 确保在头部引入 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 确保Supabase正确初始化 -->
-    <script>
-        window.addEventListener('DOMContentLoaded', function() {
-            // 确认Supabase库已加载
-            if (typeof window.Supabase === 'undefined') {
-                console.error('Supabase 库未正确加载，尝试重新加载');
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-                script.onload = function() {
-                    console.log('Supabase 库加载成功');
-                };
-                document.head.appendChild(script);
-            } else {
-                console.log('Supabase 库已正常加载');
-            }
-        });
-    </script>
 </head>
 <body>
     <!-- 粒子背景画布 -->
@@ -1689,19 +1671,6 @@
     </script>
     <!-- 务必确保这个顺序：先supabaseClient.js，然后script.js -->
     <script src="supabaseClient.js"></script>
-    <script>
-        // 验证supabase客户端是否正确初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                if (typeof supabase === 'undefined' || !supabase || !supabase.auth) {
-                    console.error('Supabase客户端初始化失败');
-                    alert('Supabase认证服务加载失败，请刷新页面重试');
-                } else {
-                    console.log('Supabase客户端初始化成功');
-                }
-            }, 500);
-        });
-    </script>
     <script src="script.js"></script>
     <script src="particles.js"></script>
 
