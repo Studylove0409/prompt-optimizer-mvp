@@ -99,6 +99,16 @@
                                             <span class="mode-name">学术</span>
                                         </button>
                                     </div>
+                                    <!-- 手机端下拉框 -->
+                                    <div class="mode-select-container">
+                                        <select class="mode-select" id="modeSelect">
+                                            <option value="general" selected>🌟 通用</option>
+                                            <option value="business">💼 商业</option>
+                                            <option value="drawing">🎨 绘画</option>
+                                            <option value="academic">📚 学术</option>
+                                        </select>
+                                        <span class="mode-select-icon">▼</span>
+                                    </div>
                                 </div>
                                 
                                 <span class="shortcut-hint">Enter 优化 | Ctrl + Enter 快速优化 | Shift + Enter 换行</span>
@@ -484,6 +494,50 @@
             50% { opacity: 0.6; }
         }
         
+        /* 手机端下拉框样式 */
+        .mode-select-container {
+            display: none;
+            position: relative;
+        }
+        
+        .mode-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: linear-gradient(to right, rgba(110, 142, 251, 0.1), rgba(167, 119, 227, 0.1));
+            border: 1px solid rgba(110, 142, 251, 0.3);
+            border-radius: 15px;
+            padding: 8px 32px 8px 12px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .mode-select:focus {
+            border-color: rgba(110, 142, 251, 0.8);
+            box-shadow: 0 3px 10px rgba(110, 142, 251, 0.2);
+        }
+        
+        .mode-select-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 16px;
+            color: rgba(110, 142, 251, 0.8);
+        }
+        
+        .mode-option-icon {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        
         @media (max-width: 768px) {
             .mode-selector {
                 order: -1;
@@ -492,13 +546,17 @@
                 justify-content: center;
             }
             
-            .textarea-footer {
-                flex-wrap: wrap;
+            .mode-options {
+                display: none; /* 在手机端隐藏按钮组 */
             }
             
-            .mode-options {
-                padding: 4px;
-                gap: 8px;
+            .mode-select-container {
+                display: block; /* 在手机端显示下拉框 */
+                width: 100%;
+            }
+            
+            .textarea-footer {
+                flex-wrap: wrap;
             }
             
             .mode-btn {
@@ -1128,10 +1186,38 @@
                     currentMode = this.dataset.mode;
                     console.log('模式已切换为:', currentMode);
                     
+                    // 同步更新下拉框的值
+                    const modeSelect = document.getElementById('modeSelect');
+                    if (modeSelect) {
+                        modeSelect.value = currentMode;
+                    }
+                    
                     // 这里可以根据不同模式修改提示文本或其他UI元素
                     updatePlaceholderByMode(currentMode);
                 });
             });
+            
+            // 处理下拉框选择
+            const modeSelect = document.getElementById('modeSelect');
+            if (modeSelect) {
+                modeSelect.addEventListener('change', function() {
+                    // 更新当前模式
+                    currentMode = this.value;
+                    console.log('模式已切换为:', currentMode);
+                    
+                    // 同步更新按钮状态
+                    modeButtons.forEach(btn => {
+                        if (btn.dataset.mode === currentMode) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                    
+                    // 更新提示文本
+                    updatePlaceholderByMode(currentMode);
+                });
+            }
             
             // 根据模式更新输入框提示文本
             function updatePlaceholderByMode(mode) {
