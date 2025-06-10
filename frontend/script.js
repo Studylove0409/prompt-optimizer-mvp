@@ -692,6 +692,9 @@ let registerFormElement;
 let showRegisterFormBtn;
 let showLoginFormBtn;
 let closeAuthModalBtn;
+let loginTab;
+let registerTab;
+let authTabIndicator;
 
 // 当前用户状态
 let currentUser = null;
@@ -711,6 +714,9 @@ function initAuth() {
     showRegisterFormBtn = document.getElementById('showRegisterForm');
     showLoginFormBtn = document.getElementById('showLoginForm');
     closeAuthModalBtn = document.getElementById('closeAuthModal');
+    loginTab = document.getElementById('loginTab');
+    registerTab = document.getElementById('registerTab');
+    authTabIndicator = document.querySelector('.auth-tab-indicator');
 
     // 检查Supabase是否可用
     if (!window.supabaseClient) {
@@ -719,6 +725,9 @@ function initAuth() {
 
     // 绑定事件监听器
     bindAuthEvents();
+
+    // 初始化UI功能
+    initAuthUI();
 
     // 监听认证状态变化
     if (window.supabaseClient) {
@@ -750,18 +759,31 @@ function bindAuthEvents() {
         closeAuthModalBtn.addEventListener('click', closeAuthModal);
     }
 
-    // 表单切换
+    // 标签切换
+    if (loginTab) {
+        loginTab.addEventListener('click', () => {
+            switchToLoginTab();
+        });
+    }
+
+    if (registerTab) {
+        registerTab.addEventListener('click', () => {
+            switchToRegisterTab();
+        });
+    }
+
+    // 表单切换（兼容旧版本）
     if (showRegisterFormBtn) {
         showRegisterFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showRegisterFormFunction();
+            switchToRegisterTab();
         });
     }
 
     if (showLoginFormBtn) {
         showLoginFormBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            showLoginFormFunction();
+            switchToLoginTab();
         });
     }
 
@@ -777,7 +799,7 @@ function bindAuthEvents() {
     // 点击弹窗外部关闭
     if (authModal) {
         authModal.addEventListener('click', (e) => {
-            if (e.target === authModal) {
+            if (e.target === authModal || e.target.classList.contains('auth-modal-backdrop')) {
                 closeAuthModal();
             }
         });
@@ -791,6 +813,180 @@ function bindAuthEvents() {
     });
 }
 
+// 初始化认证UI功能
+function initAuthUI() {
+    // 初始化密码显示切换
+    initPasswordToggles();
+
+    // 初始化密码强度检测
+    initPasswordStrength();
+
+    // 初始化表单验证
+    initFormValidation();
+
+    // 初始化浮动标签
+    initFloatingLabels();
+}
+
+// 初始化密码显示切换
+function initPasswordToggles() {
+    const passwordToggles = document.querySelectorAll('.password-toggle');
+
+    passwordToggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const input = toggle.parentElement.querySelector('input[type="password"], input[type="text"]');
+            const eyeOpen = toggle.querySelector('.eye-open');
+            const eyeClosed = toggle.querySelector('.eye-closed');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
+            } else {
+                input.type = 'password';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
+            }
+        });
+    });
+}
+
+// 初始化密码强度检测
+function initPasswordStrength() {
+    const registerPassword = document.getElementById('registerPassword');
+    const strengthBar = document.querySelector('.strength-fill');
+    const strengthText = document.querySelector('.strength-text');
+
+    if (registerPassword && strengthBar && strengthText) {
+        registerPassword.addEventListener('input', (e) => {
+            const password = e.target.value;
+            const strength = calculatePasswordStrength(password);
+
+            strengthBar.style.width = `${strength.percentage}%`;
+            strengthText.textContent = strength.text;
+
+            // 更新颜色
+            if (strength.percentage < 30) {
+                strengthBar.style.background = '#FF3B30';
+            } else if (strength.percentage < 70) {
+                strengthBar.style.background = '#FF9500';
+            } else {
+                strengthBar.style.background = '#34C759';
+            }
+        });
+    }
+}
+
+// 计算密码强度
+function calculatePasswordStrength(password) {
+    let score = 0;
+    let text = '密码强度';
+
+    if (password.length >= 6) score += 20;
+    if (password.length >= 8) score += 10;
+    if (/[a-z]/.test(password)) score += 15;
+    if (/[A-Z]/.test(password)) score += 15;
+    if (/[0-9]/.test(password)) score += 15;
+    if (/[^A-Za-z0-9]/.test(password)) score += 25;
+
+    if (score < 30) {
+        text = '密码强度：弱';
+    } else if (score < 70) {
+        text = '密码强度：中';
+    } else {
+        text = '密码强度：强';
+    }
+
+    return { percentage: Math.min(score, 100), text };
+}
+
+// 初始化表单验证
+function initFormValidation() {
+    const inputs = document.querySelectorAll('.auth-form input');
+
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateInput);
+        input.addEventListener('input', clearError);
+    });
+}
+
+// 验证输入
+function validateInput(e) {
+    const input = e.target;
+    const errorElement = input.parentElement.parentElement.querySelector('.form-error');
+
+    if (!errorElement) return;
+
+    let errorMessage = '';
+
+    if (input.type === 'email' && input.value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input.value)) {
+            errorMessage = '请输入有效的邮箱地址';
+        }
+    }
+
+    if (input.type === 'password' && input.value) {
+        if (input.value.length < 6) {
+            errorMessage = '密码长度至少为6位';
+        }
+    }
+
+    if (input.id === 'confirmPassword' && input.value) {
+        const password = document.getElementById('registerPassword').value;
+        if (input.value !== password) {
+            errorMessage = '两次输入的密码不一致';
+        }
+    }
+
+    showError(errorElement, errorMessage);
+}
+
+// 清除错误提示
+function clearError(e) {
+    const input = e.target;
+    const errorElement = input.parentElement.parentElement.querySelector('.form-error');
+
+    if (errorElement) {
+        showError(errorElement, '');
+    }
+}
+
+// 显示错误提示
+function showError(errorElement, message) {
+    if (message) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+    } else {
+        errorElement.classList.remove('show');
+        setTimeout(() => {
+            if (!errorElement.classList.contains('show')) {
+                errorElement.textContent = '';
+            }
+        }, 300);
+    }
+}
+
+// 初始化浮动标签
+function initFloatingLabels() {
+    const inputs = document.querySelectorAll('.auth-form input');
+
+    inputs.forEach(input => {
+        // 检查初始值
+        if (input.value) {
+            input.classList.add('has-value');
+        }
+
+        input.addEventListener('input', () => {
+            if (input.value) {
+                input.classList.add('has-value');
+            } else {
+                input.classList.remove('has-value');
+            }
+        });
+    });
+}
+
 // 显示认证弹窗
 function showAuthModal(mode = 'login') {
     if (!authModal) return;
@@ -798,10 +994,16 @@ function showAuthModal(mode = 'login') {
     authModal.style.display = 'flex';
 
     if (mode === 'login') {
-        showLoginFormFunction();
+        switchToLoginTab();
     } else {
-        showRegisterFormFunction();
+        switchToRegisterTab();
     }
+
+    // 重新初始化UI功能（确保动态内容正常工作）
+    setTimeout(() => {
+        initPasswordToggles();
+        initFloatingLabels();
+    }, 100);
 }
 
 // 关闭认证弹窗
@@ -815,22 +1017,46 @@ function closeAuthModal() {
     if (registerFormElement) registerFormElement.reset();
 }
 
-// 显示登录表单
-function showLoginFormFunction() {
+// 切换到登录标签
+function switchToLoginTab() {
+    if (loginTab) {
+        loginTab.classList.add('active');
+    }
+    if (registerTab) {
+        registerTab.classList.remove('active');
+    }
+    if (authTabIndicator) {
+        authTabIndicator.classList.remove('register');
+    }
+
     if (loginForm) loginForm.style.display = 'block';
     if (registerForm) registerForm.style.display = 'none';
-
-    const modalTitle = document.getElementById('authModalTitle');
-    if (modalTitle) modalTitle.textContent = '登录';
 }
 
-// 显示注册表单
-function showRegisterFormFunction() {
+// 切换到注册标签
+function switchToRegisterTab() {
+    if (loginTab) {
+        loginTab.classList.remove('active');
+    }
+    if (registerTab) {
+        registerTab.classList.add('active');
+    }
+    if (authTabIndicator) {
+        authTabIndicator.classList.add('register');
+    }
+
     if (loginForm) loginForm.style.display = 'none';
     if (registerForm) registerForm.style.display = 'block';
+}
 
-    const modalTitle = document.getElementById('authModalTitle');
-    if (modalTitle) modalTitle.textContent = '注册';
+// 显示登录表单（兼容旧版本）
+function showLoginFormFunction() {
+    switchToLoginTab();
+}
+
+// 显示注册表单（兼容旧版本）
+function showRegisterFormFunction() {
+    switchToRegisterTab();
 }
 
 // 检查Supabase客户端是否可用
@@ -856,11 +1082,10 @@ async function handleLogin(e) {
         return;
     }
 
-    // 禁用提交按钮
+    // 禁用提交按钮并显示加载状态
     const submitBtn = e.target.querySelector('.auth-submit-btn');
-    const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = '登录中...';
+    submitBtn.classList.add('loading');
 
     try {
         const { error } = await window.supabaseClient.auth.signInWithPassword({
@@ -889,7 +1114,7 @@ async function handleLogin(e) {
     } finally {
         // 恢复按钮状态
         submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
     }
 }
 
@@ -918,11 +1143,10 @@ async function handleRegister(e) {
         return;
     }
 
-    // 禁用提交按钮
+    // 禁用提交按钮并显示加载状态
     const submitBtn = e.target.querySelector('.auth-submit-btn');
-    const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = '注册中...';
+    submitBtn.classList.add('loading');
 
     try {
         const { error } = await window.supabaseClient.auth.signUp({
@@ -951,7 +1175,7 @@ async function handleRegister(e) {
     } finally {
         // 恢复按钮状态
         submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
+        submitBtn.classList.remove('loading');
     }
 }
 
@@ -975,7 +1199,7 @@ async function handleLogout() {
 }
 
 // 处理认证状态变化
-function handleAuthStateChange(event, session) {
+function handleAuthStateChange(_event, session) {
     if (session && session.user) {
         // 用户已登录
         currentUser = session.user;
