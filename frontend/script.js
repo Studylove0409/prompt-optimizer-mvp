@@ -628,14 +628,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeOptions = document.querySelectorAll('.mode-option');
     const selectedModeIcon = document.querySelector('.selected-mode-icon');
     const selectedModeName = document.querySelector('.selected-mode-name');
-    
+
+    console.log('模式选择器元素检查:', {
+        modeDropdownBtn: modeDropdownBtn ? '存在' : '不存在',
+        modeDropdownContent: modeDropdownContent ? '存在' : '不存在',
+        modeOptions: modeOptions.length + '个选项',
+        selectedModeIcon: selectedModeIcon ? '存在' : '不存在',
+        selectedModeName: selectedModeName ? '存在' : '不存在'
+    });
+
     // 点击下拉按钮显示/隐藏下拉内容
-    if (modeDropdownBtn) {
+    if (modeDropdownBtn && modeDropdownContent) {
         modeDropdownBtn.addEventListener('click', function(e) {
+            console.log('点击了模式下拉按钮');
             e.stopPropagation();
             this.classList.toggle('active');
             modeDropdownContent.classList.toggle('show');
+            console.log('下拉框状态:', modeDropdownContent.classList.contains('show') ? '显示' : '隐藏');
         });
+    } else {
+        console.error('模式下拉按钮或内容元素不存在');
     }
     
     // 点击选项切换模式
@@ -669,14 +681,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 点击页面其他区域关闭下拉菜单
     document.addEventListener('click', function(e) {
         if (modeDropdownContent && modeDropdownContent.classList.contains('show')) {
+            console.log('点击页面其他区域，关闭下拉菜单');
             modeDropdownContent.classList.remove('show');
-            modeDropdownBtn.classList.remove('active');
+            if (modeDropdownBtn) {
+                modeDropdownBtn.classList.remove('active');
+            }
         }
     });
-    
+
     // 防止点击下拉内容时关闭
     if (modeDropdownContent) {
         modeDropdownContent.addEventListener('click', function(e) {
+            console.log('点击了下拉内容，阻止冒泡');
             e.stopPropagation();
         });
     }
