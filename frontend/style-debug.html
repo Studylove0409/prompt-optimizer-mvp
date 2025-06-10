@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样式调试页面</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="modal-styles.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        .debug-section {
+            margin-bottom: 10px;
+        }
+        .debug-title {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .debug-item {
+            margin: 2px 0;
+        }
+        .status-ok {
+            color: #4CAF50;
+        }
+        .status-error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">
+        <div class="debug-section">
+            <div class="debug-title">CSS 文件加载状态</div>
+            <div class="debug-item">style.css: <span id="styleStatus">检查中...</span></div>
+            <div class="debug-item">modal-styles.css: <span id="modalStyleStatus">检查中...</span></div>
+        </div>
+        <div class="debug-section">
+            <div class="debug-title">关键样式检查</div>
+            <div class="debug-item">模式选择器: <span id="modeStatus">检查中...</span></div>
+            <div class="debug-item">公告弹窗: <span id="announcementStatus">检查中...</span></div>
+        </div>
+    </div>
+
+    <div style="padding: 20px;">
+        <h1>样式调试页面</h1>
+        <p>这个页面用于检查CSS样式是否正确加载</p>
+        
+        <div style="margin: 20px 0;">
+            <h3>模式选择器测试</h3>
+            <div class="mode-selector">
+                <span class="mode-title">模式:</span>
+                <div class="mode-options">
+                    <button class="mode-btn active" data-mode="general">
+                        <span class="mode-icon">🎯</span>
+                        <span class="mode-name">通用</span>
+                    </button>
+                    <button class="mode-btn" data-mode="business">
+                        <span class="mode-icon">💼</span>
+                        <span class="mode-name">商业</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="showAnnouncement()" style="padding: 10px 20px; font-size: 16px;">测试公告弹窗</button>
+    </div>
+
+    <!-- 公告弹框 -->
+    <div class="announcement-modal" id="announcementModal">
+        <div class="announcement-modal-content">
+            <div class="announcement-modal-header">
+                <div class="announcement-icon">🎉</div>
+                <h2>样式测试</h2>
+                <span class="close-modal" onclick="closeAnnouncement()">&times;</span>
+            </div>
+            <div class="announcement-modal-body">
+                <div class="announcement-content-box">
+                    <div class="announcement-text">
+                        <p class="announcement-welcome">🎉 <strong>样式测试成功！</strong></p>
+                        <p class="announcement-item">✨ 如果你能看到这个弹窗的完整样式，说明CSS加载正常</p>
+                        <p class="announcement-recommendation">🧠 <strong>推荐使用 <span class="pro-badge">Pro版</span></strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="announcement-modal-footer">
+                <button class="announcement-btn" onclick="closeAnnouncement()">关闭测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAnnouncement() {
+            document.getElementById('announcementModal').style.display = 'flex';
+        }
+
+        function closeAnnouncement() {
+            document.getElementById('announcementModal').style.display = 'none';
+        }
+
+        // 检查CSS样式是否正确加载
+        function checkStyles() {
+            const styleStatus = document.getElementById('styleStatus');
+            const modalStyleStatus = document.getElementById('modalStyleStatus');
+            const modeStatus = document.getElementById('modeStatus');
+            const announcementStatus = document.getElementById('announcementStatus');
+
+            // 检查CSS文件是否加载
+            const stylesheets = Array.from(document.styleSheets);
+            let styleLoaded = false;
+            let modalStyleLoaded = false;
+
+            stylesheets.forEach(sheet => {
+                if (sheet.href && sheet.href.includes('style.css')) {
+                    styleLoaded = true;
+                }
+                if (sheet.href && sheet.href.includes('modal-styles.css')) {
+                    modalStyleLoaded = true;
+                }
+            });
+
+            styleStatus.textContent = styleLoaded ? '✓ 已加载' : '✗ 未加载';
+            styleStatus.className = styleLoaded ? 'status-ok' : 'status-error';
+
+            modalStyleStatus.textContent = modalStyleLoaded ? '✓ 已加载' : '✗ 未加载';
+            modalStyleStatus.className = modalStyleLoaded ? 'status-ok' : 'status-error';
+
+            // 检查关键样式
+            const modeSelector = document.querySelector('.mode-selector');
+            const modeStyles = modeSelector ? window.getComputedStyle(modeSelector) : null;
+            const modeOk = modeStyles && modeStyles.display === 'flex';
+
+            modeStatus.textContent = modeOk ? '✓ 正常' : '✗ 异常';
+            modeStatus.className = modeOk ? 'status-ok' : 'status-error';
+
+            const announcementModal = document.querySelector('.announcement-modal');
+            const announcementStyles = announcementModal ? window.getComputedStyle(announcementModal) : null;
+            const announcementOk = announcementStyles && announcementStyles.position === 'fixed';
+
+            announcementStatus.textContent = announcementOk ? '✓ 正常' : '✗ 异常';
+            announcementStatus.className = announcementOk ? 'status-ok' : 'status-error';
+        }
+
+        // 页面加载完成后检查样式
+        window.addEventListener('load', () => {
+            setTimeout(checkStyles, 500);
+        });
+    </script>
+</body>
+</html>

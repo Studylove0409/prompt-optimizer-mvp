@@ -575,6 +575,49 @@
                         已有账号？<a href="#" id="showLoginForm">立即登录</a>
                     </p>
                 </div>
+
+                <!-- 注册成功界面 -->
+                <div class="auth-success" id="registerSuccess" style="display: none;">
+                    <div class="success-animation">
+                        <div class="success-icon">
+                            <svg class="checkmark" viewBox="0 0 52 52">
+                                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                                <path class="checkmark-check" fill="none" d="m14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                        </div>
+                        <div class="success-content">
+                            <h3 class="success-title">注册成功！</h3>
+                            <p class="success-message">
+                                我们已向您的邮箱发送了验证链接<br>
+                                请查收邮件并点击链接完成验证
+                            </p>
+                            <div class="success-tips">
+                                <div class="tip-item">
+                                    <span class="tip-icon">📧</span>
+                                    <span class="tip-text">检查邮箱（包括垃圾邮件文件夹）</span>
+                                </div>
+                                <div class="tip-item">
+                                    <span class="tip-icon">🔗</span>
+                                    <span class="tip-text">点击邮件中的验证链接</span>
+                                </div>
+                                <div class="tip-item">
+                                    <span class="tip-icon">✨</span>
+                                    <span class="tip-text">验证完成后即可正常使用</span>
+                                </div>
+                            </div>
+                            <div class="success-actions">
+                                <button class="success-btn primary" id="goToLogin">
+                                    <span class="btn-icon">🚀</span>
+                                    <span class="btn-text">去登录</span>
+                                </button>
+                                <button class="success-btn secondary" id="closeSuccessModal">
+                                    <span class="btn-icon">👋</span>
+                                    <span class="btn-text">稍后再说</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
