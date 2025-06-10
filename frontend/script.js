@@ -615,10 +615,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化帮助弹框
     initHelpModal();
 
-    // 初始化认证功能
-    setTimeout(() => {
+    // 监听Supabase准备就绪事件
+    window.addEventListener('supabaseReady', function(event) {
+        console.log('收到Supabase准备就绪事件，开始初始化认证功能');
         initAuth();
-    }, 1000); // 延迟初始化，确保Supabase客户端已加载
+    });
+
+    // 如果Supabase已经准备好，立即初始化
+    if (window.supabaseClient) {
+        console.log('Supabase客户端已存在，立即初始化认证功能');
+        initAuth();
+    } else {
+        // 备用方案：延迟初始化
+        setTimeout(() => {
+            if (window.supabaseClient) {
+                console.log('延迟检查发现Supabase客户端已准备好');
+                initAuth();
+            } else {
+                console.warn('Supabase客户端仍未准备好，请检查网络连接');
+            }
+        }, 2000);
+    }
 });
 
 // 初始化帮助弹框功能
@@ -727,17 +744,8 @@ function initAuth() {
     closeAuthModalBtn = document.getElementById('closeAuthModal');
 
     // 检查Supabase是否可用
-    if (typeof window.supabaseClient === 'undefined') {
-        console.error('Supabase客户端未初始化');
-        // 尝试重新初始化
-        setTimeout(() => {
-            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-                const SUPABASE_URL = 'https://njzvtxlieysctiapnpsx.supabase.co';
-                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qenZ0eGxpZXlzY3RpYXBucHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1Mzc0OTEsImV4cCI6MjA2NTExMzQ5MX0.uECZbzE72n1rxoQRhPXe4GfdLfXgaJ853T6dh_ezL7M';
-                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('Supabase客户端重新初始化成功');
-            }
-        }, 500);
+    if (!window.supabaseClient) {
+        console.error('Supabase客户端未初始化，认证功能将不可用');
         return;
     }
 
@@ -861,7 +869,8 @@ function showRegisterFormFunction() {
 // 检查Supabase客户端是否可用
 function checkSupabaseClient() {
     if (!window.supabaseClient) {
-        showCustomAlert('认证服务未初始化，请刷新页面重试', 'error');
+        console.error('Supabase客户端未初始化');
+        showCustomAlert('认证服务暂时不可用，请刷新页面重试', 'error');
         return false;
     }
     return true;

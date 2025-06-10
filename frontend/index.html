@@ -1463,7 +1463,66 @@
             });
         });
     </script>
-    <script src="supabaseClient.js"></script>
+
+    <!-- Supabase 客户端初始化 -->
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://njzvtxlieysctiapnpsx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qenZ0eGxpZXlzY3RpYXBucHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1Mzc0OTEsImV4cCI6MjA2NTExMzQ5MX0.uECZbzE72n1rxoQRhPXe4GfdLfXgaJ853T6dh_ezL7M';
+
+        // 初始化Supabase客户端的函数
+        function initializeSupabase() {
+            try {
+                console.log('开始初始化Supabase客户端...');
+                console.log('window.supabase 类型:', typeof window.supabase);
+
+                // 检查Supabase库是否已加载
+                if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                    // 初始化Supabase客户端
+                    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                    // 将客户端实例挂载到全局对象
+                    window.supabaseClient = supabaseClient;
+
+                    console.log('✅ Supabase客户端初始化成功', supabaseClient);
+
+                    // 触发自定义事件通知其他脚本
+                    window.dispatchEvent(new CustomEvent('supabaseReady', { detail: supabaseClient }));
+
+                    return supabaseClient;
+                } else {
+                    console.error('❌ Supabase库未正确加载，window.supabase:', typeof window.supabase);
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ 初始化Supabase客户端失败:', error);
+                return null;
+            }
+        }
+
+        // 等待Supabase库加载完成
+        function waitForSupabase() {
+            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                initializeSupabase();
+            } else {
+                console.log('等待Supabase库加载...');
+                setTimeout(waitForSupabase, 100);
+            }
+        }
+
+        // 页面加载完成后开始等待Supabase库
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，开始等待Supabase库...');
+            waitForSupabase();
+        });
+
+        // 如果页面已经加载完成，立即开始等待
+        if (document.readyState !== 'loading') {
+            console.log('页面已加载完成，立即开始等待Supabase库...');
+            waitForSupabase();
+        }
+    </script>
+
     <script src="script.js"></script>
     <script src="particles.js"></script>
 
