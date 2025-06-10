@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化认证功能
     setTimeout(() => {
         initAuth();
-    }, 500); // 延迟初始化，确保Supabase客户端已加载
+    }, 1000); // 延迟初始化，确保Supabase客户端已加载
 });
 
 // 初始化帮助弹框功能
@@ -709,6 +709,8 @@ let currentUser = null;
 // 初始化认证功能
 function initAuth() {
     console.log('初始化认证功能');
+    console.log('window.supabase:', typeof window.supabase);
+    console.log('window.supabaseClient:', typeof window.supabaseClient);
 
     // 获取DOM元素
     authModal = document.getElementById('authModal');
@@ -725,8 +727,17 @@ function initAuth() {
     closeAuthModalBtn = document.getElementById('closeAuthModal');
 
     // 检查Supabase是否可用
-    if (typeof window.supabase === 'undefined') {
+    if (typeof window.supabaseClient === 'undefined') {
         console.error('Supabase客户端未初始化');
+        // 尝试重新初始化
+        setTimeout(() => {
+            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                const SUPABASE_URL = 'https://njzvtxlieysctiapnpsx.supabase.co';
+                const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qenZ0eGxpZXlzY3RpYXBucHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1Mzc0OTEsImV4cCI6MjA2NTExMzQ5MX0.uECZbzE72n1rxoQRhPXe4GfdLfXgaJ853T6dh_ezL7M';
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase客户端重新初始化成功');
+            }
+        }, 500);
         return;
     }
 
@@ -734,10 +745,12 @@ function initAuth() {
     bindAuthEvents();
 
     // 监听认证状态变化
-    window.supabase.auth.onAuthStateChange((event, session) => {
-        console.log('认证状态变化:', event, session);
-        handleAuthStateChange(event, session);
-    });
+    if (window.supabaseClient) {
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('认证状态变化:', event, session);
+            handleAuthStateChange(event, session);
+        });
+    }
 
     // 检查当前用户状态
     checkCurrentUser();
@@ -845,9 +858,20 @@ function showRegisterFormFunction() {
     if (modalTitle) modalTitle.textContent = '注册';
 }
 
+// 检查Supabase客户端是否可用
+function checkSupabaseClient() {
+    if (!window.supabaseClient) {
+        showCustomAlert('认证服务未初始化，请刷新页面重试', 'error');
+        return false;
+    }
+    return true;
+}
+
 // 处理登录
 async function handleLogin(e) {
     e.preventDefault();
+
+    if (!checkSupabaseClient()) return;
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -864,7 +888,7 @@ async function handleLogin(e) {
     submitBtn.textContent = '登录中...';
 
     try {
-        const { data, error } = await window.supabase.auth.signInWithPassword({
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -898,6 +922,8 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
 
+    if (!checkSupabaseClient()) return;
+
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -924,7 +950,7 @@ async function handleRegister(e) {
     submitBtn.textContent = '注册中...';
 
     try {
-        const { data, error } = await window.supabase.auth.signUp({
+        const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password
         });
@@ -956,8 +982,10 @@ async function handleRegister(e) {
 
 // 处理登出
 async function handleLogout() {
+    if (!checkSupabaseClient()) return;
+
     try {
-        const { error } = await window.supabase.auth.signOut();
+        const { error } = await window.supabaseClient.auth.signOut();
 
         if (error) {
             throw error;
@@ -1008,8 +1036,13 @@ function updateUIForLoggedOutUser() {
 
 // 检查当前用户状态
 async function checkCurrentUser() {
+    if (!window.supabaseClient) {
+        console.log('Supabase客户端未初始化，跳过用户状态检查');
+        return;
+    }
+
     try {
-        const { data: { session }, error } = await window.supabase.auth.getSession();
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
 
         if (error) {
             console.error('获取用户会话失败:', error);

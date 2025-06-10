@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase 测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Supabase 连接测试</h1>
+        
+        <div id="status"></div>
+        
+        <h2>测试步骤</h2>
+        <button onclick="testSupabaseLibrary()">1. 测试 Supabase 库加载</button>
+        <button onclick="testClientInitialization()">2. 测试客户端初始化</button>
+        <button onclick="testConnection()">3. 测试连接</button>
+        
+        <h2>测试结果</h2>
+        <div id="results"></div>
+        
+        <h2>调试信息</h2>
+        <pre id="debug"></pre>
+    </div>
+
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://njzvtxlieysctiapnpsx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qenZ0eGxpZXlzY3RpYXBucHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1Mzc0OTEsImV4cCI6MjA2NTExMzQ5MX0.uECZbzE72n1rxoQRhPXe4GfdLfXgaJ853T6dh_ezL7M';
+        
+        let supabaseClient = null;
+        
+        function addStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            statusDiv.appendChild(div);
+        }
+        
+        function addResult(title, result, success = true) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${success ? 'success' : 'error'}`;
+            div.innerHTML = `<strong>${title}:</strong> ${result}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        function addDebug(info) {
+            const debugDiv = document.getElementById('debug');
+            debugDiv.textContent += info + '\n';
+        }
+        
+        function testSupabaseLibrary() {
+            addDebug('=== 测试 Supabase 库加载 ===');
+            addDebug(`window.supabase 类型: ${typeof window.supabase}`);
+            
+            if (typeof window.supabase !== 'undefined') {
+                addDebug(`window.supabase.createClient 类型: ${typeof window.supabase.createClient}`);
+                addResult('Supabase 库加载', '✅ 成功', true);
+                addStatus('Supabase 库已正确加载', 'success');
+                return true;
+            } else {
+                addResult('Supabase 库加载', '❌ 失败', false);
+                addStatus('Supabase 库未加载', 'error');
+                return false;
+            }
+        }
+        
+        function testClientInitialization() {
+            addDebug('=== 测试客户端初始化 ===');
+            
+            if (!testSupabaseLibrary()) {
+                return false;
+            }
+            
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                addDebug(`客户端对象: ${typeof supabaseClient}`);
+                addDebug(`客户端.auth: ${typeof supabaseClient.auth}`);
+                addDebug(`客户端.auth.signUp: ${typeof supabaseClient.auth.signUp}`);
+                
+                addResult('客户端初始化', '✅ 成功', true);
+                addStatus('Supabase 客户端初始化成功', 'success');
+                return true;
+            } catch (error) {
+                addDebug(`初始化错误: ${error.message}`);
+                addResult('客户端初始化', `❌ 失败: ${error.message}`, false);
+                addStatus('客户端初始化失败', 'error');
+                return false;
+            }
+        }
+        
+        async function testConnection() {
+            addDebug('=== 测试连接 ===');
+            
+            if (!supabaseClient) {
+                if (!testClientInitialization()) {
+                    return false;
+                }
+            }
+            
+            try {
+                // 测试获取会话
+                const { data, error } = await supabaseClient.auth.getSession();
+                
+                if (error) {
+                    addDebug(`连接错误: ${error.message}`);
+                    addResult('连接测试', `❌ 失败: ${error.message}`, false);
+                    addStatus('连接测试失败', 'error');
+                    return false;
+                } else {
+                    addDebug(`会话数据: ${JSON.stringify(data, null, 2)}`);
+                    addResult('连接测试', '✅ 成功', true);
+                    addStatus('Supabase 连接正常', 'success');
+                    return true;
+                }
+            } catch (error) {
+                addDebug(`连接异常: ${error.message}`);
+                addResult('连接测试', `❌ 异常: ${error.message}`, false);
+                addStatus('连接测试异常', 'error');
+                return false;
+            }
+        }
+        
+        // 页面加载完成后自动运行基础测试
+        window.addEventListener('load', function() {
+            addStatus('开始 Supabase 测试...', 'info');
+            setTimeout(() => {
+                testSupabaseLibrary();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
