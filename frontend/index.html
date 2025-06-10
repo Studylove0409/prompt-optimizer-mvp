@@ -551,8 +551,21 @@
             }
             
             .mode-select-container {
-                display: block; /* 在手机端显示下拉框 */
-                width: 100%;
+                display: inline-block; /* 改为内联块元素 */
+                width: auto; /* 宽度根据内容自动调整 */
+                max-width: 120px; /* 减小最大宽度 */
+                margin: 0 auto; /* 居中显示 */
+            }
+            
+            .mode-select {
+                padding: 5px 20px 5px 8px; /* 进一步减小内边距 */
+                font-size: 12px; /* 减小字体大小 */
+                border-radius: 12px; /* 减小圆角 */
+            }
+            
+            .mode-select-icon {
+                right: 6px; /* 调整图标位置 */
+                font-size: 10px; /* 减小图标大小 */
             }
             
             .textarea-footer {
