@@ -65,11 +65,20 @@ class PromptService:
             # 调用LLM API
             optimized_prompt = await self.llm_service.call_llm_api(request.model, messages)
 
-            # 保存历史记录（仅限已登录用户，因为数据库约束要求user_id必须存在于auth.users表中）
+            # 保存历史记录（支持已登录用户和匿名用户）
             if user and user.id:
-                # 已登录用户，保存历史记录
+                # 已登录用户，使用用户ID保存历史记录
                 await self.supabase_service.save_optimization_history(
                     user_id=str(user.id),
+                    original_prompt=request.original_prompt,
+                    optimized_prompt=optimized_prompt,
+                    mode=request.mode
+                )
+            else:
+                # 匿名用户，使用IP地址生成会话ID保存历史记录
+                session_id = f"anonymous_{client_ip}_{hash(client_ip) % 10000}"
+                await self.supabase_service.save_optimization_history(
+                    session_id=session_id,
                     original_prompt=request.original_prompt,
                     optimized_prompt=optimized_prompt,
                     mode=request.mode

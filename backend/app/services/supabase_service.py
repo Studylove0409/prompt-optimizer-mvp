@@ -35,20 +35,41 @@ class SupabaseService:
     
     async def save_optimization_history(
         self,
-        user_id: str,
-        original_prompt: str,
-        optimized_prompt: str,
-        mode: str
+        user_id: str = None,
+        session_id: str = None,
+        original_prompt: str = "",
+        optimized_prompt: str = "",
+        mode: str = "general"
     ) -> bool:
-        """保存优化历史记录（仅限已认证用户）"""
+        """保存优化历史记录（支持已认证用户和匿名用户）"""
         try:
-            # 插入历史记录到optimization_history表
-            result = self.client.table("optimization_history").insert({
-                "user_id": user_id,
+            # 构建插入数据
+            insert_data = {
                 "original_prompt": original_prompt,
                 "optimized_prompt": optimized_prompt,
                 "mode": mode
-            }).execute()
+            }
+
+            if user_id:
+                # 已登录用户
+                insert_data.update({
+                    "user_id": user_id,
+                    "user_type": "authenticated",
+                    "session_id": None
+                })
+            elif session_id:
+                # 匿名用户
+                insert_data.update({
+                    "user_id": None,
+                    "user_type": "anonymous",
+                    "session_id": session_id
+                })
+            else:
+                print("保存历史记录失败: 必须提供 user_id 或 session_id")
+                return False
+
+            # 插入历史记录到optimization_history表
+            result = self.client.table("optimization_history").insert(insert_data).execute()
 
             return True
 
@@ -59,17 +80,26 @@ class SupabaseService:
     
     async def get_user_optimization_history(
         self,
-        user_id: str,
+        user_id: str = None,
+        session_id: str = None,
         limit: int = 50
     ) -> list:
-        """获取用户的优化历史记录"""
+        """获取用户的优化历史记录（支持已登录用户和匿名用户）"""
         try:
-            result = self.client.table("optimization_history")\
-                .select("id, original_prompt, optimized_prompt, mode, created_at")\
-                .eq("user_id", user_id)\
-                .order("created_at", desc=True)\
-                .limit(limit)\
-                .execute()
+            query = self.client.table("optimization_history")\
+                .select("id, original_prompt, optimized_prompt, mode, created_at, user_type")
+
+            if user_id:
+                # 已登录用户的历史记录
+                query = query.eq("user_id", user_id).eq("user_type", "authenticated")
+            elif session_id:
+                # 匿名用户的历史记录
+                query = query.eq("session_id", session_id).eq("user_type", "anonymous")
+            else:
+                print("获取历史记录失败: 必须提供 user_id 或 session_id")
+                return []
+
+            result = query.order("created_at", desc=True).limit(limit).execute()
 
             return result.data
 
