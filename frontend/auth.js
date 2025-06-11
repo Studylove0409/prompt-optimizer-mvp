@@ -73,9 +73,36 @@ window.addEventListener('supabaseReady', (event) => {
     setupAuthStateListener();
 });
 
+// 处理邮箱验证回调
+function handleEmailVerificationCallback() {
+    const hash = window.location.hash;
+    console.log('检查邮箱验证回调，当前hash:', hash);
+
+    if (hash && (hash.includes('access_token') || hash.includes('token_type'))) {
+        console.log('检测到邮箱验证回调参数');
+
+        // 确保Supabase客户端可用
+        if (window.supabaseClient) {
+            console.log('Supabase客户端可用，处理认证回调');
+            // Supabase会自动处理URL中的认证参数
+            // 我们只需要等待onAuthStateChange事件
+        } else {
+            console.log('Supabase客户端未准备就绪，等待初始化...');
+            // 监听supabaseReady事件
+            window.addEventListener('supabaseReady', () => {
+                console.log('Supabase客户端准备就绪，重新检查认证状态');
+                // Supabase客户端初始化后会自动处理URL参数
+            }, { once: true });
+        }
+    }
+}
+
 // 页面加载完成后检查并设置监听器
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM加载完成，检查Supabase客户端...');
+
+    // 首先处理可能的邮箱验证回调
+    handleEmailVerificationCallback();
 
     // 延迟检查，确保Supabase客户端有时间初始化
     setTimeout(() => {
@@ -667,7 +694,10 @@ async function proceedWithRegistration(e, email, password) {
     try {
         const { error } = await window.supabaseClient.auth.signUp({
             email: email,
-            password: password
+            password: password,
+            options: {
+                emailRedirectTo: window.location.origin
+            }
         });
 
         if (error) {
