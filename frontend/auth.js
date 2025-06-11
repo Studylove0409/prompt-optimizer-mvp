@@ -24,36 +24,74 @@ let currentUser = null;
 // 核心：Supabase 认证状态监听器
 // ===================================================================
 function setupAuthStateListener() {
+    console.log('设置认证状态监听器，Supabase客户端状态:', !!window.supabaseClient);
+
     if (window.supabaseClient) {
+        console.log('开始监听认证状态变化...');
+
         window.supabaseClient.auth.onAuthStateChange((event, session) => {
             // 加上这行日志，方便你在浏览器控制台里看到每次状态变化的具体事件
             console.log(`认证事件: ${event}`, session);
+            console.log('当前URL:', window.location.href);
+            console.log('URL Hash:', window.location.hash);
 
             const user = session?.user;
 
             // 当事件是 SIGNED_IN 时，我们可以认为是一次登录或激活成功
             if (event === "SIGNED_IN") {
-                // 为了避免每次刷新都提示，可以加一个简单的判断
-                // 比如，检查URL里是否包含 #access_token，这是从邮件链接跳转回来的典型特征
-                if (window.location.hash.includes('access_token')) {
+                console.log('检测到SIGNED_IN事件');
+
+                // 检查URL里是否包含认证相关参数
+                const hasAccessToken = window.location.hash.includes('access_token');
+                const hasTokenType = window.location.hash.includes('token_type');
+                const isFromEmailLink = hasAccessToken || hasTokenType;
+
+                console.log('是否来自邮件链接:', isFromEmailLink, {hasAccessToken, hasTokenType});
+
+                if (isFromEmailLink) {
+                    console.log('显示激活成功提示');
                     showToast('账户激活成功！', '欢迎您！', 'success', 4000);
 
-                    // (可选) 清理URL，让它看起来更干净
-                    window.history.replaceState(null, null, ' ');
+                    // 清理URL，让它看起来更干净
+                    setTimeout(() => {
+                        window.history.replaceState(null, null, window.location.pathname);
+                    }, 1000);
                 }
             }
 
             // 不管发生什么事件，都调用一个统一的函数来更新UI
             updateUI(user);
         });
+    } else {
+        console.warn('Supabase客户端未准备就绪，无法设置认证监听器');
     }
 }
 
 // 监听Supabase客户端准备就绪事件
-window.addEventListener('supabaseReady', setupAuthStateListener);
+window.addEventListener('supabaseReady', (event) => {
+    console.log('收到supabaseReady事件:', event.detail);
+    setupAuthStateListener();
+});
+
+// 页面加载完成后检查并设置监听器
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM加载完成，检查Supabase客户端...');
+
+    // 延迟检查，确保Supabase客户端有时间初始化
+    setTimeout(() => {
+        if (window.supabaseClient) {
+            console.log('Supabase客户端已准备就绪，设置监听器');
+            setupAuthStateListener();
+        } else {
+            console.log('等待Supabase客户端初始化...');
+            // 继续等待supabaseReady事件
+        }
+    }, 500);
+});
 
 // 如果Supabase客户端已经可用，立即设置监听器
 if (window.supabaseClient) {
+    console.log('Supabase客户端已存在，立即设置监听器');
     setupAuthStateListener();
 }
 
@@ -61,33 +99,59 @@ if (window.supabaseClient) {
 // 统一更新UI的函数
 // ===================================================================
 function updateUI(user) {
+    console.log('更新UI，用户状态:', user ? `已登录 (${user.email})` : '未登录');
+
     // 获取你需要根据登录状态切换显示的HTML元素
-    // 建议你把所有"未登录"时显示的元素（如登录按钮）都包在一个div里
     const loggedOutElements = document.getElementById('loggedOutStateContainer');
-    // 把所有"已登录"时显示的元素（如历史记录按钮、退出按钮）都包在另一个div里
     const loggedInElements = document.getElementById('loggedInStateContainer');
-    const userEmailDisplay = document.getElementById('userEmailDisplay'); // 假设你有一个元素用来显示用户邮箱
+    const userEmailDisplay = document.getElementById('userEmailDisplay');
+
+    console.log('UI元素状态:', {
+        loggedOutElements: !!loggedOutElements,
+        loggedInElements: !!loggedInElements,
+        userEmailDisplay: !!userEmailDisplay
+    });
 
     if (user) {
         // --- 用户已登录 ---
-        if (loggedOutElements) loggedOutElements.style.display = 'none';
-        if (loggedInElements) loggedInElements.style.display = 'flex'; // 或者 'block'
+        console.log('设置已登录状态UI');
+
+        if (loggedOutElements) {
+            loggedOutElements.style.display = 'none';
+            console.log('隐藏登录按钮');
+        }
+
+        if (loggedInElements) {
+            loggedInElements.style.display = 'flex';
+            console.log('显示用户菜单');
+        }
 
         // 更新显示的邮箱
         if (userEmailDisplay) {
             userEmailDisplay.textContent = user.email;
+            console.log('更新用户邮箱显示:', user.email);
         }
 
         // 更新全局用户状态
         currentUser = user;
     } else {
         // --- 用户未登录 ---
-        if (loggedInElements) loggedInElements.style.display = 'none';
-        if (loggedOutElements) loggedOutElements.style.display = 'block';
+        console.log('设置未登录状态UI');
+
+        if (loggedInElements) {
+            loggedInElements.style.display = 'none';
+            console.log('隐藏用户菜单');
+        }
+
+        if (loggedOutElements) {
+            loggedOutElements.style.display = 'block';
+            console.log('显示登录按钮');
+        }
 
         // 清空用户信息
         if (userEmailDisplay) {
             userEmailDisplay.textContent = '';
+            console.log('清空用户邮箱显示');
         }
 
         // 更新全局用户状态
