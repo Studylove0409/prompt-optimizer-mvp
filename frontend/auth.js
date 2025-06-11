@@ -469,6 +469,7 @@ async function handleRegister(e) {
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
+    const agreeTerms = document.getElementById('agreeTerms');
 
     if (!email || !password || !confirmPassword) {
         showCustomAlert('请填写完整的注册信息', 'warning');
@@ -485,10 +486,38 @@ async function handleRegister(e) {
         return;
     }
 
+    // 检查用户协议复选框
+    if (!agreeTerms || !agreeTerms.checked) {
+        showCustomConfirm(
+            '请同意协议后点击注册',
+            () => {
+                // 确认按钮：自动勾选协议复选框并继续注册
+                if (agreeTerms) {
+                    agreeTerms.checked = true;
+                }
+                // 继续执行注册流程
+                proceedWithRegistration(e, email, password);
+            },
+            () => {
+                // 取消按钮：什么都不做，关闭对话框
+            },
+            '📋'
+        );
+        return;
+    }
+
+    // 继续执行注册流程
+    proceedWithRegistration(e, email, password);
+}
+
+// 执行实际的注册流程
+async function proceedWithRegistration(e, email, password) {
     // 禁用提交按钮并显示加载状态
     const submitBtn = e.target.querySelector('.auth-submit-btn');
-    submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+    }
 
     try {
         const { error } = await window.supabaseClient.auth.signUp({
@@ -519,8 +548,10 @@ async function handleRegister(e) {
         showCustomAlert(errorMessage, 'error');
     } finally {
         // 恢复按钮状态
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+        }
     }
 }
 
