@@ -20,6 +20,81 @@ let authTabIndicator;
 // 当前用户状态
 let currentUser = null;
 
+// ===================================================================
+// 核心：Supabase 认证状态监听器
+// ===================================================================
+function setupAuthStateListener() {
+    if (window.supabaseClient) {
+        window.supabaseClient.auth.onAuthStateChange((event, session) => {
+            // 加上这行日志，方便你在浏览器控制台里看到每次状态变化的具体事件
+            console.log(`认证事件: ${event}`, session);
+
+            const user = session?.user;
+
+            // 当事件是 SIGNED_IN 时，我们可以认为是一次登录或激活成功
+            if (event === "SIGNED_IN") {
+                // 为了避免每次刷新都提示，可以加一个简单的判断
+                // 比如，检查URL里是否包含 #access_token，这是从邮件链接跳转回来的典型特征
+                if (window.location.hash.includes('access_token')) {
+                    showToast('账户激活成功！', '欢迎您！', 'success', 4000);
+
+                    // (可选) 清理URL，让它看起来更干净
+                    window.history.replaceState(null, null, ' ');
+                }
+            }
+
+            // 不管发生什么事件，都调用一个统一的函数来更新UI
+            updateUI(user);
+        });
+    }
+}
+
+// 监听Supabase客户端准备就绪事件
+window.addEventListener('supabaseReady', setupAuthStateListener);
+
+// 如果Supabase客户端已经可用，立即设置监听器
+if (window.supabaseClient) {
+    setupAuthStateListener();
+}
+
+// ===================================================================
+// 统一更新UI的函数
+// ===================================================================
+function updateUI(user) {
+    // 获取你需要根据登录状态切换显示的HTML元素
+    // 建议你把所有"未登录"时显示的元素（如登录按钮）都包在一个div里
+    const loggedOutElements = document.getElementById('loggedOutStateContainer');
+    // 把所有"已登录"时显示的元素（如历史记录按钮、退出按钮）都包在另一个div里
+    const loggedInElements = document.getElementById('loggedInStateContainer');
+    const userEmailDisplay = document.getElementById('userEmailDisplay'); // 假设你有一个元素用来显示用户邮箱
+
+    if (user) {
+        // --- 用户已登录 ---
+        if (loggedOutElements) loggedOutElements.style.display = 'none';
+        if (loggedInElements) loggedInElements.style.display = 'flex'; // 或者 'block'
+
+        // 更新显示的邮箱
+        if (userEmailDisplay) {
+            userEmailDisplay.textContent = user.email;
+        }
+
+        // 更新全局用户状态
+        currentUser = user;
+    } else {
+        // --- 用户未登录 ---
+        if (loggedInElements) loggedInElements.style.display = 'none';
+        if (loggedOutElements) loggedOutElements.style.display = 'block';
+
+        // 清空用户信息
+        if (userEmailDisplay) {
+            userEmailDisplay.textContent = '';
+        }
+
+        // 更新全局用户状态
+        currentUser = null;
+    }
+}
+
 // 初始化认证功能
 function initAuth() {
     // 获取DOM元素
@@ -36,12 +111,7 @@ function initAuth() {
     // 初始化UI功能
     initAuthUI();
 
-    // 监听认证状态变化
-    if (window.supabaseClient) {
-        window.supabaseClient.auth.onAuthStateChange((event, session) => {
-            handleAuthStateChange(event, session);
-        });
-    }
+    // 认证状态监听器已在文件顶部设置
 
     // 检查当前用户状态
     checkCurrentUser();
@@ -439,6 +509,7 @@ async function handleLogin(e) {
             throw error;
         }
 
+        // 成功后什么都不用做，onAuthStateChange会自动监听到变化并更新UI！
         showCustomAlert('登录成功！', 'success');
         closeAuthModal();
 
@@ -576,6 +647,7 @@ async function handleLogout() {
             throw error;
         }
 
+        // 成功后什么都不用做，onAuthStateChange会自动监听到变化并更新UI！
         showCustomAlert('已成功退出登录', 'success');
 
     } catch (error) {
@@ -584,34 +656,7 @@ async function handleLogout() {
     }
 }
 
-// 处理认证状态变化
-function handleAuthStateChange(_event, session) {
-    if (session && session.user) {
-        // 用户已登录
-        currentUser = session.user;
-        updateUIForLoggedInUser(session.user);
-    } else {
-        // 用户未登录
-        currentUser = null;
-        updateUIForLoggedOutUser();
-    }
-}
-
-// 更新已登录用户的UI
-function updateUIForLoggedInUser(user) {
-    // 隐藏登录按钮，显示用户菜单
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (userMenu) userMenu.style.display = 'block';
-    if (userEmail) userEmail.textContent = user.email;
-}
-
-// 更新未登录用户的UI
-function updateUIForLoggedOutUser() {
-    // 显示登录按钮，隐藏用户菜单
-    if (loginBtn) loginBtn.style.display = 'block';
-    if (userMenu) userMenu.style.display = 'none';
-    if (userEmail) userEmail.textContent = '';
-}
+// 旧的认证状态处理函数已被统一的updateUI函数替代
 
 // 检查当前用户状态
 async function checkCurrentUser() {
@@ -626,13 +671,8 @@ async function checkCurrentUser() {
             return;
         }
 
-        if (session && session.user) {
-            currentUser = session.user;
-            updateUIForLoggedInUser(session.user);
-        } else {
-            currentUser = null;
-            updateUIForLoggedOutUser();
-        }
+        // 使用统一的updateUI函数
+        updateUI(session?.user);
 
     } catch (error) {
         // 静默处理错误
