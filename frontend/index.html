@@ -43,18 +43,12 @@
                     <a href="#" class="nav-link" id="announcementLink">公告</a>
                     <!-- 用户认证按钮 -->
                     <div class="auth-section" id="authSection">
-                        <!-- 未登录状态显示的元素 -->
-                        <div id="loggedOutStateContainer">
-                            <button class="auth-btn login-btn" id="loginBtn">登录/注册</button>
-                        </div>
-                        <!-- 已登录状态显示的元素 -->
-                        <div id="loggedInStateContainer" style="display: none;">
-                            <div class="user-menu" id="userMenu">
-                                <div class="user-info">
-                                    <span class="user-email" id="userEmailDisplay"></span>
-                                </div>
-                                <button class="auth-btn logout-btn" id="logoutBtn">退出登录</button>
+                        <button class="auth-btn login-btn" id="loginBtn">登录/注册</button>
+                        <div class="user-menu" id="userMenu" style="display: none;">
+                            <div class="user-info">
+                                <span class="user-email" id="userEmail"></span>
                             </div>
+                            <button class="auth-btn logout-btn" id="logoutBtn">退出登录</button>
                         </div>
                     </div>
                 </div>
