@@ -10,12 +10,34 @@ const API_CONFIG = {
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 30000 // 30秒超时
+    timeout: 120000 // 120秒超时（2分钟）
 };
+
+// 获取当前用户的认证令牌
+async function getAuthToken() {
+    if (!window.supabaseClient) {
+        return null;
+    }
+
+    try {
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error || !session) {
+            return null;
+        }
+        return session.access_token;
+    } catch (error) {
+        console.error('获取认证令牌失败:', error);
+        return null;
+    }
+}
 
 // 通用API调用函数
 async function apiCall(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+
+    // 获取认证令牌
+    const token = await getAuthToken();
+
     const config = {
         ...API_CONFIG,
         ...options,
@@ -25,9 +47,17 @@ async function apiCall(endpoint, options = {}) {
         }
     };
 
+    // 如果有认证令牌，添加到请求头
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('已添加认证令牌到请求头');
+    } else {
+        console.log('未检测到认证令牌，使用匿名请求');
+    }
+
     try {
         const response = await fetch(url, config);
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
