@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "backend/app/main.py": {
+      "maxDuration": 60
+    }
+  }
+}
