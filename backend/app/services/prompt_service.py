@@ -3,11 +3,16 @@
 处理提示词优化的业务逻辑
 """
 from fastapi import HTTPException
+from typing import Optional
+import hashlib
+import uuid
 
 from ..config import Settings
 from ..constants import SUPPORTED_MODELS, get_meta_prompt_template, get_prompt_template_by_mode
 from ..models import PromptRequest, PromptResponse
+from ..auth import User
 from .llm_service import LLMService
+from .supabase_service import SupabaseService
 
 
 class PromptService:
@@ -16,6 +21,7 @@ class PromptService:
     def __init__(self, settings: Settings):
         self.settings = settings
         self.llm_service = LLMService(settings)
+        self.supabase_service = SupabaseService(settings)
     
     def validate_model(self, model: str) -> None:
         """验证模型选择"""
@@ -40,7 +46,7 @@ class PromptService:
         template = get_prompt_template_by_mode(mode)
         return template.format(user_input_prompt=original_prompt)
     
-    async def optimize_prompt(self, request: PromptRequest) -> PromptResponse:
+    async def optimize_prompt(self, request: PromptRequest, user: Optional[User] = None, client_ip: str = "unknown") -> PromptResponse:
         """优化提示词"""
         try:
             # 验证模型
@@ -58,7 +64,17 @@ class PromptService:
             
             # 调用LLM API
             optimized_prompt = await self.llm_service.call_llm_api(request.model, messages)
-            
+
+            # 保存历史记录（仅限已登录用户，因为数据库约束要求user_id必须存在于auth.users表中）
+            if user and user.id:
+                # 已登录用户，保存历史记录
+                await self.supabase_service.save_optimization_history(
+                    user_id=str(user.id),
+                    original_prompt=request.original_prompt,
+                    optimized_prompt=optimized_prompt,
+                    mode=request.mode
+                )
+
             # 返回优化结果
             return PromptResponse(
                 optimized_prompt=optimized_prompt,

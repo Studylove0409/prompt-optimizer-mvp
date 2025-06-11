@@ -6,7 +6,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from .config import get_settings
 from .limiter import limiter  # 导入limiter实例
-from .routers import health, models, optimize
+from .routers import health, models, optimize, history, user
 
 # 获取配置
 settings = get_settings()
@@ -41,6 +41,8 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(models.router)
 app.include_router(optimize.router)
+app.include_router(history.router)
+app.include_router(user.router)
 
 
 @app.get("/")

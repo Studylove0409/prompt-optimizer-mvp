@@ -15,6 +15,11 @@ class Settings:
         self.my_llm_api_key = os.getenv("MY_LLM_API_KEY", "")
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
 
+        # Supabase配置
+        self.supabase_url = os.getenv("SUPABASE_URL", "")
+        self.supabase_key = os.getenv("SUPABASE_ANON_KEY", "")
+        self.supabase_jwt_secret = os.getenv("SUPABASE_JWT_SECRET", "")
+
         # API配置
         self.deepseek_base_url = "https://api.deepseek.com/v1"
         self.gemini_base_url = "https://www.chataiapi.com/v1"
