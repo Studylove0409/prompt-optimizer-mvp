@@ -1,0 +1,337 @@
+/* ===== 注册成功样式 ===== */
+
+/* 注册成功容器 */
+.register-success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    min-height: 300px;
+    animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 成功图标容器 */
+.success-icon {
+    margin-bottom: 24px;
+    position: relative;
+}
+
+/* 对勾圆圈动画 */
+.checkmark-circle {
+    position: relative;
+    display: inline-block;
+    animation: scaleIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s both;
+}
+
+.checkmark-circle svg {
+    display: block;
+    width: 60px;
+    height: 60px;
+}
+
+.checkmark-circle .checkmark {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawCheckmark 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+/* 成功内容 */
+.success-content {
+    max-width: 280px;
+}
+
+.success-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0 0 12px 0;
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s both;
+}
+
+.success-message {
+    font-size: 1rem;
+    color: #86868b;
+    line-height: 1.5;
+    margin: 0 0 32px 0;
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.6s both;
+}
+
+/* 成功操作按钮 */
+.success-actions {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both;
+}
+
+.success-btn {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 22px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+    min-width: 120px;
+}
+
+.success-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+}
+
+.success-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+}
+
+/* ===== 吐司提示样式 ===== */
+
+/* 吐司容器 */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+/* 吐司提示 */
+.toast {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: 400px;
+    pointer-events: auto;
+    transform: translateX(100%);
+    opacity: 0;
+    animation: slideInToast 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.toast.toast-out {
+    animation: slideOutToast 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* 吐司图标 */
+.toast-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-success .toast-icon {
+    background: #34C759;
+    color: white;
+}
+
+.toast-error .toast-icon {
+    background: #FF3B30;
+    color: white;
+}
+
+.toast-warning .toast-icon {
+    background: #FF9500;
+    color: white;
+}
+
+.toast-info .toast-icon {
+    background: #007AFF;
+    color: white;
+}
+
+/* 吐司内容 */
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: #86868b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* 吐司关闭按钮 */
+.toast-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: #86868b;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1d1d1f;
+}
+
+/* ===== 动画定义 ===== */
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes drawCheckmark {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes slideInToast {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutToast {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* ===== 响应式设计 ===== */
+
+@media (max-width: 768px) {
+    .register-success {
+        padding: 32px 16px;
+        min-height: 280px;
+    }
+    
+    .checkmark-circle svg {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .success-title {
+        font-size: 1.3rem;
+    }
+    
+    .success-message {
+        font-size: 0.9rem;
+    }
+    
+    .success-btn {
+        padding: 10px 20px;
+        font-size: 15px;
+    }
+    
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
+        max-width: none;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-success {
+        padding: 24px 12px;
+        min-height: 250px;
+    }
+    
+    .checkmark-circle svg {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .success-title {
+        font-size: 1.2rem;
+    }
+    
+    .success-message {
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+    }
+    
+    .success-btn {
+        padding: 9px 18px;
+        font-size: 14px;
+        border-radius: 20px;
+    }
+    
+    .toast {
+        padding: 12px 16px;
+        border-radius: 12px;
+    }
+    
+    .toast-title {
+        font-size: 13px;
+    }
+    
+    .toast-message {
+        font-size: 12px;
+    }
+}

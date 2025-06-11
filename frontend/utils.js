@@ -67,94 +67,6 @@ function showCustomAlert(message, type = 'info', duration = 3000) {
     return alertBox;
 }
 
-// 创建漂亮的吐司提示（从右上角滑出）
-function showToast(message, type = 'success', duration = 4000) {
-    // 移除现有的吐司
-    const existingToasts = document.querySelectorAll('.toast-notification');
-    existingToasts.forEach(toast => {
-        if (toast.parentNode) {
-            toast.classList.add('toast-exit');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }
-    });
-
-    // 创建吐司元素
-    const toast = document.createElement('div');
-    toast.className = `toast-notification ${type}`;
-
-    // 根据类型设置图标和颜色
-    let icon = '🎉';
-    let bgColor = '#4CAF50';
-    if (type === 'error') {
-        icon = '❌';
-        bgColor = '#f44336';
-    } else if (type === 'warning') {
-        icon = '⚠️';
-        bgColor = '#ff9800';
-    } else if (type === 'info') {
-        icon = 'ℹ️';
-        bgColor = '#2196f3';
-    }
-
-    toast.innerHTML = `
-        <div class="toast-content">
-            <div class="toast-icon">${icon}</div>
-            <div class="toast-message">${message}</div>
-            <button class="toast-close">×</button>
-        </div>
-        <div class="toast-progress">
-            <div class="toast-progress-bar" style="background: ${bgColor}"></div>
-        </div>
-    `;
-
-    // 添加到页面
-    document.body.appendChild(toast);
-
-    // 显示动画
-    setTimeout(() => {
-        toast.classList.add('toast-show');
-    }, 10);
-
-    // 进度条动画
-    const progressBar = toast.querySelector('.toast-progress-bar');
-    if (progressBar && duration > 0) {
-        progressBar.style.animation = `toastProgress ${duration}ms linear forwards`;
-    }
-
-    // 关闭按钮事件
-    const closeBtn = toast.querySelector('.toast-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            toast.classList.add('toast-exit');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        });
-    }
-
-    // 自动关闭
-    if (duration > 0) {
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.classList.add('toast-exit');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
-            }
-        }, duration);
-    }
-
-    return toast;
-}
-
 // 创建自定义确认对话框
 function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
     // 创建确认框元素
@@ -400,7 +312,6 @@ function throttle(func, limit) {
 
 // 导出函数到全局作用域
 window.showCustomAlert = showCustomAlert;
-window.showToast = showToast;
 window.showCustomConfirm = showCustomConfirm;
 window.getSelectedModel = getSelectedModel;
 window.getSelectedMode = getSelectedMode;

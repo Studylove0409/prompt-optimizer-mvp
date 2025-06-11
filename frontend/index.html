@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#4285f4">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="modal-styles.css">
+    <link rel="stylesheet" href="auth-success.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -480,6 +481,25 @@
 
                 <!-- 注册表单 -->
                 <div class="auth-form" id="registerForm" style="display: none;">
+                    <!-- 注册成功提示 -->
+                    <div class="register-success" id="registerSuccess" style="display: none;">
+                        <div class="success-icon">
+                            <div class="checkmark-circle">
+                                <svg class="checkmark" width="60" height="60" viewBox="0 0 60 60">
+                                    <circle cx="30" cy="30" r="28" fill="none" stroke="#34C759" stroke-width="3"/>
+                                    <path d="M18 30l8 8 16-16" fill="none" stroke="#34C759" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="success-content">
+                            <h3 class="success-title">注册成功！</h3>
+                            <p class="success-message">请检查您的邮箱以完成验证</p>
+                            <div class="success-actions">
+                                <button type="button" class="success-btn" id="backToLoginBtn">返回登录</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <form id="registerFormElement">
                         <div class="form-group">
                             <div class="input-wrapper">
@@ -574,49 +594,6 @@
                     <p class="auth-switch">
                         已有账号？<a href="#" id="showLoginForm">立即登录</a>
                     </p>
-                </div>
-
-                <!-- 注册成功界面 -->
-                <div class="auth-success" id="registerSuccess" style="display: none;">
-                    <div class="success-animation">
-                        <div class="success-icon">
-                            <svg class="checkmark" viewBox="0 0 52 52">
-                                <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                                <path class="checkmark-check" fill="none" d="m14.1 27.2l7.1 7.2 16.7-16.8"/>
-                            </svg>
-                        </div>
-                        <div class="success-content">
-                            <h3 class="success-title">注册成功！</h3>
-                            <p class="success-message">
-                                我们已向您的邮箱发送了验证链接<br>
-                                请查收邮件并点击链接完成验证
-                            </p>
-                            <div class="success-tips">
-                                <div class="tip-item">
-                                    <span class="tip-icon">📧</span>
-                                    <span class="tip-text">检查邮箱（包括垃圾邮件文件夹）</span>
-                                </div>
-                                <div class="tip-item">
-                                    <span class="tip-icon">🔗</span>
-                                    <span class="tip-text">点击邮件中的验证链接</span>
-                                </div>
-                                <div class="tip-item">
-                                    <span class="tip-icon">✨</span>
-                                    <span class="tip-text">验证完成后即可正常使用</span>
-                                </div>
-                            </div>
-                            <div class="success-actions">
-                                <button class="success-btn primary" id="goToLogin">
-                                    <span class="btn-icon">🚀</span>
-                                    <span class="btn-text">去登录</span>
-                                </button>
-                                <button class="success-btn secondary" id="closeSuccessModal">
-                                    <span class="btn-icon">👋</span>
-                                    <span class="btn-text">稍后再说</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

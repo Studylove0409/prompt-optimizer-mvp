@@ -367,91 +367,6 @@ function closeAuthModal() {
     // 清空表单
     if (loginFormElement) loginFormElement.reset();
     if (registerFormElement) registerFormElement.reset();
-
-    // 重置到登录表单状态
-    resetToLoginForm();
-}
-
-// 显示注册成功界面
-function showRegisterSuccess() {
-    const registerForm = document.getElementById('registerForm');
-    const registerSuccess = document.getElementById('registerSuccess');
-    const authModalTitle = document.getElementById('authModalTitle');
-    const authTabs = document.querySelector('.auth-tabs');
-
-    if (registerForm && registerSuccess) {
-        // 隐藏注册表单
-        registerForm.style.display = 'none';
-
-        // 隐藏标签栏
-        if (authTabs) {
-            authTabs.style.display = 'none';
-        }
-
-        // 更新标题
-        if (authModalTitle) {
-            authModalTitle.textContent = '注册成功';
-        }
-
-        // 显示成功界面
-        registerSuccess.style.display = 'block';
-
-        // 绑定成功界面的按钮事件
-        bindSuccessEvents();
-    }
-}
-
-// 重置到登录表单状态
-function resetToLoginForm() {
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const registerSuccess = document.getElementById('registerSuccess');
-    const authModalTitle = document.getElementById('authModalTitle');
-    const authTabs = document.querySelector('.auth-tabs');
-    const loginTab = document.getElementById('loginTab');
-    const registerTab = document.getElementById('registerTab');
-    const tabIndicator = document.querySelector('.auth-tab-indicator');
-
-    // 显示登录表单
-    if (loginForm) loginForm.style.display = 'block';
-
-    // 隐藏注册表单和成功界面
-    if (registerForm) registerForm.style.display = 'none';
-    if (registerSuccess) registerSuccess.style.display = 'none';
-
-    // 显示标签栏
-    if (authTabs) authTabs.style.display = 'flex';
-
-    // 重置标题
-    if (authModalTitle) authModalTitle.textContent = '欢迎使用智优词';
-
-    // 重置标签状态
-    if (loginTab && registerTab && tabIndicator) {
-        loginTab.classList.add('active');
-        registerTab.classList.remove('active');
-        tabIndicator.classList.remove('register');
-    }
-}
-
-// 绑定成功界面的事件
-function bindSuccessEvents() {
-    const goToLoginBtn = document.getElementById('goToLogin');
-    const closeSuccessModalBtn = document.getElementById('closeSuccessModal');
-
-    // 去登录按钮
-    if (goToLoginBtn) {
-        goToLoginBtn.addEventListener('click', () => {
-            resetToLoginForm();
-            switchToLoginTab();
-        });
-    }
-
-    // 关闭按钮
-    if (closeSuccessModalBtn) {
-        closeSuccessModalBtn.addEventListener('click', () => {
-            closeAuthModal();
-        });
-    }
 }
 
 // 切换到登录标签
@@ -589,9 +504,7 @@ async function handleRegister(e) {
         showRegisterSuccess();
 
         // 显示吐司提示
-        if (window.showToast) {
-            window.showToast('注册成功！请查收邮箱验证链接', 'success', 5000);
-        }
+        showToast('注册成功！', '请检查您的邮箱以完成验证', 'success', 5000);
 
     } catch (error) {
         console.error('注册失败:', error);
@@ -695,7 +608,107 @@ function isUserLoggedIn() {
     return currentUser !== null;
 }
 
+// 显示注册成功界面
+function showRegisterSuccess() {
+    const registerFormElement = document.getElementById('registerFormElement');
+    const registerSuccess = document.getElementById('registerSuccess');
+
+    if (registerFormElement && registerSuccess) {
+        // 隐藏注册表单
+        registerFormElement.style.display = 'none';
+
+        // 显示成功提示
+        registerSuccess.style.display = 'flex';
+
+        // 绑定返回登录按钮事件
+        const backToLoginBtn = document.getElementById('backToLoginBtn');
+        if (backToLoginBtn) {
+            backToLoginBtn.addEventListener('click', () => {
+                // 重置表单显示状态
+                registerFormElement.style.display = 'block';
+                registerSuccess.style.display = 'none';
+
+                // 清空表单
+                registerFormElement.reset();
+
+                // 切换到登录标签
+                switchToLoginTab();
+            });
+        }
+    }
+}
+
+// 显示吐司提示
+function showToast(title, message, type = 'info', duration = 3000) {
+    // 创建吐司容器（如果不存在）
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+
+    // 创建吐司元素
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+
+    // 图标映射
+    const iconMap = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+
+    toast.innerHTML = `
+        <div class="toast-icon">${iconMap[type] || iconMap.info}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            ${message ? `<div class="toast-message">${message}</div>` : ''}
+        </div>
+        <button class="toast-close" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+    `;
+
+    // 添加到容器
+    toastContainer.appendChild(toast);
+
+    // 绑定关闭按钮事件
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            removeToast(toast);
+        });
+    }
+
+    // 自动移除
+    if (duration > 0) {
+        setTimeout(() => {
+            removeToast(toast);
+        }, duration);
+    }
+
+    return toast;
+}
+
+// 移除吐司提示
+function removeToast(toast) {
+    if (toast && toast.parentNode) {
+        toast.classList.add('toast-out');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
 // 导出函数到全局作用域
 window.initAuth = initAuth;
 window.getCurrentUser = getCurrentUser;
 window.isUserLoggedIn = isUserLoggedIn;
+window.showRegisterSuccess = showRegisterSuccess;
+window.showToast = showToast;
