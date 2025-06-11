@@ -487,22 +487,32 @@ async function handleRegister(e) {
     }
 
     // 检查用户协议复选框
+    console.log('检查协议复选框:', agreeTerms, agreeTerms ? agreeTerms.checked : 'null');
     if (!agreeTerms || !agreeTerms.checked) {
-        showCustomConfirm(
-            '请同意协议后点击注册',
-            () => {
-                // 确认按钮：自动勾选协议复选框并继续注册
-                if (agreeTerms) {
-                    agreeTerms.checked = true;
-                }
-                // 继续执行注册流程
-                proceedWithRegistration(e, email, password);
-            },
-            () => {
-                // 取消按钮：什么都不做，关闭对话框
-            },
-            '📋'
-        );
+        console.log('显示协议确认对话框');
+        // 检查 showCustomConfirm 函数是否存在
+        if (typeof showCustomConfirm === 'function') {
+            showCustomConfirm(
+                '请同意协议后点击注册',
+                () => {
+                    // 确认按钮：自动勾选协议复选框并继续注册
+                    console.log('用户点击确认，自动勾选协议');
+                    if (agreeTerms) {
+                        agreeTerms.checked = true;
+                    }
+                    // 继续执行注册流程
+                    proceedWithRegistration(e, email, password);
+                },
+                () => {
+                    // 取消按钮：什么都不做，关闭对话框
+                    console.log('用户点击取消');
+                },
+                '📋'
+            );
+        } else {
+            console.error('showCustomConfirm 函数不存在');
+            showCustomAlert('请先同意用户协议和隐私政策', 'warning');
+        }
         return;
     }
 
