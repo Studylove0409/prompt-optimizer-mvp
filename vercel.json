@@ -28,6 +28,10 @@
       "dest": "frontend/modal-styles.css"
     },
     {
+      "src": "/auth-success.css",
+      "dest": "frontend/auth-success.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
