@@ -1,0 +1,354 @@
+/* 个人资料模态框样式 */
+
+/* 模态框背景 */
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-modal.show {
+    display: flex;
+    opacity: 1;
+}
+
+.profile-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* 模态框内容 */
+.profile-modal-content {
+    position: relative;
+    margin: auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.profile-modal.show .profile-modal-content {
+    transform: scale(1);
+}
+
+/* 模态框头部 */
+.profile-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-icon {
+    font-size: 24px;
+}
+
+.profile-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* 模态框主体 */
+.profile-modal-body {
+    padding: 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* 头像区域 */
+.avatar-section {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.avatar-preview {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.avatar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+    color: white;
+}
+
+.avatar-preview:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.change-avatar-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.change-avatar-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.avatar-hint {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+}
+
+/* 表单区域 */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 48px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: white;
+    box-sizing: border-box;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-wrapper input:disabled {
+    background: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.input-wrapper input::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-error {
+    font-size: 12px;
+    color: #e74c3c;
+    margin-top: 4px;
+    display: none;
+}
+
+.field-hint {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+}
+
+/* 模态框底部 */
+.profile-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 24px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.profile-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-btn.secondary {
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.profile-btn.secondary:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.profile-btn.primary {
+    background: #667eea;
+    color: white;
+}
+
+.profile-btn.primary:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.profile-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-loading {
+    display: none;
+}
+
+.profile-btn.loading .btn-text {
+    opacity: 0;
+}
+
+.profile-btn.loading .btn-loading {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .profile-modal-content {
+        width: 95%;
+        margin: 20px auto;
+        max-height: calc(100vh - 40px);
+    }
+
+    .profile-modal-header,
+    .profile-modal-body,
+    .profile-modal-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .profile-avatar-img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .input-wrapper input {
+        padding: 10px 12px 10px 44px;
+        font-size: 16px; /* 防止iOS缩放 */
+    }
+
+    .input-icon {
+        left: 14px;
+    }
+}

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="auth-success.css">
     <link rel="stylesheet" href="history-modal.css">
     <link rel="stylesheet" href="user-dropdown.css">
+    <link rel="stylesheet" href="profile-modal.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -657,6 +658,85 @@
         </div>
     </div>
 
+    <!-- 个人资料弹框 -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-modal-backdrop"></div>
+        <div class="profile-modal-content">
+            <div class="profile-modal-header">
+                <div class="profile-title">
+                    <div class="profile-icon">👤</div>
+                    <h2>个人资料</h2>
+                </div>
+                <button class="close-modal" id="closeProfileModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="profile-modal-body">
+                <!-- 头像区域 -->
+                <div class="avatar-section">
+                    <div class="avatar-preview">
+                        <img src="https://via.placeholder.com/120" alt="用户头像" class="profile-avatar-img" id="profileAvatarImg">
+                        <div class="avatar-overlay">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="2"/>
+                                <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="avatar-actions">
+                        <button class="change-avatar-btn" id="changeAvatarBtn">更换头像</button>
+                        <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
+                        <p class="avatar-hint">支持 JPG、PNG 格式，文件大小不超过 5MB</p>
+                    </div>
+                </div>
+
+                <!-- 用户信息区域 -->
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label for="profileUsername">用户名</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="profileUsername" placeholder="用户名" maxlength="50">
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="form-error" id="profileUsernameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profileEmail">邮箱地址</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="profileEmail" readonly disabled>
+                            <div class="input-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2"/>
+                                    <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="field-hint">邮箱地址无法修改</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-modal-footer">
+                <button class="profile-btn secondary" id="cancelProfileBtn">取消</button>
+                <button class="profile-btn primary" id="saveProfileBtn">
+                    <span class="btn-text">保存更改</span>
+                    <div class="btn-loading" style="display: none;">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 历史记录弹框 -->
     <div class="history-modal" id="historyModal">
         <div class="history-modal-backdrop"></div>
@@ -755,6 +835,7 @@
     <script src="modals.js"></script>
     <script src="history.js"></script>
     <script src="user-dropdown.js"></script>
+    <script src="profile-modal.js"></script>
 
     <script src="script.js"></script>
     <script src="particles.js"></script>

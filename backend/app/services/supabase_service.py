@@ -207,6 +207,38 @@ class SupabaseService:
             print(f"创建用户profile失败: {e}")
             return False
 
+    async def update_user_profile(self, user_id: str, update_data: dict) -> bool:
+        """更新用户profile信息"""
+        try:
+            # 添加更新时间戳
+            update_data["updated_at"] = datetime.now().isoformat()
+
+            # 执行更新操作
+            result = self.client.table("profiles")\
+                .update(update_data)\
+                .eq("id", user_id)\
+                .execute()
+
+            # 检查是否有数据被更新
+            if result.data:
+                print(f"成功更新用户 {user_id} 的profile")
+                return True
+            else:
+                # 如果没有找到记录，尝试创建一个新的profile
+                print(f"用户 {user_id} 的profile不存在，尝试创建新的profile")
+                create_data = {"id": user_id, **update_data}
+                create_result = self.client.table("profiles").insert(create_data).execute()
+                if create_result.data:
+                    print(f"成功为用户 {user_id} 创建新的profile")
+                    return True
+                else:
+                    print(f"创建用户 {user_id} 的profile失败")
+                    return False
+
+        except Exception as e:
+            print(f"更新用户profile失败: {e}")
+            return False
+
     async def get_user_subscription(self, user_id: str) -> dict:
         """获取用户订阅信息"""
         try:

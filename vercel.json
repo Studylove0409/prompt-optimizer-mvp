@@ -40,6 +40,10 @@
       "dest": "frontend/user-dropdown.css"
     },
     {
+      "src": "/profile-modal.css",
+      "dest": "frontend/profile-modal.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
@@ -71,6 +75,10 @@
       "src": "/user-dropdown.js",
       "dest": "frontend/user-dropdown.js"
     },
+    {
+      "src": "/profile-modal.js",
+      "dest": "frontend/profile-modal.js"
+    },
 
     {
       "src": "/particles.js",
@@ -80,6 +88,7 @@
       "src": "/reset-password.html",
       "dest": "frontend/reset-password.html"
     },
+
     {
       "src": "/img/(.*)",
       "dest": "frontend/img/$1"
