@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="modal-styles.css">
     <link rel="stylesheet" href="auth-success.css">
+    <link rel="stylesheet" href="history-modal.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -48,6 +49,7 @@
                             <div class="user-info">
                                 <span class="user-email" id="userEmail"></span>
                             </div>
+                            <button class="auth-btn history-btn" id="historyButton">📚 历史记录</button>
                             <button class="auth-btn logout-btn" id="logoutBtn">退出登录</button>
                         </div>
                     </div>
@@ -599,6 +601,61 @@
         </div>
     </div>
 
+    <!-- 历史记录弹框 -->
+    <div class="history-modal" id="historyModal">
+        <div class="history-modal-backdrop"></div>
+        <div class="history-modal-content">
+            <div class="history-modal-header">
+                <div class="history-title">
+                    <div class="history-icon">📚</div>
+                    <h2>我的优化历史</h2>
+                </div>
+                <button class="close-modal" id="closeHistoryModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="history-modal-body">
+                <!-- 历史记录加载状态 -->
+                <div class="history-loading" id="historyLoading" style="display: none;">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载历史记录...</p>
+                </div>
+
+                <!-- 历史记录列表容器 -->
+                <div class="history-list-container" id="historyListContainer">
+                    <!-- 历史记录将动态插入这里 -->
+                </div>
+
+                <!-- 空状态 -->
+                <div class="history-empty" id="historyEmpty" style="display: none;">
+                    <div class="empty-icon">📝</div>
+                    <h3>暂无历史记录</h3>
+                    <p>开始优化您的第一个提示词吧！</p>
+                </div>
+
+                <!-- 分页控制 -->
+                <div class="history-pagination" id="historyPagination" style="display: none;">
+                    <button class="pagination-btn" id="prevPageBtn" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        上一页
+                    </button>
+                    <span class="pagination-info" id="paginationInfo">第 1 页，共 1 页</span>
+                    <button class="pagination-btn" id="nextPageBtn" disabled>
+                        下一页
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 脚本文件 -->
 
 
@@ -614,6 +671,7 @@
     <script src="auth.js"></script>
     <script src="ui.js"></script>
     <script src="modals.js"></script>
+    <script src="history.js"></script>
     <script src="script.js"></script>
     <script src="particles.js"></script>
 </body>

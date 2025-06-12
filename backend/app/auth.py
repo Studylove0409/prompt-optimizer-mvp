@@ -73,3 +73,39 @@ async def get_optional_user(
     except HTTPException:
         # 如果令牌无效，返回None而不是抛出异常
         return None
+
+
+async def get_authenticated_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    settings: Settings = Depends(get_settings)
+) -> User:
+    """获取已认证用户（生产级别，提供详细错误信息）"""
+    if not credentials:
+        raise HTTPException(
+            status_code=401,
+            detail="无效的身份验证凭据"
+        )
+
+    try:
+        # 验证令牌
+        user_data = verify_jwt_token(credentials.credentials, settings)
+
+        # 验证用户ID是否存在
+        if not user_data.get("sub"):
+            raise HTTPException(
+                status_code=500,
+                detail="无法提取用户ID"
+            )
+
+        # 创建用户对象
+        return User(user_data)
+
+    except HTTPException:
+        # 重新抛出HTTP异常
+        raise
+    except Exception as e:
+        # 处理其他异常
+        raise HTTPException(
+            status_code=401,
+            detail="无效的身份验证凭据"
+        )

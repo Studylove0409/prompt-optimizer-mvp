@@ -107,6 +107,57 @@ class SupabaseService:
             print(f"获取历史记录失败: {e}")
             return []
 
+    async def get_user_optimization_history_paginated(
+        self,
+        user_id: str,
+        page: int = 1,
+        page_size: int = 20
+    ) -> list:
+        """获取用户的优化历史记录（分页版本，仅支持已登录用户）"""
+        try:
+            # 计算偏移量
+            offset = (page - 1) * page_size
+
+            # 构建查询
+            query = self.client.table("optimization_history")\
+                .select("id, user_id, original_prompt, optimized_prompt, mode, created_at, user_type")\
+                .eq("user_id", user_id)\
+                .eq("user_type", "authenticated")\
+                .order("created_at", desc=True)\
+                .range(offset, offset + page_size - 1)
+
+            result = query.execute()
+            return result.data
+
+        except Exception as e:
+            print(f"获取分页历史记录失败: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="数据库查询失败"
+            )
+
+    async def get_user_optimization_history_count(
+        self,
+        user_id: str
+    ) -> int:
+        """获取用户的优化历史记录总数（仅支持已登录用户）"""
+        try:
+            # 使用count查询获取总数
+            result = self.client.table("optimization_history")\
+                .select("id", count="exact")\
+                .eq("user_id", user_id)\
+                .eq("user_type", "authenticated")\
+                .execute()
+
+            return result.count if result.count is not None else 0
+
+        except Exception as e:
+            print(f"获取历史记录总数失败: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail="数据库查询失败"
+            )
+
     async def get_user_profile(self, user_id: str) -> dict:
         """获取用户profile信息"""
         try:
