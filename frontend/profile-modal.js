@@ -315,10 +315,22 @@ class ProfileModal {
         }
     }
 
-    updatePageUserInfo() {
+    async updatePageUserInfo() {
         // 更新导航栏中的用户信息显示
         if (window.userDropdownManager) {
-            window.userDropdownManager.updateUserInfo();
+            try {
+                // 构建更新后的用户信息
+                const updatedUserInfo = {
+                    name: this.currentProfile.username || this.currentUser.email?.split('@')[0] || '用户',
+                    email: this.currentUser.email,
+                    avatar: this.currentProfile.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(this.currentUser.email)}&background=667eea&color=fff`
+                };
+
+                // 更新用户下拉菜单中的信息
+                window.userDropdownManager.updateUserInfo(updatedUserInfo);
+            } catch (error) {
+                console.error('更新页面用户信息失败:', error);
+            }
         }
     }
 

@@ -585,11 +585,11 @@ async function handleLogout() {
 }
 
 // 处理认证状态变化
-function handleAuthStateChange(_event, session) {
+async function handleAuthStateChange(_event, session) {
     if (session && session.user) {
         // 用户已登录
         currentUser = session.user;
-        updateUIForLoggedInUser(session.user);
+        await updateUIForLoggedInUser(session.user);
     } else {
         // 用户未登录
         currentUser = null;
@@ -598,15 +598,26 @@ function handleAuthStateChange(_event, session) {
 }
 
 // 更新已登录用户的UI
-function updateUIForLoggedInUser(user) {
+async function updateUIForLoggedInUser(user) {
     // 使用新的用户下拉菜单系统
     if (window.userDropdownManager) {
-        const userInfo = {
+        // 先显示基本信息
+        const basicUserInfo = {
             name: user.user_metadata?.name || user.email?.split('@')[0] || '用户',
             email: user.email,
             avatar: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=667eea&color=fff`
         };
-        window.userDropdownManager.showUserMenu(userInfo);
+        window.userDropdownManager.showUserMenu(basicUserInfo);
+
+        // 然后异步获取完整的用户信息（包括profiles表中的数据）
+        try {
+            const fullUserInfo = await window.userDropdownManager.getCurrentUserInfo();
+            if (fullUserInfo) {
+                window.userDropdownManager.updateUserInfo(fullUserInfo);
+            }
+        } catch (error) {
+            console.log('获取完整用户信息失败，使用基本信息:', error);
+        }
     } else {
         // 备用方案：使用旧的UI系统
         if (loginBtn) loginBtn.style.display = 'none';
@@ -643,7 +654,7 @@ async function checkCurrentUser() {
 
         if (session && session.user) {
             currentUser = session.user;
-            updateUIForLoggedInUser(session.user);
+            await updateUIForLoggedInUser(session.user);
         } else {
             currentUser = null;
             updateUIForLoggedOutUser();

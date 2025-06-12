@@ -263,12 +263,28 @@ class UserDropdownManager {
             if (window.supabaseClient) {
                 const { data: { user }, error } = await window.supabaseClient.auth.getUser();
                 if (error) throw error;
-                
+
                 if (user) {
+                    // 尝试从profiles表获取用户信息
+                    let profileData = {};
+                    try {
+                        const { data: profiles, error: profileError } = await window.supabaseClient
+                            .from('profiles')
+                            .select('username, avatar_url')
+                            .eq('id', user.id)
+                            .single();
+
+                        if (!profileError && profiles) {
+                            profileData = profiles;
+                        }
+                    } catch (profileError) {
+                        console.log('获取profile信息失败，使用默认值:', profileError);
+                    }
+
                     return {
-                        name: user.user_metadata?.name || user.email?.split('@')[0] || '用户',
+                        name: profileData.username || user.user_metadata?.name || user.email?.split('@')[0] || '用户',
                         email: user.email,
-                        avatar: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=667eea&color=fff`
+                        avatar: profileData.avatar_url || user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=667eea&color=fff`
                     };
                 }
             }
