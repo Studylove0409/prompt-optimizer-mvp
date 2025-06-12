@@ -36,6 +36,10 @@
       "dest": "frontend/history-modal.css"
     },
     {
+      "src": "/user-dropdown.css",
+      "dest": "frontend/user-dropdown.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
@@ -62,6 +66,10 @@
     {
       "src": "/history.js",
       "dest": "frontend/history.js"
+    },
+    {
+      "src": "/user-dropdown.js",
+      "dest": "frontend/user-dropdown.js"
     },
 
     {
