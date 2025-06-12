@@ -32,6 +32,10 @@
       "dest": "frontend/auth-success.css"
     },
     {
+      "src": "/history-modal.css",
+      "dest": "frontend/history-modal.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
@@ -56,8 +60,24 @@
       "dest": "frontend/modals.js"
     },
     {
+      "src": "/history.js",
+      "dest": "frontend/history.js"
+    },
+    {
+      "src": "/debug-history.js",
+      "dest": "frontend/debug-history.js"
+    },
+    {
+      "src": "/vercel-check.js",
+      "dest": "frontend/vercel-check.js"
+    },
+    {
       "src": "/particles.js",
       "dest": "frontend/particles.js"
+    },
+    {
+      "src": "/reset-password.html",
+      "dest": "frontend/reset-password.html"
     },
     {
       "src": "/img/(.*)",
