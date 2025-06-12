@@ -63,14 +63,7 @@
       "src": "/history.js",
       "dest": "frontend/history.js"
     },
-    {
-      "src": "/debug-history.js",
-      "dest": "frontend/debug-history.js"
-    },
-    {
-      "src": "/vercel-check.js",
-      "dest": "frontend/vercel-check.js"
-    },
+
     {
       "src": "/particles.js",
       "dest": "frontend/particles.js"
