@@ -1,0 +1,310 @@
+/**
+ * 用户下拉菜单功能模块
+ */
+
+class UserDropdownManager {
+    constructor() {
+        this.isInitialized = false;
+        this.isDropdownOpen = false;
+        
+        // 绑定方法到实例
+        this.handleAvatarClick = this.handleAvatarClick.bind(this);
+        this.handleDocumentClick = this.handleDocumentClick.bind(this);
+        this.handleDropdownClick = this.handleDropdownClick.bind(this);
+        this.handleKeydown = this.handleKeydown.bind(this);
+        
+        this.initializeElements();
+        this.bindEvents();
+    }
+
+    initializeElements() {
+        // 获取DOM元素
+        this.userAvatarBtn = document.getElementById('userAvatarBtn');
+        this.userDropdown = document.getElementById('userDropdown');
+        this.userAvatarSection = document.getElementById('userAvatarSection');
+        this.authSection = document.getElementById('authSection');
+        this.loginBtn = document.getElementById('loginBtn');
+        
+        // 用户信息元素
+        this.userNameElement = document.getElementById('userName');
+        this.userEmailElement = document.getElementById('userEmail');
+        this.userAvatarImg = document.getElementById('userAvatarImg');
+        this.userAvatarImgLarge = document.getElementById('userAvatarImgLarge');
+        
+        // 菜单项元素
+        this.historyButton = document.getElementById('historyButton');
+        this.profileButton = document.getElementById('profileButton');
+        this.settingsButton = document.getElementById('settingsButton');
+        this.logoutBtn = document.getElementById('logoutBtn');
+    }
+
+    bindEvents() {
+        // 头像按钮点击事件
+        if (this.userAvatarBtn) {
+            this.userAvatarBtn.addEventListener('click', this.handleAvatarClick);
+        }
+
+        // 文档点击事件（用于关闭下拉菜单）
+        document.addEventListener('click', this.handleDocumentClick);
+
+        // 下拉菜单内部点击事件（阻止冒泡）
+        if (this.userDropdown) {
+            this.userDropdown.addEventListener('click', this.handleDropdownClick);
+        }
+
+        // 键盘事件
+        document.addEventListener('keydown', this.handleKeydown);
+
+        // 菜单项点击事件
+        this.bindMenuItemEvents();
+    }
+
+    bindMenuItemEvents() {
+        // 历史记录按钮
+        if (this.historyButton) {
+            this.historyButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeDropdown();
+                // 触发历史记录功能
+                if (typeof historyManager !== 'undefined' && historyManager.openHistoryModal) {
+                    historyManager.openHistoryModal();
+                } else {
+                    console.log('历史记录功能');
+                }
+            });
+        }
+
+        // 个人资料按钮
+        if (this.profileButton) {
+            this.profileButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeDropdown();
+                console.log('个人资料功能');
+                // 这里可以添加个人资料功能
+            });
+        }
+
+        // 设置按钮
+        if (this.settingsButton) {
+            this.settingsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeDropdown();
+                console.log('设置功能');
+                // 这里可以添加设置功能
+            });
+        }
+
+        // 退出登录按钮
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.closeDropdown();
+                this.handleLogout();
+            });
+        }
+    }
+
+    handleAvatarClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleDropdown();
+    }
+
+    handleDocumentClick(e) {
+        // 如果点击的不是头像按钮或下拉菜单内部，则关闭下拉菜单
+        if (this.isDropdownOpen && 
+            !this.userAvatarBtn.contains(e.target) && 
+            !this.userDropdown.contains(e.target)) {
+            this.closeDropdown();
+        }
+    }
+
+    handleDropdownClick(e) {
+        // 阻止下拉菜单内部点击事件冒泡
+        e.stopPropagation();
+    }
+
+    handleKeydown(e) {
+        // ESC键关闭下拉菜单
+        if (e.key === 'Escape' && this.isDropdownOpen) {
+            this.closeDropdown();
+        }
+    }
+
+    toggleDropdown() {
+        if (this.isDropdownOpen) {
+            this.closeDropdown();
+        } else {
+            this.openDropdown();
+        }
+    }
+
+    openDropdown() {
+        if (!this.userDropdown) return;
+        
+        this.isDropdownOpen = true;
+        this.userDropdown.classList.add('show');
+        this.userAvatarBtn.classList.add('active');
+        
+        // 添加动画类
+        this.userDropdown.style.animation = 'dropdownFadeIn 0.2s ease-out';
+    }
+
+    closeDropdown() {
+        if (!this.userDropdown) return;
+        
+        this.isDropdownOpen = false;
+        this.userDropdown.classList.remove('show');
+        this.userAvatarBtn.classList.remove('active');
+        
+        // 添加动画类
+        this.userDropdown.style.animation = 'dropdownFadeOut 0.2s ease-out';
+    }
+
+    // 显示用户菜单（登录后调用）
+    showUserMenu(userInfo = {}) {
+        if (this.loginBtn) {
+            this.loginBtn.style.display = 'none';
+        }
+        if (this.userAvatarSection) {
+            this.userAvatarSection.style.display = 'block';
+        }
+
+        // 更新用户信息
+        this.updateUserInfo(userInfo);
+    }
+
+    // 隐藏用户菜单（退出登录后调用）
+    hideUserMenu() {
+        if (this.loginBtn) {
+            this.loginBtn.style.display = 'block';
+        }
+        if (this.userAvatarSection) {
+            this.userAvatarSection.style.display = 'none';
+        }
+        
+        // 关闭下拉菜单
+        this.closeDropdown();
+    }
+
+    // 更新用户信息
+    updateUserInfo(userInfo) {
+        const {
+            name = '用户',
+            email = 'user@example.com',
+            avatar = 'https://via.placeholder.com/40'
+        } = userInfo;
+
+        // 更新用户名
+        if (this.userNameElement) {
+            this.userNameElement.textContent = name;
+        }
+
+        // 更新邮箱
+        if (this.userEmailElement) {
+            this.userEmailElement.textContent = email;
+        }
+
+        // 更新头像
+        if (this.userAvatarImg) {
+            this.userAvatarImg.src = avatar;
+            this.userAvatarImg.alt = `${name}的头像`;
+        }
+
+        if (this.userAvatarImgLarge) {
+            this.userAvatarImgLarge.src = avatar;
+            this.userAvatarImgLarge.alt = `${name}的头像`;
+        }
+    }
+
+    // 处理退出登录
+    handleLogout() {
+        // 显示确认对话框
+        if (typeof showCustomConfirm === 'function') {
+            showCustomConfirm('确定要退出登录吗？', '退出登录', () => {
+                this.performLogout();
+            });
+        } else {
+            if (confirm('确定要退出登录吗？')) {
+                this.performLogout();
+            }
+        }
+    }
+
+    // 执行退出登录
+    performLogout() {
+        try {
+            // 调用Supabase退出登录
+            if (window.supabaseClient) {
+                window.supabaseClient.auth.signOut().then(() => {
+                    this.hideUserMenu();
+                    if (typeof showCustomAlert === 'function') {
+                        showCustomAlert('已成功退出登录', 'success');
+                    }
+                });
+            } else {
+                // 备用方案
+                this.hideUserMenu();
+                if (typeof showCustomAlert === 'function') {
+                    showCustomAlert('已成功退出登录', 'success');
+                }
+            }
+        } catch (error) {
+            console.error('退出登录失败:', error);
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert('退出登录失败，请重试', 'error');
+            }
+        }
+    }
+
+    // 获取当前用户信息（从Supabase或其他来源）
+    async getCurrentUserInfo() {
+        try {
+            if (window.supabaseClient) {
+                const { data: { user }, error } = await window.supabaseClient.auth.getUser();
+                if (error) throw error;
+                
+                if (user) {
+                    return {
+                        name: user.user_metadata?.name || user.email?.split('@')[0] || '用户',
+                        email: user.email,
+                        avatar: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=667eea&color=fff`
+                    };
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('获取用户信息失败:', error);
+            return null;
+        }
+    }
+}
+
+// 初始化用户下拉菜单管理器
+let userDropdownManager;
+
+// 等待DOM加载完成后初始化
+function initializeUserDropdown() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeUserDropdown);
+        return;
+    }
+
+    try {
+        userDropdownManager = new UserDropdownManager();
+        window.userDropdownManager = userDropdownManager;
+        
+        // 触发自定义事件
+        window.dispatchEvent(new CustomEvent('userDropdownReady'));
+        
+        console.log('用户下拉菜单初始化成功');
+    } catch (error) {
+        console.error('用户下拉菜单初始化失败:', error);
+    }
+}
+
+// 开始初始化
+initializeUserDropdown();
+
+// 导出到全局作用域
+window.UserDropdownManager = UserDropdownManager;

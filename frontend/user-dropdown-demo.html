@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户下拉菜单演示</title>
+    <link rel="stylesheet" href="user-dropdown.css">
+    <style>
+        /* 演示页面基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+
+        .demo-header {
+            background: white;
+            color: #333;
+            padding: 40px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .demo-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .demo-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .demo-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .demo-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .demo-nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .demo-nav-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .demo-nav-link:hover {
+            color: #333;
+        }
+
+        .demo-content {
+            padding: 40px;
+        }
+
+        .demo-section {
+            margin-bottom: 40px;
+        }
+
+        .demo-section h2 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .demo-section p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .demo-btn-primary {
+            background: #333;
+            color: white;
+        }
+
+        .demo-btn-primary:hover {
+            background: #555;
+            transform: translateY(-1px);
+        }
+
+        .demo-btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .demo-btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .feature-card {
+            padding: 24px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .feature-card h3 {
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .demo-navbar {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px 20px;
+            }
+
+            .demo-nav-links {
+                gap: 16px;
+            }
+
+            .demo-content {
+                padding: 24px 20px;
+            }
+
+            .demo-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- 演示标题 -->
+        <div class="demo-header">
+            <h1 class="demo-title">用户下拉菜单演示</h1>
+            <p class="demo-subtitle">现代、简洁、响应式的用户界面组件</p>
+        </div>
+
+        <!-- 演示导航栏 -->
+        <div class="demo-navbar">
+            <div class="demo-logo">智优词</div>
+            <div class="demo-nav-links">
+                <a href="#" class="demo-nav-link">首页</a>
+                <a href="#" class="demo-nav-link">功能</a>
+                <a href="#" class="demo-nav-link">帮助</a>
+                
+                <!-- 用户下拉菜单 -->
+                <div class="user-avatar-section" id="userAvatarSection">
+                    <button class="user-avatar-btn" id="userAvatarBtn">
+                        <img src="https://ui-avatars.com/api/?name=Demo+User&background=667eea&color=fff" alt="用户头像" class="avatar-img" id="userAvatarImg">
+                        <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <div class="user-avatar-large">
+                                <img src="https://ui-avatars.com/api/?name=Demo+User&background=667eea&color=fff" alt="用户头像" class="avatar-img-large" id="userAvatarImgLarge">
+                            </div>
+                            <div class="user-info">
+                                <div class="user-name" id="userName">演示用户</div>
+                                <div class="user-email" id="userEmail">demo@example.com</div>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-menu">
+                            <a href="#" class="dropdown-item" id="historyButton">
+                                <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>历史记录</span>
+                            </a>
+                            
+                            <a href="#" class="dropdown-item" id="profileButton">
+                                <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>个人资料</span>
+                            </a>
+                            
+                            <a href="#" class="dropdown-item" id="settingsButton">
+                                <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>设置</span>
+                            </a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-footer">
+                            <a href="#" class="dropdown-item logout-item" id="logoutBtn">
+                                <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>退出登录</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 演示内容 -->
+        <div class="demo-content">
+            <div class="demo-section">
+                <h2>功能特性</h2>
+                <p>这个用户下拉菜单组件具有以下特性：</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>🎨 现代设计</h3>
+                        <p>采用现代化的设计语言，简洁美观，符合当前设计趋势</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>📱 响应式</h3>
+                        <p>完美适配各种屏幕尺寸，从桌面到移动设备都有良好体验</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>⚡ 流畅动画</h3>
+                        <p>精心设计的过渡动画，提供流畅的交互体验</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔧 易于定制</h3>
+                        <p>使用CSS变量，可以轻松定制颜色、尺寸等样式属性</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>♿ 无障碍</h3>
+                        <p>支持键盘导航，符合无障碍设计标准</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🌙 深色模式</h3>
+                        <p>内置深色模式支持，自动适配用户系统偏好</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-section">
+                <h2>交互演示</h2>
+                <p>点击右上角的用户头像来体验下拉菜单的交互效果。您可以：</p>
+                <ul style="color: #6b7280; line-height: 1.6; margin-left: 20px;">
+                    <li>点击头像按钮打开/关闭菜单</li>
+                    <li>点击页面其他地方关闭菜单</li>
+                    <li>按ESC键关闭菜单</li>
+                    <li>点击菜单项执行相应操作</li>
+                </ul>
+            </div>
+
+            <div class="demo-section">
+                <h2>测试功能</h2>
+                <div class="demo-buttons">
+                    <button class="demo-btn demo-btn-primary" onclick="updateUserInfo()">更新用户信息</button>
+                    <button class="demo-btn demo-btn-secondary" onclick="toggleDropdown()">切换下拉菜单</button>
+                    <button class="demo-btn demo-btn-secondary" onclick="changeAvatar()">更换头像</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript -->
+    <script src="user-dropdown.js"></script>
+    <script>
+        // 演示功能
+        function updateUserInfo() {
+            if (window.userDropdownManager) {
+                const randomNames = ['张三', '李四', '王五', '赵六', '钱七'];
+                const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+                const randomEmail = `${randomName.toLowerCase()}@example.com`;
+                
+                window.userDropdownManager.updateUserInfo({
+                    name: randomName,
+                    email: randomEmail,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(randomName)}&background=${Math.floor(Math.random()*16777215).toString(16)}&color=fff`
+                });
+                
+                alert(`用户信息已更新为：${randomName} (${randomEmail})`);
+            }
+        }
+
+        function toggleDropdown() {
+            if (window.userDropdownManager) {
+                window.userDropdownManager.toggleDropdown();
+            }
+        }
+
+        function changeAvatar() {
+            if (window.userDropdownManager) {
+                const colors = ['667eea', 'f56565', '48bb78', 'ed8936', '9f7aea', '38b2ac'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                const currentName = document.getElementById('userName').textContent;
+                
+                window.userDropdownManager.updateUserInfo({
+                    name: currentName,
+                    email: document.getElementById('userEmail').textContent,
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(currentName)}&background=${randomColor}&color=fff`
+                });
+                
+                alert('头像已更换！');
+            }
+        }
+
+        // 监听用户下拉菜单就绪事件
+        window.addEventListener('userDropdownReady', function() {
+            console.log('用户下拉菜单演示页面加载完成');
+        });
+    </script>
+</body>
+</html>

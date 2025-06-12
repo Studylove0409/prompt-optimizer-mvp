@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="modal-styles.css">
     <link rel="stylesheet" href="auth-success.css">
     <link rel="stylesheet" href="history-modal.css">
+    <link rel="stylesheet" href="user-dropdown.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -45,12 +46,67 @@
                     <!-- 用户认证按钮 -->
                     <div class="auth-section" id="authSection">
                         <button class="auth-btn login-btn" id="loginBtn">登录/注册</button>
-                        <div class="user-menu" id="userMenu" style="display: none;">
-                            <div class="user-info">
-                                <span class="user-email" id="userEmail"></span>
+
+                        <!-- 用户头像下拉菜单 -->
+                        <div class="user-avatar-section" id="userAvatarSection" style="display: none;">
+                            <button class="user-avatar-btn" id="userAvatarBtn">
+                                <img src="https://via.placeholder.com/40" alt="用户头像" class="avatar-img" id="userAvatarImg">
+                                <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                    <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="dropdown-header">
+                                    <div class="user-avatar-large">
+                                        <img src="https://via.placeholder.com/48" alt="用户头像" class="avatar-img-large" id="userAvatarImgLarge">
+                                    </div>
+                                    <div class="user-info">
+                                        <div class="user-name" id="userName">用户</div>
+                                        <div class="user-email" id="userEmail">user@example.com</div>
+                                    </div>
+                                </div>
+
+                                <div class="dropdown-divider"></div>
+
+                                <div class="dropdown-menu">
+                                    <a href="#" class="dropdown-item" id="historyButton">
+                                        <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>历史记录</span>
+                                    </a>
+
+                                    <a href="#" class="dropdown-item" id="profileButton">
+                                        <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                        <span>个人资料</span>
+                                    </a>
+
+                                    <a href="#" class="dropdown-item" id="settingsButton">
+                                        <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                        <span>设置</span>
+                                    </a>
+                                </div>
+
+                                <div class="dropdown-divider"></div>
+
+                                <div class="dropdown-footer">
+                                    <a href="#" class="dropdown-item logout-item" id="logoutBtn">
+                                        <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>退出登录</span>
+                                    </a>
+                                </div>
                             </div>
-                            <button class="auth-btn history-btn" id="historyButton">📚 历史记录</button>
-                            <button class="auth-btn logout-btn" id="logoutBtn">退出登录</button>
                         </div>
                     </div>
                 </div>
@@ -617,6 +673,32 @@
                 </button>
             </div>
 
+            <!-- 日期筛选器 -->
+            <div class="history-filter-section">
+                <div class="filter-group">
+                    <label for="dateFilterSelect">时间筛选：</label>
+                    <select id="dateFilterSelect" class="date-filter-select">
+                        <option value="all">全部时间</option>
+                        <option value="today">今天</option>
+                        <option value="week">最近7天</option>
+                        <option value="month">最近30天</option>
+                        <option value="custom">自定义日期</option>
+                    </select>
+                </div>
+
+                <div id="customDateRange" class="custom-date-range" style="display: none;">
+                    <div class="date-input-group">
+                        <label for="startDateInput">开始日期：</label>
+                        <input type="date" id="startDateInput" class="date-input">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="endDateInput">结束日期：</label>
+                        <input type="date" id="endDateInput" class="date-input">
+                    </div>
+                    <button id="applyDateFilterBtn" class="apply-filter-btn">应用筛选</button>
+                </div>
+            </div>
+
             <div class="history-modal-body">
                 <!-- 历史记录加载状态 -->
                 <div class="history-loading" id="historyLoading" style="display: none;">
@@ -672,6 +754,7 @@
     <script src="ui.js"></script>
     <script src="modals.js"></script>
     <script src="history.js"></script>
+    <script src="user-dropdown.js"></script>
 
     <script src="script.js"></script>
     <script src="particles.js"></script>

@@ -9,7 +9,12 @@ class HistoryManager {
         this.totalPages = 1;
         this.totalCount = 0;
         this.isLoading = false;
-        
+
+        // 日期筛选相关
+        this.dateFilter = 'all'; // 'all', 'today', 'week', 'month', 'custom'
+        this.startDate = null;
+        this.endDate = null;
+
         this.initializeElements();
         this.bindEvents();
     }
@@ -25,6 +30,13 @@ class HistoryManager {
         this.prevPageBtn = document.getElementById('prevPageBtn');
         this.nextPageBtn = document.getElementById('nextPageBtn');
         this.paginationInfo = document.getElementById('paginationInfo');
+
+        // 日期筛选相关元素
+        this.dateFilterSelect = document.getElementById('dateFilterSelect');
+        this.customDateRange = document.getElementById('customDateRange');
+        this.startDateInput = document.getElementById('startDateInput');
+        this.endDateInput = document.getElementById('endDateInput');
+        this.applyDateFilterBtn = document.getElementById('applyDateFilterBtn');
     }
 
     bindEvents() {
@@ -61,6 +73,105 @@ class HistoryManager {
                 this.closeHistoryModal();
             }
         });
+
+        // 日期筛选事件
+        this.bindDateFilterEvents();
+
+        // 复制按钮事件委托
+        this.bindCopyEvents();
+    }
+
+    bindDateFilterEvents() {
+        // 日期筛选下拉框事件
+        if (this.dateFilterSelect) {
+            this.dateFilterSelect.addEventListener('change', (e) => {
+                this.dateFilter = e.target.value;
+                if (this.dateFilter === 'custom') {
+                    this.customDateRange.style.display = 'flex';
+                } else {
+                    this.customDateRange.style.display = 'none';
+                    this.applyDateFilter();
+                }
+            });
+        }
+
+        // 应用自定义日期范围按钮
+        if (this.applyDateFilterBtn) {
+            this.applyDateFilterBtn.addEventListener('click', () => {
+                this.applyDateFilter();
+            });
+        }
+
+        // 日期输入框回车键应用筛选
+        if (this.startDateInput) {
+            this.startDateInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.applyDateFilter();
+                }
+            });
+        }
+
+        if (this.endDateInput) {
+            this.endDateInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.applyDateFilter();
+                }
+            });
+        }
+    }
+
+    bindCopyEvents() {
+        // 使用事件委托处理复制按钮点击
+        if (this.historyListContainer) {
+            this.historyListContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.copy-btn')) {
+                    const copyBtn = e.target.closest('.copy-btn');
+                    const text = copyBtn.getAttribute('data-text');
+                    if (text) {
+                        this.copyToClipboard(text, copyBtn);
+                    }
+                }
+            });
+        }
+    }
+
+    async applyDateFilter() {
+        // 设置日期范围
+        this.setDateRange();
+
+        // 重置到第一页
+        this.currentPage = 1;
+
+        // 重新加载数据
+        await this.loadHistoryData();
+    }
+
+    setDateRange() {
+        const now = new Date();
+
+        switch (this.dateFilter) {
+            case 'today':
+                this.startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                this.endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+                break;
+            case 'week':
+                this.startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                this.endDate = now;
+                break;
+            case 'month':
+                this.startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                this.endDate = now;
+                break;
+            case 'custom':
+                if (this.startDateInput && this.endDateInput) {
+                    this.startDate = this.startDateInput.value ? new Date(this.startDateInput.value) : null;
+                    this.endDate = this.endDateInput.value ? new Date(this.endDateInput.value + 'T23:59:59') : null;
+                }
+                break;
+            default:
+                this.startDate = null;
+                this.endDate = null;
+        }
     }
 
     async openHistoryModal() {
@@ -150,7 +261,15 @@ class HistoryManager {
 
             // 构建正确的API URL
             const baseUrl = this.getBaseUrl();
-            const apiUrl = `${baseUrl}/api/history?page=${this.currentPage}&page_size=${this.pageSize}`;
+            let apiUrl = `${baseUrl}/api/history?page=${this.currentPage}&page_size=${this.pageSize}`;
+
+            // 添加日期筛选参数
+            if (this.startDate) {
+                apiUrl += `&start_date=${this.startDate.toISOString()}`;
+            }
+            if (this.endDate) {
+                apiUrl += `&end_date=${this.endDate.toISOString()}`;
+            }
 
             const response = await fetch(apiUrl, {
                 headers: {
@@ -250,7 +369,7 @@ class HistoryManager {
                 <div class="prompt-section">
                     <div class="prompt-label">
                         <strong>原始提示词</strong>
-                        <button class="copy-btn" onclick="historyManager.copyToClipboard('${this.escapeHtml(item.original_prompt)}', this)">
+                        <button class="copy-btn" data-text="${this.escapeHtml(item.original_prompt)}">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
@@ -263,7 +382,7 @@ class HistoryManager {
                 <div class="prompt-section">
                     <div class="prompt-label">
                         <strong>优化后的提示词</strong>
-                        <button class="copy-btn" onclick="historyManager.copyToClipboard('${this.escapeHtml(item.optimized_prompt)}', this)">
+                        <button class="copy-btn" data-text="${this.escapeHtml(item.optimized_prompt)}">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>

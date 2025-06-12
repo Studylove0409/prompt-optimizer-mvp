@@ -5,6 +5,7 @@ Supabase服务模块
 from supabase import create_client, Client
 from fastapi import HTTPException
 from typing import Dict, Any, Optional
+from datetime import datetime
 
 from ..config import Settings
 
@@ -111,7 +112,9 @@ class SupabaseService:
         self,
         user_id: str,
         page: int = 1,
-        page_size: int = 20
+        page_size: int = 20,
+        start_date: datetime = None,
+        end_date: datetime = None
     ) -> list:
         """获取用户的优化历史记录（分页版本，仅支持已登录用户）"""
         try:
@@ -122,8 +125,16 @@ class SupabaseService:
             query = self.client.table("optimization_history")\
                 .select("id, user_id, original_prompt, optimized_prompt, mode, created_at, user_type")\
                 .eq("user_id", user_id)\
-                .eq("user_type", "authenticated")\
-                .order("created_at", desc=True)\
+                .eq("user_type", "authenticated")
+
+            # 添加日期筛选
+            if start_date:
+                query = query.gte("created_at", start_date.isoformat())
+            if end_date:
+                query = query.lte("created_at", end_date.isoformat())
+
+            # 添加排序和分页
+            query = query.order("created_at", desc=True)\
                 .range(offset, offset + page_size - 1)
 
             result = query.execute()
@@ -138,17 +149,25 @@ class SupabaseService:
 
     async def get_user_optimization_history_count(
         self,
-        user_id: str
+        user_id: str,
+        start_date: datetime = None,
+        end_date: datetime = None
     ) -> int:
         """获取用户的优化历史记录总数（仅支持已登录用户）"""
         try:
-            # 使用count查询获取总数
-            result = self.client.table("optimization_history")\
+            # 构建查询
+            query = self.client.table("optimization_history")\
                 .select("id", count="exact")\
                 .eq("user_id", user_id)\
-                .eq("user_type", "authenticated")\
-                .execute()
+                .eq("user_type", "authenticated")
 
+            # 添加日期筛选
+            if start_date:
+                query = query.gte("created_at", start_date.isoformat())
+            if end_date:
+                query = query.lte("created_at", end_date.isoformat())
+
+            result = query.execute()
             return result.count if result.count is not None else 0
 
         except Exception as e:

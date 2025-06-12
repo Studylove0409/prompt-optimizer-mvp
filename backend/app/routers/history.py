@@ -38,6 +38,8 @@ async def get_optimization_history_production(
     response: Response,
     page: int = Query(1, ge=1, description="页码，从1开始"),
     page_size: int = Query(20, ge=1, le=100, description="每页记录数，最大100"),
+    start_date: Optional[str] = Query(None, description="开始日期，ISO格式"),
+    end_date: Optional[str] = Query(None, description="结束日期，ISO格式"),
     user: User = Depends(get_authenticated_user),
     settings: Settings = Depends(get_settings)
 ):
@@ -60,16 +62,36 @@ async def get_optimization_history_production(
         # 创建Supabase服务实例
         supabase_service = SupabaseService(settings)
 
-        # 获取用户历史记录（带分页）
+        # 解析日期参数
+        parsed_start_date = None
+        parsed_end_date = None
+
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            except ValueError:
+                raise HTTPException(status_code=400, detail="开始日期格式无效")
+
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            except ValueError:
+                raise HTTPException(status_code=400, detail="结束日期格式无效")
+
+        # 获取用户历史记录（带分页和日期筛选）
         history_data = await supabase_service.get_user_optimization_history_paginated(
             user_id=str(user.id),
             page=page,
-            page_size=page_size
+            page_size=page_size,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
         )
 
-        # 获取总记录数
+        # 获取总记录数（带日期筛选）
         total_count = await supabase_service.get_user_optimization_history_count(
-            user_id=str(user.id)
+            user_id=str(user.id),
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
         )
 
         # 计算总页数

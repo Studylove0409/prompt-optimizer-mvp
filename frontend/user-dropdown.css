@@ -1,0 +1,323 @@
+/* 用户下拉菜单样式 */
+
+/* CSS变量定义 - 白色简约风格 */
+:root {
+    --dropdown-bg: #ffffff;
+    --dropdown-border: #f0f0f0;
+    --dropdown-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --dropdown-radius: 8px;
+    --dropdown-width: 260px;
+
+    --avatar-size: 36px;
+    --avatar-large-size: 44px;
+
+    --item-padding: 10px 16px;
+    --item-hover-bg: #fafafa;
+    --item-text-color: #333333;
+    --item-icon-color: #888888;
+
+    --divider-color: #f5f5f5;
+    --header-bg: #ffffff;
+
+    --transition-duration: 0.15s;
+    --transition-easing: ease-out;
+}
+
+/* 用户头像区域 */
+.user-avatar-section {
+    position: relative;
+    display: inline-block;
+}
+
+/* 头像按钮 - 简约风格 */
+.user-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 4px;
+    background: var(--dropdown-bg);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all var(--transition-duration) var(--transition-easing);
+    box-shadow: none;
+}
+
+.user-avatar-btn:hover {
+    background: var(--item-hover-bg);
+    border-color: var(--dropdown-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.user-avatar-btn:active {
+    transform: scale(0.98);
+}
+
+/* 头像图片 - 简约风格 */
+.avatar-img {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    transition: all var(--transition-duration) var(--transition-easing);
+}
+
+.user-avatar-btn:hover .avatar-img {
+    border-color: #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 下拉箭头 - 简约风格 */
+.dropdown-arrow {
+    color: #ccc;
+    transition: all var(--transition-duration) var(--transition-easing);
+    opacity: 0.7;
+}
+
+.user-avatar-btn:hover .dropdown-arrow {
+    color: #999;
+    opacity: 1;
+}
+
+.user-avatar-btn.active .dropdown-arrow {
+    transform: rotate(180deg);
+    color: #666;
+}
+
+/* 下拉菜单容器 - 简约风格 */
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: var(--dropdown-width);
+    background: var(--dropdown-bg);
+    border: 1px solid var(--dropdown-border);
+    border-radius: var(--dropdown-radius);
+    box-shadow: var(--dropdown-shadow);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.96);
+    transition: all var(--transition-duration) var(--transition-easing);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.user-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* 下拉菜单头部 - 简约风格 */
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--divider-color);
+}
+
+.user-avatar-large {
+    flex-shrink: 0;
+}
+
+.avatar-img-large {
+    width: var(--avatar-large-size);
+    height: var(--avatar-large-size);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333333;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-email {
+    font-size: 13px;
+    color: #888888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 分割线 */
+.dropdown-divider {
+    height: 1px;
+    background: var(--divider-color);
+    margin: 0;
+}
+
+/* 菜单项容器 - 简约风格 */
+.dropdown-menu {
+    padding: 6px 0;
+}
+
+.dropdown-footer {
+    padding: 6px 0;
+}
+
+/* 菜单项 - 简约风格 */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: var(--item-padding);
+    color: var(--item-text-color);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 400;
+    transition: all var(--transition-duration) var(--transition-easing);
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    border-radius: 4px;
+    margin: 0 6px;
+    width: calc(100% - 12px);
+}
+
+.dropdown-item:hover {
+    background: var(--item-hover-bg);
+    color: #222222;
+}
+
+.dropdown-item:active {
+    background: #f0f0f0;
+    transform: scale(0.98);
+}
+
+/* 菜单项图标 - 简约风格 */
+.item-icon {
+    color: var(--item-icon-color);
+    flex-shrink: 0;
+    transition: color var(--transition-duration) var(--transition-easing);
+}
+
+.dropdown-item:hover .item-icon {
+    color: #555555;
+}
+
+/* 退出登录项特殊样式 - 简约风格 */
+.logout-item {
+    color: #e74c3c;
+}
+
+.logout-item:hover {
+    background: #fdf2f2;
+    color: #c0392b;
+}
+
+.logout-item .item-icon {
+    color: #e74c3c;
+}
+
+.logout-item:hover .item-icon {
+    color: #c0392b;
+}
+
+/* 响应式设计 - 简约风格 */
+@media (max-width: 768px) {
+    :root {
+        --dropdown-width: 240px;
+        --avatar-size: 32px;
+        --avatar-large-size: 40px;
+    }
+
+    .user-dropdown {
+        right: -8px;
+        left: auto;
+        width: var(--dropdown-width);
+    }
+
+    .dropdown-header {
+        padding: 14px 12px;
+    }
+
+    .user-name {
+        font-size: 14px;
+    }
+
+    .user-email {
+        font-size: 12px;
+    }
+
+    .dropdown-item {
+        padding: 8px 10px;
+        font-size: 12px;
+        margin: 0 4px;
+        width: calc(100% - 8px);
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --dropdown-width: 220px;
+    }
+
+    .user-dropdown {
+        right: -12px;
+    }
+}
+
+/* 动画效果 */
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes dropdownFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+}
+
+/* 额外的简约样式优化 */
+.user-dropdown {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* 去除所有不必要的阴影和效果，保持纯净白色 */
+.dropdown-item:focus {
+    outline: none;
+    background: var(--item-hover-bg);
+}
+
+/* 确保所有文本都是清晰的黑色 */
+.dropdown-item span {
+    color: inherit;
+}
+
+/* 简化分割线 */
+.dropdown-divider {
+    background: #f8f8f8;
+    height: 1px;
+    margin: 4px 0;
+}

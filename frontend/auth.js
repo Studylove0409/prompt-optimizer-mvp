@@ -599,18 +599,33 @@ function handleAuthStateChange(_event, session) {
 
 // 更新已登录用户的UI
 function updateUIForLoggedInUser(user) {
-    // 隐藏登录按钮，显示用户菜单
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (userMenu) userMenu.style.display = 'block';
-    if (userEmail) userEmail.textContent = user.email;
+    // 使用新的用户下拉菜单系统
+    if (window.userDropdownManager) {
+        const userInfo = {
+            name: user.user_metadata?.name || user.email?.split('@')[0] || '用户',
+            email: user.email,
+            avatar: user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=667eea&color=fff`
+        };
+        window.userDropdownManager.showUserMenu(userInfo);
+    } else {
+        // 备用方案：使用旧的UI系统
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (userMenu) userMenu.style.display = 'block';
+        if (userEmail) userEmail.textContent = user.email;
+    }
 }
 
 // 更新未登录用户的UI
 function updateUIForLoggedOutUser() {
-    // 显示登录按钮，隐藏用户菜单
-    if (loginBtn) loginBtn.style.display = 'block';
-    if (userMenu) userMenu.style.display = 'none';
-    if (userEmail) userEmail.textContent = '';
+    // 使用新的用户下拉菜单系统
+    if (window.userDropdownManager) {
+        window.userDropdownManager.hideUserMenu();
+    } else {
+        // 备用方案：使用旧的UI系统
+        if (loginBtn) loginBtn.style.display = 'block';
+        if (userMenu) userMenu.style.display = 'none';
+        if (userEmail) userEmail.textContent = '';
+    }
 }
 
 // 检查当前用户状态
