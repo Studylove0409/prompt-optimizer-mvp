@@ -421,40 +421,60 @@ class HistoryManager {
 // 初始化历史记录管理器
 let historyManager;
 
+// 初始化状态跟踪
+let initializationAttempts = 0;
+const MAX_INIT_ATTEMPTS = 10;
+
 // 等待DOM和Supabase都准备好后初始化
 function initializeHistoryManager() {
-    console.log('=== 尝试初始化历史记录管理器 ===');
+    initializationAttempts++;
+    console.log(`=== 尝试初始化历史记录管理器 (第${initializationAttempts}次) ===`);
     console.log('DOM状态:', document.readyState);
     console.log('Supabase客户端:', window.supabaseClient);
     console.log('已存在的管理器:', historyManager);
 
+    // 如果已经初始化过，不要重复初始化
+    if (historyManager) {
+        console.log('历史记录管理器已存在，跳过初始化');
+        return true;
+    }
+
+    // 检查是否超过最大尝试次数
+    if (initializationAttempts > MAX_INIT_ATTEMPTS) {
+        console.error('❌ 历史记录管理器初始化失败：超过最大尝试次数');
+        return false;
+    }
+
     // 检查DOM是否准备好
     if (document.readyState === 'loading') {
         console.log('DOM还在加载中，等待DOMContentLoaded事件...');
-        document.addEventListener('DOMContentLoaded', initializeHistoryManager);
-        return;
+        document.addEventListener('DOMContentLoaded', initializeHistoryManager, { once: true });
+        return false;
+    }
+
+    // 检查必要的DOM元素是否存在
+    const historyButton = document.getElementById('historyButton');
+    const historyModal = document.getElementById('historyModal');
+
+    if (!historyButton || !historyModal) {
+        console.log('DOM元素未准备好，延迟重试...');
+        setTimeout(initializeHistoryManager, 500);
+        return false;
     }
 
     // 检查Supabase客户端是否准备好
     if (!window.supabaseClient) {
-        console.log('Supabase客户端未准备好，等待supabaseReady事件...');
-        // 监听Supabase准备就绪事件
-        window.addEventListener('supabaseReady', initializeHistoryManager);
+        console.log('Supabase客户端未准备好，设置监听器和重试...');
 
-        // 设置超时重试机制
-        setTimeout(() => {
-            if (!window.supabaseClient && !historyManager) {
-                console.log('超时重试初始化历史记录管理器...');
-                initializeHistoryManager();
-            }
-        }, 2000);
-        return;
-    }
+        // 只添加一次事件监听器
+        if (!window.historyManagerInitListenerAdded) {
+            window.addEventListener('supabaseReady', initializeHistoryManager, { once: true });
+            window.historyManagerInitListenerAdded = true;
+        }
 
-    // 如果已经初始化过，不要重复初始化
-    if (historyManager) {
-        console.log('历史记录管理器已存在，跳过初始化');
-        return;
+        // 设置重试机制
+        setTimeout(initializeHistoryManager, 1000);
+        return false;
     }
 
     try {
@@ -468,10 +488,31 @@ function initializeHistoryManager() {
         // 触发自定义事件通知其他组件
         window.dispatchEvent(new CustomEvent('historyManagerReady'));
 
+        return true;
+
     } catch (error) {
         console.error('❌ 历史记录管理器初始化失败:', error);
+
+        // 如果是构造函数错误，延迟重试
+        if (initializationAttempts < MAX_INIT_ATTEMPTS) {
+            setTimeout(initializeHistoryManager, 1000);
+        }
+
+        return false;
     }
 }
+
+// 强制初始化函数（用于手动调用）
+function forceInitializeHistoryManager() {
+    console.log('🔧 强制初始化历史记录管理器...');
+    initializationAttempts = 0;
+    historyManager = null;
+    window.historyManager = null;
+    return initializeHistoryManager();
+}
+
+// 导出强制初始化函数到全局
+window.forceInitializeHistoryManager = forceInitializeHistoryManager;
 
 // 开始初始化
 initializeHistoryManager();
@@ -483,3 +524,11 @@ window.addEventListener('load', () => {
         setTimeout(initializeHistoryManager, 1000);
     }
 });
+
+// 额外的备用初始化（延迟5秒）
+setTimeout(() => {
+    if (!historyManager) {
+        console.log('延迟备用初始化历史记录管理器...');
+        initializeHistoryManager();
+    }
+}, 5000);

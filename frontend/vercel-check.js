@@ -149,7 +149,7 @@ async function runVercelCheck() {
 // 检查历史记录功能的特定依赖
 async function checkHistoryFeature() {
     console.log('\n🔍 检查历史记录功能依赖...');
-    
+
     const historyDeps = [
         '/history.js',
         '/history-modal.css',
@@ -157,7 +157,7 @@ async function checkHistoryFeature() {
     ];
 
     let allGood = true;
-    
+
     for (const dep of historyDeps) {
         const result = await checkFile(dep);
         if (result.exists) {
@@ -171,10 +171,10 @@ async function checkHistoryFeature() {
     // 检查DOM元素
     const historyButton = document.getElementById('historyButton');
     const historyModal = document.getElementById('historyModal');
-    
+
     console.log(`历史记录按钮: ${historyButton ? '✅ 存在' : '❌ 缺失'}`);
     console.log(`历史记录模态框: ${historyModal ? '✅ 存在' : '❌ 缺失'}`);
-    
+
     if (!historyButton || !historyModal) {
         allGood = false;
     }
@@ -182,8 +182,24 @@ async function checkHistoryFeature() {
     // 检查JavaScript对象
     console.log(`历史记录管理器: ${window.historyManager ? '✅ 已初始化' : '❌ 未初始化'}`);
     console.log(`Supabase客户端: ${window.supabaseClient ? '✅ 可用' : '❌ 不可用'}`);
-    
-    if (!window.historyManager || !window.supabaseClient) {
+
+    // 如果历史记录管理器未初始化，尝试强制初始化
+    if (!window.historyManager && window.supabaseClient && historyButton && historyModal) {
+        console.log('🔧 尝试强制初始化历史记录管理器...');
+
+        if (typeof window.forceInitializeHistoryManager === 'function') {
+            const success = window.forceInitializeHistoryManager();
+            if (success) {
+                console.log('✅ 强制初始化成功');
+            } else {
+                console.log('❌ 强制初始化失败');
+                allGood = false;
+            }
+        } else {
+            console.log('❌ 强制初始化函数不可用');
+            allGood = false;
+        }
+    } else if (!window.historyManager) {
         allGood = false;
     }
 
@@ -191,6 +207,13 @@ async function checkHistoryFeature() {
         console.log('🎉 历史记录功能依赖检查通过！');
     } else {
         console.log('⚠️ 历史记录功能存在问题，请检查上述缺失项');
+
+        // 提供修复建议
+        if (!window.historyManager && window.supabaseClient) {
+            console.log('\n🔧 修复建议:');
+            console.log('运行以下命令尝试手动修复:');
+            console.log('window.forceInitializeHistoryManager()');
+        }
     }
 
     return allGood;
@@ -221,13 +244,70 @@ function generateFixSuggestions(results) {
     }
 }
 
+// 快速修复历史记录功能
+function quickFixHistory() {
+    console.log('🚀 开始快速修复历史记录功能...');
+
+    // 1. 检查基本依赖
+    if (!window.supabaseClient) {
+        console.log('❌ Supabase客户端不可用，无法修复');
+        return false;
+    }
+
+    const historyButton = document.getElementById('historyButton');
+    const historyModal = document.getElementById('historyModal');
+
+    if (!historyButton || !historyModal) {
+        console.log('❌ DOM元素缺失，无法修复');
+        return false;
+    }
+
+    // 2. 强制初始化历史记录管理器
+    if (!window.historyManager) {
+        console.log('🔧 强制初始化历史记录管理器...');
+
+        if (typeof window.forceInitializeHistoryManager === 'function') {
+            const success = window.forceInitializeHistoryManager();
+            if (!success) {
+                console.log('❌ 强制初始化失败');
+                return false;
+            }
+        } else {
+            // 手动创建实例
+            try {
+                if (typeof HistoryManager !== 'undefined') {
+                    window.historyManager = new HistoryManager();
+                    console.log('✅ 手动创建历史记录管理器成功');
+                } else {
+                    console.log('❌ HistoryManager类不可用');
+                    return false;
+                }
+            } catch (error) {
+                console.log('❌ 手动创建失败:', error);
+                return false;
+            }
+        }
+    }
+
+    // 3. 测试功能
+    if (window.historyManager) {
+        console.log('✅ 历史记录管理器可用');
+        console.log('🎉 快速修复完成！');
+        return true;
+    } else {
+        console.log('❌ 快速修复失败');
+        return false;
+    }
+}
+
 // 导出到全局
 window.vercelCheck = {
     run: runVercelCheck,
     checkHistory: checkHistoryFeature,
     checkFile: checkFile,
     checkAPI: checkAPI,
-    generateFix: generateFixSuggestions
+    generateFix: generateFixSuggestions,
+    quickFix: quickFixHistory
 };
 
 // 自动运行检查（仅在非localhost环境）
