@@ -64,8 +64,17 @@ class HistoryManager {
     }
 
     async openHistoryModal() {
+        console.log('=== 开始打开历史记录模态框 ===');
+        console.log('当前环境:', {
+            protocol: window.location.protocol,
+            hostname: window.location.hostname,
+            host: window.location.host,
+            href: window.location.href
+        });
+
         // 检查 Supabase 客户端是否可用
         if (!window.supabaseClient) {
+            console.error('Supabase客户端不可用');
             if (typeof showCustomAlert === 'function') {
                 showCustomAlert('认证服务暂时不可用，请刷新页面重试', 'error');
             } else {
@@ -74,9 +83,12 @@ class HistoryManager {
             return;
         }
 
+        console.log('Supabase客户端可用，检查用户登录状态...');
+
         // 检查用户是否已登录
         const accessToken = await this.getAccessToken();
         if (!accessToken) {
+            console.warn('用户未登录或访问令牌无效');
             if (typeof showCustomAlert === 'function') {
                 showCustomAlert('请先登录以查看历史记录', 'warning');
             } else {
@@ -85,7 +97,10 @@ class HistoryManager {
             return;
         }
 
+        console.log('用户已登录，访问令牌长度:', accessToken.length);
+
         // 显示模态框
+        console.log('显示历史记录模态框...');
         this.historyModal.style.display = 'block';
         setTimeout(() => {
             this.historyModal.classList.add('show');
@@ -93,6 +108,7 @@ class HistoryManager {
 
         // 重置到第一页并加载数据
         this.currentPage = 1;
+        console.log('开始加载历史数据...');
         await this.loadHistoryData();
     }
 
@@ -101,6 +117,20 @@ class HistoryManager {
         setTimeout(() => {
             this.historyModal.style.display = 'none';
         }, 300);
+    }
+
+    getBaseUrl() {
+        // 检查当前是否在开发环境中
+        if (window.location.protocol === 'file:') {
+            // 如果是直接打开的HTML文件，使用localhost
+            return 'http://localhost:8000';
+        } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // 如果是本地开发环境
+            return `${window.location.protocol}//${window.location.host}`;
+        } else {
+            // 生产环境，使用当前域名
+            return `${window.location.protocol}//${window.location.host}`;
+        }
     }
 
     async getAccessToken() {
@@ -141,7 +171,13 @@ class HistoryManager {
                 throw new Error('未找到访问令牌');
             }
 
-            const response = await fetch(`/api/history?page=${this.currentPage}&page_size=${this.pageSize}`, {
+            // 构建正确的API URL
+            const baseUrl = this.getBaseUrl();
+            const apiUrl = `${baseUrl}/api/history?page=${this.currentPage}&page_size=${this.pageSize}`;
+
+            console.log('请求URL:', apiUrl);
+
+            const response = await fetch(apiUrl, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
@@ -387,31 +423,63 @@ let historyManager;
 
 // 等待DOM和Supabase都准备好后初始化
 function initializeHistoryManager() {
+    console.log('=== 尝试初始化历史记录管理器 ===');
+    console.log('DOM状态:', document.readyState);
+    console.log('Supabase客户端:', window.supabaseClient);
+    console.log('已存在的管理器:', historyManager);
+
     // 检查DOM是否准备好
     if (document.readyState === 'loading') {
+        console.log('DOM还在加载中，等待DOMContentLoaded事件...');
         document.addEventListener('DOMContentLoaded', initializeHistoryManager);
         return;
     }
 
     // 检查Supabase客户端是否准备好
     if (!window.supabaseClient) {
+        console.log('Supabase客户端未准备好，等待supabaseReady事件...');
         // 监听Supabase准备就绪事件
         window.addEventListener('supabaseReady', initializeHistoryManager);
+
+        // 设置超时重试机制
+        setTimeout(() => {
+            if (!window.supabaseClient && !historyManager) {
+                console.log('超时重试初始化历史记录管理器...');
+                initializeHistoryManager();
+            }
+        }, 2000);
         return;
     }
 
     // 如果已经初始化过，不要重复初始化
     if (historyManager) {
+        console.log('历史记录管理器已存在，跳过初始化');
         return;
     }
 
-    // 创建历史记录管理器实例
-    historyManager = new HistoryManager();
-    // 导出给全局使用
-    window.historyManager = historyManager;
+    try {
+        // 创建历史记录管理器实例
+        historyManager = new HistoryManager();
+        // 导出给全局使用
+        window.historyManager = historyManager;
 
-    console.log('历史记录管理器已初始化');
+        console.log('✅ 历史记录管理器初始化成功');
+
+        // 触发自定义事件通知其他组件
+        window.dispatchEvent(new CustomEvent('historyManagerReady'));
+
+    } catch (error) {
+        console.error('❌ 历史记录管理器初始化失败:', error);
+    }
 }
 
 // 开始初始化
 initializeHistoryManager();
+
+// 页面完全加载后再次尝试初始化（备用方案）
+window.addEventListener('load', () => {
+    if (!historyManager) {
+        console.log('页面加载完成，重新尝试初始化历史记录管理器...');
+        setTimeout(initializeHistoryManager, 1000);
+    }
+});
