@@ -45,6 +45,19 @@ class ExpertInterviewManager {
         
         // 结果元素
         this.expertOptimizedPrompt = document.getElementById('expertOptimizedPrompt');
+        
+        // 检查关键元素是否存在
+        if (!this.expertSection) {
+            console.error('专家访谈区域元素未找到: expertInterviewSection');
+        }
+        if (!this.analysisStage) {
+            console.error('分析阶段元素未找到: analysisStage');
+        }
+        if (!this.interviewForm) {
+            console.error('访谈表单元素未找到: interviewForm');
+        }
+        
+        console.log('专家访谈DOM元素初始化完成');
     }
 
     bindEvents() {
@@ -71,16 +84,33 @@ class ExpertInterviewManager {
 
     // 开始智能访谈流程
     async startInterview(originalPrompt) {
-        if (this.isProcessing) return;
+        console.log('开始智能访谈流程:', originalPrompt);
+        
+        if (this.isProcessing) {
+            console.log('正在处理中，跳过重复调用');
+            return;
+        }
+
+        if (!originalPrompt || originalPrompt.trim() === '') {
+            console.error('原始提示词为空');
+            showCustomAlert('请先输入您的想法', 'warning');
+            return;
+        }
 
         this.originalIdea = originalPrompt;
         this.isProcessing = true;
 
-        // 显示专家模式界面
-        this.showExpertSection();
-        
-        // 开始第一阶段：需求分析
-        await this.startAnalysisPhase();
+        try {
+            // 显示专家模式界面
+            this.showExpertSection();
+            
+            // 开始第一阶段：需求分析
+            await this.startAnalysisPhase();
+        } catch (error) {
+            console.error('启动智能访谈失败:', error);
+            this.isProcessing = false;
+            showCustomAlert('启动智能访谈失败，请重试', 'error');
+        }
     }
 
     // 显示专家模式界面
@@ -164,11 +194,24 @@ class ExpertInterviewManager {
             mode: 'expert'
         };
 
-        const response = await fetch('/api/optimize', {
+        const API_BASE_URL = window.location.protocol === 'file:'
+            ? 'http://localhost:8000/api'
+            : '/api';
+
+        // 获取认证令牌
+        const token = window.getAuthToken ? await window.getAuthToken() : null;
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        console.log('调用分析器API:', `${API_BASE_URL}/optimize`);
+        const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(requestBody)
         });
 
@@ -401,11 +444,24 @@ ${answersText}
             mode: 'expert'
         };
 
-        const response = await fetch('/api/optimize', {
+        const API_BASE_URL = window.location.protocol === 'file:'
+            ? 'http://localhost:8000/api'
+            : '/api';
+
+        // 获取认证令牌
+        const token = window.getAuthToken ? await window.getAuthToken() : null;
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        console.log('调用合成器API:', `${API_BASE_URL}/optimize`);
+        const response = await fetch(`${API_BASE_URL}/optimize`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: headers,
             body: JSON.stringify(requestBody)
         });
 

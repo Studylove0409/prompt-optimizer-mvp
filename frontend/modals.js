@@ -69,6 +69,9 @@ function updatePlaceholderByMode(mode) {
         case 'academic':
             textarea.placeholder = "在这里输入您想要优化的学术提示词...例如：解释量子力学的基本原理";
             break;
+        case 'expert':
+            textarea.placeholder = "在这里输入您的初步想法...例如：我想做一个项目但不知道从哪开始";
+            break;
         default:
             textarea.placeholder = "在这里输入您想要优化的提示词...";
     }

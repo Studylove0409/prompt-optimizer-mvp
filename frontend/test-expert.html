@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专家模式测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .mode-btn { background: #f0f0f0; border: 1px solid #ccc; }
+        .mode-btn.active { background: #007AFF; color: white; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; max-height: 200px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>专家模式功能测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 模式选择测试</h2>
+        <button class="mode-btn active" data-mode="general">通用模式</button>
+        <button class="mode-btn" data-mode="expert">专家模式</button>
+        <div>当前模式: <span id="currentMode">general</span></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. API函数测试</h2>
+        <button onclick="testGetSelectedMode()">测试 getSelectedMode()</button>
+        <button onclick="testExpertManager()">测试专家访谈管理器</button>
+        <div class="log" id="testLog"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 完整流程测试</h2>
+        <textarea id="testPrompt" placeholder="输入测试提示词...">我想学习一门新的编程语言</textarea>
+        <button onclick="testOptimizeWithExpert()">测试专家模式优化</button>
+        <div class="log" id="flowLog"></div>
+    </div>
+
+    <!-- 智能访谈区域 -->
+    <section class="expert-interview-section" id="expertInterviewSection" style="display: none;">
+        <h2>智能访谈测试区域</h2>
+        
+        <div class="interview-stage" id="analysisStage">
+            <div>阶段1: 需求分析</div>
+            <div id="analysisStatus">等待中...</div>
+            <div class="analysis-result" id="analysisResult" style="display: none;">
+                <p class="analysis-summary">分析结果将显示在这里</p>
+            </div>
+        </div>
+
+        <div class="interview-stage" id="interviewStage" style="display: none;">
+            <div>阶段2: 智能访谈</div>
+            <div id="interviewStatus">访谈状态</div>
+            <div class="interview-form" id="interviewForm"></div>
+            <button id="interviewBackBtn">返回修改</button>
+            <button id="interviewSubmitBtn">提交并生成</button>
+        </div>
+
+        <div class="interview-stage" id="synthesisStage" style="display: none;">
+            <div>阶段3: 提示词合成</div>
+            <div id="synthesisStatus">合成状态</div>
+            <div class="synthesis-result" id="synthesisResult" style="display: none;">
+                <div id="expertOptimizedPrompt"></div>
+                <button id="expertCopyBtn">复制结果</button>
+                <button id="expertRestartBtn">重新开始</button>
+            </div>
+        </div>
+
+        <div class="interview-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="interviewProgressFill" style="width: 33%;"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">分析</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">访谈</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">合成</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="expert-interview.js"></script>
+    
+    <script>
+        // 测试脚本
+        function log(message, containerId = 'testLog') {
+            const logDiv = document.getElementById(containerId);
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 模式选择测试
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('currentMode').textContent = this.dataset.mode;
+                log(`模式切换到: ${this.dataset.mode}`);
+            });
+        });
+
+        function testGetSelectedMode() {
+            const mode = window.getSelectedMode ? window.getSelectedMode() : 'Function not found';
+            log(`getSelectedMode() 返回: ${mode}`);
+        }
+
+        function testExpertManager() {
+            if (window.expertInterviewManager) {
+                log('✅ 专家访谈管理器已初始化');
+                log(`管理器类型: ${typeof window.expertInterviewManager}`);
+                log(`startInterview方法: ${typeof window.expertInterviewManager.startInterview}`);
+            } else {
+                log('❌ 专家访谈管理器未找到');
+            }
+        }
+
+        async function testOptimizeWithExpert() {
+            const prompt = document.getElementById('testPrompt').value;
+            log(`开始测试专家模式优化: ${prompt}`, 'flowLog');
+            
+            // 首先切换到专家模式
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-mode="expert"]').classList.add('active');
+            log('切换到专家模式', 'flowLog');
+            
+            try {
+                if (window.expertInterviewManager) {
+                    await window.expertInterviewManager.startInterview(prompt);
+                    log('✅ 专家访谈启动成功', 'flowLog');
+                } else {
+                    log('❌ 专家访谈管理器未找到', 'flowLog');
+                }
+            } catch (error) {
+                log(`❌ 测试失败: ${error.message}`, 'flowLog');
+            }
+        }
+
+        // 页面加载完成后运行初始测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('页面加载完成，开始测试...');
+                testGetSelectedMode();
+                testExpertManager();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

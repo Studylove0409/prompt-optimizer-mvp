@@ -120,9 +120,12 @@ async function optimizePrompt() {
     console.log('当前选择的模式:', selectedMode);
 
     // 检查是否为专家模式
+    console.log('当前选择的模式:', selectedMode);
     if (selectedMode === 'expert') {
+        console.log('进入专家模式流程');
         // 启动智能访谈流程
         if (window.expertInterviewManager) {
+            console.log('专家访谈管理器已找到，启动访谈');
             await window.expertInterviewManager.startInterview(originalPrompt);
         } else {
             console.error('专家访谈管理器未初始化');
@@ -179,12 +182,15 @@ async function quickOptimizePrompt() {
     }
 
     // 检查是否为专家模式
+    console.log('快速优化 - 当前选择的模式:', selectedMode);
     if (selectedMode === 'expert') {
+        console.log('快速优化 - 进入专家模式流程');
         // 专家模式不支持快速优化，使用普通流程
         if (window.expertInterviewManager) {
+            console.log('快速优化 - 专家访谈管理器已找到，启动访谈');
             await window.expertInterviewManager.startInterview(originalPrompt);
         } else {
-            console.error('专家访谈管理器未初始化');
+            console.error('快速优化 - 专家访谈管理器未初始化');
             showCustomAlert('专家模式暂时不可用，请稍后重试', 'error');
         }
         return;
