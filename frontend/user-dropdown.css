@@ -99,8 +99,21 @@
     visibility: hidden;
     transform: translateY(-8px) scale(0.96);
     transition: all var(--transition-duration) var(--transition-easing);
-    z-index: 1000;
+    z-index: 9999;
     overflow: hidden;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* 向上展开的下拉菜单 */
+.user-dropdown.dropdown-up {
+    top: auto;
+    bottom: calc(100% + 6px);
+    transform: translateY(8px) scale(0.96);
+}
+
+.user-dropdown.dropdown-up.show {
+    transform: translateY(0) scale(1);
 }
 
 .user-dropdown.show {
@@ -243,6 +256,15 @@
         right: -8px;
         left: auto;
         width: var(--dropdown-width);
+        max-height: 70vh;
+        /* 确保在移动端不会超出边界 */
+        max-width: calc(100vw - 20px);
+    }
+
+    /* 当下拉框靠近屏幕右边缘时，向左偏移 */
+    .user-dropdown.edge-adjust {
+        right: -20px;
+        transform-origin: top right;
     }
 
     .dropdown-header {
@@ -267,11 +289,16 @@
 
 @media (max-width: 480px) {
     :root {
-        --dropdown-width: 220px;
+        --dropdown-width: 200px;
     }
 
     .user-dropdown {
-        right: -12px;
+        right: -16px;
+        max-width: calc(100vw - 16px);
+    }
+
+    .user-dropdown.edge-adjust {
+        right: -30px;
     }
 }
 

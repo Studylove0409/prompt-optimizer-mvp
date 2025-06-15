@@ -55,6 +55,9 @@ class UserDropdownManager {
         // 键盘事件
         document.addEventListener('keydown', this.handleKeydown);
 
+        // 窗口大小改变事件
+        window.addEventListener('resize', this.handleWindowResize.bind(this));
+
         // 菜单项点击事件
         this.bindMenuItemEvents();
     }
@@ -131,6 +134,16 @@ class UserDropdownManager {
         }
     }
 
+    handleWindowResize() {
+        // 如果下拉菜单是打开的，重新调整位置
+        if (this.isDropdownOpen) {
+            // 延迟执行以确保窗口大小改变完成
+            setTimeout(() => {
+                this.adjustDropdownPosition();
+            }, 100);
+        }
+    }
+
     toggleDropdown() {
         if (this.isDropdownOpen) {
             this.closeDropdown();
@@ -142,12 +155,68 @@ class UserDropdownManager {
     openDropdown() {
         if (!this.userDropdown) return;
         
+        // 先移除可能存在的位置调整类
+        this.userDropdown.classList.remove('dropdown-up', 'edge-adjust');
+        
         this.isDropdownOpen = true;
         this.userDropdown.classList.add('show');
         this.userAvatarBtn.classList.add('active');
         
+        // 检测位置并调整
+        this.adjustDropdownPosition();
+        
         // 添加动画类
         this.userDropdown.style.animation = 'dropdownFadeIn 0.2s ease-out';
+    }
+
+    adjustDropdownPosition() {
+        if (!this.userDropdown || !this.userAvatarBtn) return;
+        
+        // 使用requestAnimationFrame确保DOM已经渲染完成
+        requestAnimationFrame(() => {
+            const dropdown = this.userDropdown;
+            const avatarBtn = this.userAvatarBtn;
+            
+            // 获取按钮和下拉框的位置信息
+            const btnRect = avatarBtn.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            
+            // 获取下拉框实际高度，如果还没有渲染完成则使用预估值
+            let dropdownHeight = dropdown.offsetHeight;
+            if (dropdownHeight === 0) {
+                // 临时显示来获取高度
+                dropdown.style.visibility = 'visible';
+                dropdown.style.opacity = '0';
+                dropdownHeight = dropdown.offsetHeight;
+                dropdown.style.visibility = 'hidden';
+                dropdown.style.opacity = '';
+            }
+            
+            // 如果还是获取不到高度，使用预估值
+            if (dropdownHeight === 0) {
+                dropdownHeight = 320; // 预估高度
+            }
+            
+            // 检查是否需要向上展开
+            const spaceBelow = viewportHeight - btnRect.bottom - 10; // 10px余量
+            const spaceAbove = btnRect.top - 10; // 10px余量
+            
+            if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+                dropdown.classList.add('dropdown-up');
+            }
+            
+            // 检查水平边界，在移动端调整位置
+            if (window.innerWidth <= 768) {
+                const spaceRight = viewportWidth - btnRect.right;
+                const dropdownWidth = dropdown.offsetWidth || parseInt(getComputedStyle(dropdown).width);
+                
+                // 如果右侧空间不够，向左调整
+                if (spaceRight < dropdownWidth - 30) {
+                    dropdown.classList.add('edge-adjust');
+                }
+            }
+        });
     }
 
     closeDropdown() {
