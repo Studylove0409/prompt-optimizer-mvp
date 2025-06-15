@@ -75,10 +75,10 @@ function bindAuthEvents() {
         });
     }
 
-    // 登出按钮点击
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
-    }
+    // 登出按钮点击 - 现在由 UserDropdownManager 处理
+    // if (logoutBtn) {
+    //     logoutBtn.addEventListener('click', handleLogout);
+    // }
 
     // 关闭弹窗
     if (closeAuthModalBtn) {

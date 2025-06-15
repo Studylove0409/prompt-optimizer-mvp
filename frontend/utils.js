@@ -115,20 +115,26 @@ function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
     // 取消按钮事件
     cancelBtn.addEventListener('click', () => {
         closeConfirm();
-        if (typeof onCancel === 'function') onCancel();
+        if (typeof onCancel === 'function') {
+            onCancel();
+        }
     });
     
     // 确认按钮事件
     confirmBtn.addEventListener('click', () => {
         closeConfirm();
-        if (typeof onConfirm === 'function') onConfirm();
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
     });
     
     // ESC键关闭
     const keyHandler = (e) => {
         if (e.key === 'Escape') {
             closeConfirm();
-            if (typeof onCancel === 'function') onCancel();
+            if (typeof onCancel === 'function') {
+                onCancel();
+            }
             document.removeEventListener('keydown', keyHandler);
         }
     };
@@ -138,7 +144,9 @@ function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
     // 点击背景关闭
     overlay.addEventListener('click', () => {
         closeConfirm();
-        if (typeof onCancel === 'function') onCancel();
+        if (typeof onCancel === 'function') {
+            onCancel();
+        }
     });
 }
 
