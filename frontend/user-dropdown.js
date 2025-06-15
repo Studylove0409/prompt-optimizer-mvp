@@ -290,9 +290,18 @@ class UserDropdownManager {
     handleLogout() {
         // 显示确认对话框
         if (typeof showCustomConfirm === 'function') {
-            showCustomConfirm('确定要退出登录吗？', '退出登录', () => {
-                this.performLogout();
-            });
+            showCustomConfirm(
+                '确定要退出登录吗？',
+                () => {
+                    // 确认回调
+                    this.performLogout();
+                },
+                () => {
+                    // 取消回调 - 什么都不做
+                    console.log('用户取消退出登录');
+                },
+                '🚪'
+            );
         } else {
             if (confirm('确定要退出登录吗？')) {
                 this.performLogout();
