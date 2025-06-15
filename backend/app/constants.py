@@ -331,78 +331,69 @@ C. 执行策略 (Execution Strategy)
 
 # 智能访谈分析器提示词模板
 ANALYZER_PROMPT_TEMPLATE = """
-你是一位专业的需求分析师，专门负责分析用户的初步想法，识别并提取为了生成高质量结果所缺失的关键信息点。
+作为专业的需求分析师，请分析用户的初步想法并生成结构化问题。
 
-## 核心任务
-分析用户提供的初步想法："{user_input_prompt}"
+用户想法："{user_input_prompt}"
 
-## 分析要求
-1. **深度理解用户意图**：理解用户真正想要达成的目标
-2. **识别信息缺口**：找出完成这个任务所必需但用户未提供的关键信息
-3. **生成结构化问题**：将缺失的信息转化为具体、有针对性的问题
+**重要：你必须严格按照JSON格式返回，不要添加任何解释或其他文字。**
 
-## 输出格式要求
-必须严格按照以下JSON格式返回，不要包含任何其他内容：
+要求：
+1. 生成3-5个核心问题
+2. 问题要具体、有针对性
+3. 能显著提升最终输出质量
 
-```json
+严格按此JSON格式输出：
 {
-    "questions": [
-        {
-            "key": "问题标识符(英文)",
-            "question": "具体问题内容",
-            "type": "text|textarea|select",
-            "placeholder": "输入提示文字",
-            "required": true|false
-        }
-    ],
-    "summary": "简要分析总结，说明为什么需要这些信息"
+  "questions": [
+    {
+      "key": "english_key",
+      "question": "具体问题内容",
+      "type": "textarea",
+      "placeholder": "输入提示",
+      "required": true
+    }
+  ],
+  "summary": "分析总结"
 }
-```
 
-## 设计原则
-1. **问题数量**：控制在3-6个之间，确保重点突出
-2. **问题质量**：每个问题都必须具体、有针对性，能显著提升最终输出质量
-3. **问题类型**：
-   - `text`: 简短文本输入
-   - `textarea`: 长文本输入
-   - `select`: 选择题（暂不实现）
-4. **避免过于宽泛**：问题要具体到能够直接指导后续的提示词生成
-
-## 示例
-用户输入："帮我写个市场分析报告"
-
+示例：
+输入："写一个商业计划书"
 输出：
-```json
 {
-    "questions": [
-        {
-            "key": "product_or_service",
-            "question": "请指定要分析的产品或服务名称",
-            "type": "text",
-            "placeholder": "例如：智能手机、在线教育平台等",
-            "required": true
-        },
-        {
-            "key": "target_market",
-            "question": "目标市场是什么？包括地理位置、目标用户群体等",
-            "type": "textarea",
-            "placeholder": "例如：中国一线城市的25-35岁白领群体",
-            "required": true
-        },
-        {
-            "key": "analysis_focus",
-            "question": "希望重点分析哪些方面？",
-            "type": "textarea", 
-            "placeholder": "例如：竞争对手分析、市场规模、用户需求、发展趋势等",
-            "required": true
-        }
-    ],
-    "summary": "为了生成高质量的市场分析报告，需要明确分析对象、目标市场和分析重点，这些信息将直接影响报告的针对性和实用性。"
+  "questions": [
+    {
+      "key": "business_type",
+      "question": "您的商业项目是什么类型？",
+      "type": "text",
+      "placeholder": "例如：餐饮、科技、教育等",
+      "required": true
+    },
+    {
+      "key": "target_market",
+      "question": "目标客户群体是谁？",
+      "type": "textarea",
+      "placeholder": "描述您的目标客户特征、需求等",
+      "required": true
+    },
+    {
+      "key": "competitive_advantage",
+      "question": "您的核心竞争优势是什么？",
+      "type": "textarea",
+      "placeholder": "与竞争对手相比的独特优势",
+      "required": true
+    },
+    {
+      "key": "funding_amount",
+      "question": "预计需要多少启动资金？",
+      "type": "text",
+      "placeholder": "例如：50万元、100万元等",
+      "required": false
+    }
+  ],
+  "summary": "为了制定专业的商业计划书，需要明确业务类型、目标市场、竞争优势等关键要素。"
 }
-```
 
-请直接返回JSON格式的分析结果。
-"""
+现在分析用户想法并返回JSON："""
 
 # 智能访谈合成器提示词模板
 SYNTHESIZER_PROMPT_TEMPLATE = """

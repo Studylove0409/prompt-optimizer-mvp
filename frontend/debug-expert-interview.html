@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能访谈模式调试页面</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0052a3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #0066cc;
+            background-color: #f0f8ff;
+        }
+        .error {
+            border-left-color: #ff4444;
+            background-color: #fff0f0;
+        }
+        .success {
+            border-left-color: #44ff44;
+            background-color: #f0fff0;
+        }
+        .log {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .questions-list {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .question-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 3px;
+            border-left: 3px solid #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 智能访谈模式调试页面</h1>
+        
+        <!-- 第一阶段测试：需求分析 -->
+        <div class="test-section">
+            <h3>第一阶段：需求分析测试</h3>
+            <textarea id="testIdea" placeholder="输入要测试的用户想法，例如：帮我写个市场分析报告" rows="3">帮我写个市场分析报告</textarea>
+            <button id="testAnalyzeBtn">测试分析器API</button>
+            <div class="status" id="analyzeStatus">等待测试...</div>
+            <div class="result" id="analyzeResult" style="display: none;"></div>
+            <div class="log" id="analyzeLog" style="display: none;"></div>
+        </div>
+
+        <!-- 第二阶段测试：动态表单 -->
+        <div class="test-section">
+            <h3>第二阶段：动态表单测试</h3>
+            <div id="dynamicFormTest" style="display: none;">
+                <p><strong>生成的问题列表：</strong></p>
+                <div id="questionsList" class="questions-list"></div>
+                <button id="testFormBtn">测试表单生成</button>
+                <div id="generatedForm"></div>
+            </div>
+        </div>
+
+        <!-- 第三阶段测试：提示词合成 -->
+        <div class="test-section">
+            <h3>第三阶段：提示词合成测试</h3>
+            <textarea id="testAnswers" placeholder="输入测试用的用户答案（JSON格式）" rows="4">{"target_subject": "智能手机市场", "analysis_scope": "竞争格局和发展趋势", "target_audience": "公司高管", "time_scope": "近3年数据"}</textarea>
+            <button id="testSynthesizeBtn">测试合成器API</button>
+            <div class="status" id="synthesizeStatus">等待测试...</div>
+            <div class="result" id="synthesizeResult" style="display: none;"></div>
+            <div class="log" id="synthesizeLog" style="display: none;"></div>
+        </div>
+
+        <!-- 完整流程测试 -->
+        <div class="test-section">
+            <h3>完整流程测试</h3>
+            <textarea id="fullTestIdea" placeholder="输入要测试完整流程的想法" rows="2">写一个创业项目的商业计划书</textarea>
+            <button id="testFullFlowBtn">测试完整智能访谈流程</button>
+            <div class="status" id="fullFlowStatus">等待测试...</div>
+            <div class="result" id="fullFlowResult" style="display: none;"></div>
+        </div>
+
+        <!-- 日志区域 -->
+        <div class="test-section">
+            <h3>调试日志</h3>
+            <button id="clearLogBtn">清空日志</button>
+            <div class="log" id="debugLog">调试日志将显示在这里...</div>
+        </div>
+    </div>
+
+    <script>
+        // 全局日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('debugLog');
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        // API基础URL
+        const API_BASE_URL = window.location.protocol === 'file:' 
+            ? 'http://localhost:8000/api' 
+            : '/api';
+
+        // 测试分析器API
+        document.getElementById('testAnalyzeBtn').addEventListener('click', async () => {
+            const testIdea = document.getElementById('testIdea').value.trim();
+            const statusElement = document.getElementById('analyzeStatus');
+            const resultElement = document.getElementById('analyzeResult');
+            const logElement = document.getElementById('analyzeLog');
+            
+            if (!testIdea) {
+                alert('请输入测试想法');
+                return;
+            }
+
+            statusElement.textContent = '正在测试分析器API...';
+            statusElement.style.color = '#0066cc';
+            resultElement.style.display = 'none';
+            logElement.style.display = 'none';
+
+            try {
+                log(`开始测试分析器API，输入: ${testIdea}`);
+                
+                const requestBody = {
+                    original_idea: testIdea,
+                    model: 'gemini-2.0-flash'
+                };
+
+                log(`请求数据: ${JSON.stringify(requestBody, null, 2)}`);
+
+                const response = await fetch(`${API_BASE_URL}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                log(`响应状态: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`错误响应: ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                log(`响应数据: ${JSON.stringify(data, null, 2)}`);
+
+                statusElement.textContent = '✅ 分析器API测试成功';
+                statusElement.style.color = '#00aa00';
+                
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `
+                    <h4>分析结果：</h4>
+                    <p><strong>总结：</strong> ${data.summary}</p>
+                    <p><strong>生成问题数量：</strong> ${data.questions.length}</p>
+                    <div class="questions-list">
+                        ${data.questions.map((q, i) => `
+                            <div class="question-item">
+                                <strong>问题 ${i+1}:</strong> ${q.question}<br>
+                                <small>类型: ${q.type} | 必填: ${q.required ? '是' : '否'}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                resultElement.style.display = 'block';
+
+                // 启用第二阶段测试
+                document.getElementById('dynamicFormTest').style.display = 'block';
+                document.getElementById('questionsList').innerHTML = data.questions.map((q, i) => `
+                    <div class="question-item">
+                        <strong>${q.key}:</strong> ${q.question} (${q.type})
+                    </div>
+                `).join('');
+
+                // 保存数据供后续测试使用
+                window.testAnalysisData = data;
+
+            } catch (error) {
+                log(`分析器API测试失败: ${error.message}`, 'error');
+                statusElement.textContent = '❌ 分析器API测试失败';
+                statusElement.style.color = '#ff4444';
+                
+                resultElement.className = 'result error';
+                resultElement.innerHTML = `<strong>错误：</strong> ${error.message}`;
+                resultElement.style.display = 'block';
+            }
+
+            logElement.textContent = document.getElementById('debugLog').textContent;
+            logElement.style.display = 'block';
+        });
+
+        // 测试合成器API
+        document.getElementById('testSynthesizeBtn').addEventListener('click', async () => {
+            const testIdea = document.getElementById('testIdea').value.trim();
+            const testAnswersStr = document.getElementById('testAnswers').value.trim();
+            const statusElement = document.getElementById('synthesizeStatus');
+            const resultElement = document.getElementById('synthesizeResult');
+            const logElement = document.getElementById('synthesizeLog');
+
+            if (!testIdea || !testAnswersStr) {
+                alert('请先输入测试想法和用户答案');
+                return;
+            }
+
+            try {
+                const userAnswers = JSON.parse(testAnswersStr);
+                
+                statusElement.textContent = '正在测试合成器API...';
+                statusElement.style.color = '#0066cc';
+                resultElement.style.display = 'none';
+
+                log(`开始测试合成器API`);
+                log(`原始想法: ${testIdea}`);
+                log(`用户答案: ${JSON.stringify(userAnswers, null, 2)}`);
+
+                const requestBody = {
+                    original_idea: testIdea,
+                    user_answers: userAnswers,
+                    model: 'gemini-2.0-flash'
+                };
+
+                const response = await fetch(`${API_BASE_URL}/synthesize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                log(`合成器响应状态: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log(`合成器错误响应: ${errorText}`, 'error');
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                log(`合成器响应长度: ${data.optimized_prompt.length} 字符`);
+
+                statusElement.textContent = '✅ 合成器API测试成功';
+                statusElement.style.color = '#00aa00';
+                
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `
+                    <h4>合成结果：</h4>
+                    <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+                        ${data.optimized_prompt.replace(/\n/g, '<br>')}
+                    </div>
+                    <p><strong>字符数：</strong> ${data.optimized_prompt.length}</p>
+                `;
+                resultElement.style.display = 'block';
+
+            } catch (parseError) {
+                log(`JSON解析错误: ${parseError.message}`, 'error');
+                alert('用户答案JSON格式不正确');
+            } catch (error) {
+                log(`合成器API测试失败: ${error.message}`, 'error');
+                statusElement.textContent = '❌ 合成器API测试失败';
+                statusElement.style.color = '#ff4444';
+                
+                resultElement.className = 'result error';
+                resultElement.innerHTML = `<strong>错误：</strong> ${error.message}`;
+                resultElement.style.display = 'block';
+            }
+
+            logElement.textContent = document.getElementById('debugLog').textContent;
+            logElement.style.display = 'block';
+        });
+
+        // 清空日志
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            document.getElementById('debugLog').textContent = '调试日志已清空...\n';
+        });
+
+        // 页面加载时的初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            log('智能访谈调试页面已加载');
+            log(`API基础URL: ${API_BASE_URL}`);
+        });
+    </script>
+</body>
+</html>

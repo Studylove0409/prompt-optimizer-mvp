@@ -157,7 +157,18 @@ class ExpertInterviewManager {
 
         try {
             // 调用分析器API
+            console.log('开始调用分析器API...');
             const analysisData = await this.callAnalyzerAPI(this.originalIdea);
+            console.log('分析器API返回:', analysisData);
+            
+            // 检查返回数据格式
+            if (!analysisData || !analysisData.questions || !Array.isArray(analysisData.questions)) {
+                throw new Error('API返回的数据格式不正确');
+            }
+            
+            if (analysisData.questions.length === 0) {
+                throw new Error('没有生成任何问题');
+            }
             
             // 显示分析结果
             this.displayAnalysisResult(analysisData);
@@ -169,8 +180,93 @@ class ExpertInterviewManager {
 
         } catch (error) {
             console.error('分析阶段失败:', error);
-            this.analysisStatus.textContent = '分析失败，请重试';
+            let errorMessage = '分析失败';
+            
+            if (error.message && error.message.includes('HTTP error')) {
+                errorMessage = '网络连接失败，请检查网络后重试';
+            } else if (error.message && error.message.includes('数据格式')) {
+                errorMessage = 'AI分析出现问题，正在使用备用方案...';
+                // 尝试使用备用问题
+                this.useFallbackQuestions();
+                return;
+            } else if (error.message) {
+                errorMessage = `分析失败: ${error.message}`;
+            }
+            
+            this.analysisStatus.textContent = errorMessage;
+            this.analysisStatus.style.color = '#ff4500';
             this.isProcessing = false;
+            
+            // 5秒后提供重试选项
+            setTimeout(() => {
+                this.showRetryOption();
+            }, 5000);
+        }
+    }
+
+    // 使用备用问题
+    useFallbackQuestions() {
+        console.log('使用备用问题方案');
+        const fallbackData = {
+            questions: [
+                {
+                    key: "specific_goal",
+                    question: "请详细描述您希望达到的具体目标",
+                    type: "textarea",
+                    placeholder: "例如：我想要一个专业的市场分析报告，帮助我了解行业趋势...",
+                    required: true
+                },
+                {
+                    key: "target_audience",
+                    question: "您的目标受众或使用场景是什么？",
+                    type: "textarea",
+                    placeholder: "例如：公司高管、学术研究、个人学习等",
+                    required: true
+                },
+                {
+                    key: "key_requirements",
+                    question: "有什么特殊要求或重点关注的方面吗？",
+                    type: "textarea",
+                    placeholder: "例如：时间范围、数据来源、分析深度、格式要求等",
+                    required: false
+                }
+            ],
+            summary: "为了更好地理解和完善您的想法，请回答以下几个问题。"
+        };
+        
+        this.analysisStatus.textContent = '已为您准备通用问题';
+        this.analysisStatus.style.color = '#0066cc';
+        this.displayAnalysisResult(fallbackData);
+        
+        setTimeout(() => {
+            this.startInterviewPhase(fallbackData);
+        }, 1500);
+    }
+
+    // 显示重试选项
+    showRetryOption() {
+        const retryButton = document.createElement('button');
+        retryButton.textContent = '重新分析';
+        retryButton.className = 'interview-btn primary';
+        retryButton.style.marginTop = '10px';
+        
+        retryButton.addEventListener('click', () => {
+            // 重置状态
+            this.analysisStatus.textContent = '正在重新分析...';
+            this.analysisStatus.style.color = '';
+            retryButton.remove();
+            this.isProcessing = true;
+            
+            // 重新开始分析
+            this.startAnalysisPhase();
+        });
+        
+        // 将按钮添加到分析状态区域
+        if (this.analysisStage) {
+            const statusElement = this.analysisStage.querySelector('.stage-content');
+            if (statusElement) {
+                statusElement.appendChild(retryButton);
+            }
         }
     }
 
@@ -196,18 +292,53 @@ class ExpertInterviewManager {
         }
 
         console.log('调用分析器API:', `${API_BASE_URL}/analyze`);
-        const response = await fetch(`${API_BASE_URL}/analyze`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(requestBody)
-        });
+        console.log('请求数据:', requestBody);
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/analyze`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            console.log('API响应状态:', response.status);
+            
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage += `: ${errorData.detail || errorData.message || 'Unknown error'}`;
+                    console.log('错误详情:', errorData);
+                } catch (e) {
+                    console.log('无法解析错误响应');
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            console.log('API成功响应:', data);
+            
+            // 验证响应数据结构
+            if (!data.questions) {
+                console.error('响应缺少questions字段:', data);
+                throw new Error('API返回的数据格式不正确: 缺少questions字段');
+            }
+            
+            if (!Array.isArray(data.questions)) {
+                console.error('questions不是数组:', typeof data.questions);
+                throw new Error('API返回的数据格式不正确: questions不是数组');
+            }
+            
+            return data;
+            
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                console.error('网络请求失败:', error);
+                throw new Error('网络连接失败，请检查网络连接或稍后重试');
+            }
+            console.error('API调用失败:', error);
+            throw error;
         }
-
-        const data = await response.json();
-        return data;
     }
 
     // 显示分析结果
@@ -342,19 +473,68 @@ class ExpertInterviewManager {
         this.synthesisStatus.textContent = '正在合成专业提示词...';
 
         try {
+            console.log('开始合成阶段...');
+            console.log('用户答案:', this.userAnswers);
+            
             // 调用合成器API
             const finalPrompt = await this.callSynthesizerAPI();
+            console.log('合成成功，提示词长度:', finalPrompt.length);
             
             // 显示最终结果
             this.displayFinalResult(finalPrompt);
 
         } catch (error) {
             console.error('合成阶段失败:', error);
-            this.synthesisStatus.textContent = '合成失败，请重试';
+            let errorMessage = '合成失败';
+            
+            if (error.message && error.message.includes('网络连接失败')) {
+                errorMessage = '网络连接失败，请检查网络后重试';
+            } else if (error.message && error.message.includes('HTTP')) {
+                errorMessage = `服务器错误: ${error.message}`;
+            } else if (error.message) {
+                errorMessage = `合成失败: ${error.message}`;
+            }
+            
+            this.synthesisStatus.textContent = errorMessage;
+            this.synthesisStatus.style.color = '#ff4500';
+            
+            // 显示重试按钮
+            setTimeout(() => {
+                this.showSynthesisRetryOption();
+            }, 3000);
+            
         } finally {
             this.isProcessing = false;
             this.interviewSubmitBtn.disabled = false;
             this.interviewSubmitBtn.textContent = '提交并生成';
+        }
+    }
+
+    // 显示合成阶段的重试选项
+    showSynthesisRetryOption() {
+        const retryButton = document.createElement('button');
+        retryButton.textContent = '重新合成';
+        retryButton.className = 'interview-btn primary';
+        retryButton.style.marginTop = '10px';
+        
+        retryButton.addEventListener('click', () => {
+            // 重置状态
+            this.synthesisStatus.textContent = '正在重新合成专业提示词...';
+            this.synthesisStatus.style.color = '';
+            retryButton.remove();
+            this.isProcessing = true;
+            this.interviewSubmitBtn.disabled = true;
+            
+            // 重新开始合成
+            this.startSynthesisPhase();
+        });
+        
+        // 将按钮添加到合成状态区域
+        if (this.synthesisStage) {
+            const statusElement = this.synthesisStage.querySelector('.stage-content');
+            if (statusElement) {
+                statusElement.appendChild(retryButton);
+            }
         }
     }
 
@@ -381,18 +561,53 @@ class ExpertInterviewManager {
         }
 
         console.log('调用合成器API:', `${API_BASE_URL}/synthesize`);
-        const response = await fetch(`${API_BASE_URL}/synthesize`, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(requestBody)
-        });
+        console.log('合成请求数据:', requestBody);
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/synthesize`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            console.log('合成器API响应状态:', response.status);
+            
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage += `: ${errorData.detail || errorData.message || 'Unknown error'}`;
+                    console.log('合成器错误详情:', errorData);
+                } catch (e) {
+                    console.log('无法解析合成器错误响应');
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            console.log('合成器API成功响应:', data);
+            
+            // 验证响应数据结构
+            if (!data.optimized_prompt) {
+                console.error('合成器响应缺少optimized_prompt字段:', data);
+                throw new Error('合成器返回的数据格式不正确: 缺少optimized_prompt字段');
+            }
+            
+            if (typeof data.optimized_prompt !== 'string' || data.optimized_prompt.trim().length === 0) {
+                console.error('optimized_prompt无效:', data.optimized_prompt);
+                throw new Error('合成器返回的提示词为空或格式不正确');
+            }
+            
+            return data.optimized_prompt;
+            
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                console.error('合成器网络请求失败:', error);
+                throw new Error('网络连接失败，请检查网络连接或稍后重试');
+            }
+            console.error('合成器API调用失败:', error);
+            throw error;
         }
-
-        const data = await response.json();
-        return data.optimized_prompt;
     }
 
     // 显示最终结果
