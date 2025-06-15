@@ -176,39 +176,9 @@ class ExpertInterviewManager {
 
     // 调用分析器API
     async callAnalyzerAPI(originalPrompt) {
-        const analyzerPrompt = `
-作为一个专业的需求分析师，请分析用户的初步想法，找出为了生成高质量结果所缺失的关键信息点。
-
-用户的初步想法：
-"${originalPrompt}"
-
-请以JSON格式返回缺失的关键问题点列表，格式如下：
-{
-    "questions": [
-        {
-            "key": "问题标识符",
-            "question": "具体问题",
-            "type": "text|textarea|select",
-            "placeholder": "输入提示",
-            "required": true|false
-        }
-    ],
-    "summary": "简要分析总结"
-}
-
-注意：
-1. 问题数量控制在3-6个之间
-2. 问题要具体、有针对性
-3. 避免过于宽泛的问题
-4. 重点关注能够显著提升输出质量的关键信息
-
-请直接返回JSON格式，不要包含其他内容。
-        `;
-
         const requestBody = {
-            original_prompt: analyzerPrompt,
-            model: 'gemini-2.0-flash',
-            mode: 'expert'
+            original_idea: originalPrompt,
+            model: 'gemini-2.0-flash'
         };
 
         const API_BASE_URL = window.location.protocol === 'file:'
@@ -225,8 +195,8 @@ class ExpertInterviewManager {
             headers.Authorization = `Bearer ${token}`;
         }
 
-        console.log('调用分析器API:', `${API_BASE_URL}/optimize`);
-        const response = await fetch(`${API_BASE_URL}/optimize`, {
+        console.log('调用分析器API:', `${API_BASE_URL}/analyze`);
+        const response = await fetch(`${API_BASE_URL}/analyze`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody)
@@ -237,48 +207,7 @@ class ExpertInterviewManager {
         }
 
         const data = await response.json();
-        
-        // 尝试解析JSON响应
-        try {
-            const analysisResult = JSON.parse(data.optimized_prompt);
-            return analysisResult;
-        } catch (parseError) {
-            console.warn('解析JSON失败，使用备用格式:', parseError);
-            
-            // 备用：从响应中提取JSON
-            const jsonMatch = data.optimized_prompt.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
-            
-            // 最终备用：返回默认问题
-            return {
-                questions: [
-                    {
-                        key: "target_audience",
-                        question: "您的目标受众是谁？",
-                        type: "textarea",
-                        placeholder: "请描述您的目标用户群体...",
-                        required: true
-                    },
-                    {
-                        key: "specific_goal",
-                        question: "您希望达到什么具体目标？",
-                        type: "textarea", 
-                        placeholder: "请详细描述您的期望结果...",
-                        required: true
-                    },
-                    {
-                        key: "context_info",
-                        question: "请提供相关背景信息或约束条件？",
-                        type: "textarea",
-                        placeholder: "如预算、时间、资源限制等...",
-                        required: false
-                    }
-                ],
-                summary: "为了更好地理解您的需求，我需要了解一些关键信息。"
-            };
-        }
+        return data;
     }
 
     // 显示分析结果
@@ -431,34 +360,10 @@ class ExpertInterviewManager {
 
     // 调用合成器API
     async callSynthesizerAPI() {
-        // 构建合成提示词
-        const answersText = Object.entries(this.userAnswers)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join('\n');
-
-        const synthesizerPrompt = `
-作为一个专业的提示词工程师，请将用户的初步想法和补充信息无缝融合，生成一个最终的、信息完整的、专家级的"超级提示词"。
-
-## 用户的初步想法：
-"${this.originalIdea}"
-
-## 用户补充的结构化信息：
-${answersText}
-
-## 任务要求：
-1. 将所有信息有机整合成一个连贯的专业提示词
-2. 确保提示词结构清晰、逻辑性强
-3. 包含足够的细节和上下文信息
-4. 使用专业术语和准确的表达
-5. 确保提示词能够产生高质量的输出结果
-
-请生成最终的优化提示词，直接返回提示词内容，不需要额外说明。
-        `;
-
         const requestBody = {
-            original_prompt: synthesizerPrompt,
-            model: 'gemini-2.0-flash',
-            mode: 'expert'
+            original_idea: this.originalIdea,
+            user_answers: this.userAnswers,
+            model: 'gemini-2.0-flash'
         };
 
         const API_BASE_URL = window.location.protocol === 'file:'
@@ -475,8 +380,8 @@ ${answersText}
             headers.Authorization = `Bearer ${token}`;
         }
 
-        console.log('调用合成器API:', `${API_BASE_URL}/optimize`);
-        const response = await fetch(`${API_BASE_URL}/optimize`, {
+        console.log('调用合成器API:', `${API_BASE_URL}/synthesize`);
+        const response = await fetch(`${API_BASE_URL}/synthesize`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody)
