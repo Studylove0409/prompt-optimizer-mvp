@@ -123,13 +123,30 @@ async function optimizePrompt() {
     console.log('当前选择的模式:', selectedMode);
     if (selectedMode === 'expert') {
         console.log('进入专家模式流程');
+        
+        // 确保专家访谈管理器已初始化
+        if (!window.expertInterviewManager) {
+            console.log('专家访谈管理器未初始化，尝试重新初始化...');
+            if (window.ensureExpertInterviewInitialized) {
+                window.ensureExpertInterviewInitialized();
+            }
+            
+            // 等待一小段时间让初始化完成
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
         // 启动智能访谈流程
         if (window.expertInterviewManager) {
             console.log('专家访谈管理器已找到，启动访谈');
-            await window.expertInterviewManager.startInterview(originalPrompt);
+            try {
+                await window.expertInterviewManager.startInterview(originalPrompt);
+            } catch (error) {
+                console.error('启动专家访谈失败:', error);
+                showCustomAlert('启动专家访谈失败，请重试', 'error');
+            }
         } else {
-            console.error('专家访谈管理器未初始化');
-            showCustomAlert('专家模式暂时不可用，请稍后重试', 'error');
+            console.error('专家访谈管理器初始化失败');
+            showCustomAlert('专家模式暂时不可用，请检查控制台错误信息或稍后重试', 'error');
         }
         return;
     }
@@ -185,13 +202,30 @@ async function quickOptimizePrompt() {
     console.log('快速优化 - 当前选择的模式:', selectedMode);
     if (selectedMode === 'expert') {
         console.log('快速优化 - 进入专家模式流程');
+        
+        // 确保专家访谈管理器已初始化
+        if (!window.expertInterviewManager) {
+            console.log('快速优化 - 专家访谈管理器未初始化，尝试重新初始化...');
+            if (window.ensureExpertInterviewInitialized) {
+                window.ensureExpertInterviewInitialized();
+            }
+            
+            // 等待一小段时间让初始化完成
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
         // 专家模式不支持快速优化，使用普通流程
         if (window.expertInterviewManager) {
             console.log('快速优化 - 专家访谈管理器已找到，启动访谈');
-            await window.expertInterviewManager.startInterview(originalPrompt);
+            try {
+                await window.expertInterviewManager.startInterview(originalPrompt);
+            } catch (error) {
+                console.error('快速优化 - 启动专家访谈失败:', error);
+                showCustomAlert('启动专家访谈失败，请重试', 'error');
+            }
         } else {
-            console.error('快速优化 - 专家访谈管理器未初始化');
-            showCustomAlert('专家模式暂时不可用，请稍后重试', 'error');
+            console.error('快速优化 - 专家访谈管理器初始化失败');
+            showCustomAlert('专家模式暂时不可用，请检查控制台错误信息或稍后重试', 'error');
         }
         return;
     }

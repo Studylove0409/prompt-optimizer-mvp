@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专家模式调试工具</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section { background: white; margin: 20px 0; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .section h2 { margin-top: 0; color: #333; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button { padding: 10px 20px; margin: 5px; background: #007AFF; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056CC; }
+        button.secondary { background: #6c757d; }
+        button.danger { background: #dc3545; }
+        .log { background: #f8f9fa; padding: 15px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 14px; margin: 10px 0; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .test-item { padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin: 5px 0; }
+        .test-item.pass { border-color: #28a745; background: #f8fff9; }
+        .test-item.fail { border-color: #dc3545; background: #fff8f8; }
+        
+        /* 专家模式模拟样式 */
+        .mode-btn { padding: 8px 16px; margin: 5px; border: 1px solid #ccc; background: #f8f9fa; border-radius: 4px; cursor: pointer; }
+        .mode-btn.active { background: linear-gradient(135deg, #ff8c00, #ff4500); color: white; }
+        
+        /* 专家访谈区域样式 */
+        .expert-interview-section { background: linear-gradient(135deg, rgba(255, 165, 0, 0.05), rgba(255, 69, 0, 0.05)); border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid rgba(255, 140, 0, 0.2); }
+        .interview-stage { background: rgba(255, 255, 255, 0.9); border-radius: 8px; padding: 16px; margin: 10px 0; }
+        .stage-header { font-weight: bold; margin-bottom: 10px; }
+        .progress-steps { display: flex; justify-content: space-between; margin: 20px 0; }
+        .progress-step { text-align: center; }
+        .step-number { display: inline-block; width: 24px; height: 24px; border-radius: 50%; background: #ddd; line-height: 24px; margin-bottom: 5px; }
+        .progress-step.active .step-number { background: #ff8c00; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 专家模式调试工具</h1>
+        <p>此工具用于诊断和修复专家模式初始化问题</p>
+
+        <div class="grid">
+            <!-- 左侧：状态检查 -->
+            <div>
+                <div class="section">
+                    <h2>📊 系统状态检查</h2>
+                    <div id="systemStatus">
+                        <div class="test-item" id="domTest">
+                            <strong>DOM加载状态:</strong> <span id="domStatus">检查中...</span>
+                        </div>
+                        <div class="test-item" id="scriptTest">
+                            <strong>脚本加载状态:</strong> <span id="scriptStatus">检查中...</span>
+                        </div>
+                        <div class="test-item" id="managerTest">
+                            <strong>专家访谈管理器:</strong> <span id="managerStatus">检查中...</span>
+                        </div>
+                        <div class="test-item" id="elementsTest">
+                            <strong>DOM元素检查:</strong> <span id="elementsStatus">检查中...</span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="runFullDiagnostic()">🔍 运行完整诊断</button>
+                    <button onclick="clearLog()" class="secondary">🗑️ 清空日志</button>
+                </div>
+
+                <div class="section">
+                    <h2>🛠️ 修复工具</h2>
+                    <button onclick="forceReinitialize()">🔄 强制重新初始化</button>
+                    <button onclick="checkDOMElements()">📋 检查DOM元素</button>
+                    <button onclick="testModeSelection()">🎯 测试模式选择</button>
+                    <button onclick="simulateExpertMode()" class="danger">🧠 模拟专家模式调用</button>
+                    
+                    <div id="fixResult" class="status" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- 右侧：实时日志 -->
+            <div>
+                <div class="section">
+                    <h2>📝 实时日志</h2>
+                    <div id="debugLog" class="log">等待操作...</div>
+                </div>
+
+                <div class="section">
+                    <h2>🎮 模式选择测试</h2>
+                    <div>
+                        <button class="mode-btn active" data-mode="general">🌟 通用</button>
+                        <button class="mode-btn" data-mode="business">💼 商业</button>
+                        <button class="mode-btn expert-mode" data-mode="expert">🧠 专家</button>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        当前模式: <strong id="currentModeDisplay">general</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 专家访谈区域模拟 -->
+        <div class="section">
+            <h2>🎭 专家访谈界面模拟</h2>
+            <div class="expert-interview-section" id="expertInterviewSection" style="display: none;">
+                <div class="interview-stage" id="analysisStage">
+                    <div class="stage-header">阶段1: 需求分析</div>
+                    <div id="analysisStatus">等待分析...</div>
+                    <div class="analysis-result" id="analysisResult" style="display: none;">
+                        <p class="analysis-summary">分析结果显示区域</p>
+                    </div>
+                </div>
+
+                <div class="interview-stage" id="interviewStage" style="display: none;">
+                    <div class="stage-header">阶段2: 智能访谈</div>
+                    <div id="interviewStatus">访谈状态</div>
+                    <div class="interview-form" id="interviewForm"></div>
+                    <button id="interviewBackBtn">返回修改</button>
+                    <button id="interviewSubmitBtn">提交并生成</button>
+                </div>
+
+                <div class="interview-stage" id="synthesisStage" style="display: none;">
+                    <div class="stage-header">阶段3: 提示词合成</div>
+                    <div id="synthesisStatus">合成状态</div>
+                    <div class="synthesis-result" id="synthesisResult" style="display: none;">
+                        <div id="expertOptimizedPrompt">生成的提示词将显示在这里</div>
+                        <button id="expertCopyBtn">复制结果</button>
+                        <button id="expertRestartBtn">重新开始</button>
+                    </div>
+                </div>
+
+                <div class="progress-steps">
+                    <div class="progress-step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">分析</div>
+                    </div>
+                    <div class="progress-step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">访谈</div>
+                    </div>
+                    <div class="progress-step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">合成</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="interviewProgressFill" style="width: 33%; background: linear-gradient(90deg, #ff8c00, #ff4500); height: 4px;"></div>
+                </div>
+            </div>
+            
+            <button onclick="toggleExpertSection()">🔄 切换专家区域显示</button>
+        </div>
+    </div>
+
+    <!-- 加载相同的脚本文件 -->
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="expert-interview.js"></script>
+    
+    <script>
+        // 调试工具脚本
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const typeColor = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : type === 'warning' ? '#ffc107' : '#007AFF';
+            logDiv.innerHTML += `<div style="color: ${typeColor};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').innerHTML = '日志已清空';
+        }
+
+        function setTestResult(testId, status, message) {
+            const testDiv = document.getElementById(testId);
+            testDiv.className = `test-item ${status}`;
+            testDiv.querySelector('span').textContent = message;
+        }
+
+        function runFullDiagnostic() {
+            log('开始运行完整系统诊断...', 'info');
+            
+            // 检查DOM状态
+            const domReady = document.readyState;
+            setTestResult('domTest', domReady === 'complete' ? 'pass' : 'fail', `${domReady} ${domReady === 'complete' ? '✅' : '❌'}`);
+            log(`DOM状态: ${domReady}`, domReady === 'complete' ? 'success' : 'warning');
+
+            // 检查脚本加载
+            const scriptsLoaded = !!(window.getSelectedMode && window.ExpertInterviewManager);
+            setTestResult('scriptTest', scriptsLoaded ? 'pass' : 'fail', scriptsLoaded ? '✅ 脚本已加载' : '❌ 脚本未加载');
+            log(`脚本加载状态: ${scriptsLoaded ? '成功' : '失败'}`, scriptsLoaded ? 'success' : 'error');
+
+            // 检查专家访谈管理器
+            const managerExists = !!window.expertInterviewManager;
+            setTestResult('managerTest', managerExists ? 'pass' : 'fail', managerExists ? '✅ 已初始化' : '❌ 未初始化');
+            log(`专家访谈管理器: ${managerExists ? '已初始化' : '未初始化'}`, managerExists ? 'success' : 'error');
+
+            // 检查DOM元素
+            checkDOMElements();
+
+            log('完整诊断结束', 'info');
+        }
+
+        function checkDOMElements() {
+            const requiredElements = [
+                'expertInterviewSection',
+                'analysisStage', 
+                'interviewStage',
+                'synthesisStage',
+                'analysisStatus',
+                'interviewStatus', 
+                'synthesisStatus',
+                'analysisResult',
+                'interviewForm',
+                'synthesisResult',
+                'interviewProgressFill'
+            ];
+
+            const missingElements = [];
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    missingElements.push(id);
+                }
+            });
+
+            const allElementsExist = missingElements.length === 0;
+            setTestResult('elementsTest', allElementsExist ? 'pass' : 'fail', 
+                allElementsExist ? '✅ 所有元素存在' : `❌ 缺失: ${missingElements.join(', ')}`);
+            
+            log(`DOM元素检查: ${allElementsExist ? '通过' : '失败'}`, allElementsExist ? 'success' : 'error');
+            if (!allElementsExist) {
+                log(`缺失元素: ${missingElements.join(', ')}`, 'error');
+            }
+        }
+
+        function forceReinitialize() {
+            log('开始强制重新初始化...', 'warning');
+            
+            if (window.forceReinitializeExpertInterview) {
+                const result = window.forceReinitializeExpertInterview();
+                const resultDiv = document.getElementById('fixResult');
+                resultDiv.style.display = 'block';
+                
+                if (result) {
+                    resultDiv.className = 'status success';
+                    resultDiv.textContent = '✅ 强制重新初始化成功！';
+                    log('强制重新初始化成功', 'success');
+                } else {
+                    resultDiv.className = 'status error';
+                    resultDiv.textContent = '❌ 强制重新初始化失败，请检查控制台错误';
+                    log('强制重新初始化失败', 'error');
+                }
+                
+                // 重新运行诊断
+                setTimeout(runFullDiagnostic, 500);
+            } else {
+                log('forceReinitializeExpertInterview 函数不存在', 'error');
+            }
+        }
+
+        function testModeSelection() {
+            const mode = window.getSelectedMode ? window.getSelectedMode() : 'Function not available';
+            log(`当前模式: ${mode}`, 'info');
+            
+            // 测试模式切换
+            const expertBtn = document.querySelector('[data-mode="expert"]');
+            if (expertBtn) {
+                expertBtn.click();
+                setTimeout(() => {
+                    const newMode = window.getSelectedMode ? window.getSelectedMode() : 'Function not available';
+                    log(`切换后模式: ${newMode}`, newMode === 'expert' ? 'success' : 'error');
+                }, 100);
+            }
+        }
+
+        async function simulateExpertMode() {
+            log('模拟专家模式调用...', 'warning');
+            
+            if (!window.expertInterviewManager) {
+                log('专家访谈管理器不存在，尝试初始化...', 'error');
+                forceReinitialize();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+            
+            if (window.expertInterviewManager) {
+                try {
+                    await window.expertInterviewManager.startInterview('测试专家模式功能');
+                    log('专家模式调用成功！', 'success');
+                } catch (error) {
+                    log(`专家模式调用失败: ${error.message}`, 'error');
+                }
+            } else {
+                log('专家访谈管理器仍然不可用', 'error');
+            }
+        }
+
+        function toggleExpertSection() {
+            const section = document.getElementById('expertInterviewSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            log(`专家区域显示状态: ${section.style.display}`, 'info');
+        }
+
+        // 模式选择测试
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('currentModeDisplay').textContent = this.dataset.mode;
+                log(`模式切换到: ${this.dataset.mode}`, 'info');
+            });
+        });
+
+        // 页面加载完成后自动运行诊断
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('页面加载完成，开始自动诊断...', 'info');
+                runFullDiagnostic();
+            }, 1000);
+        });
+
+        // 监听控制台错误
+        window.addEventListener('error', (event) => {
+            log(`JavaScript错误: ${event.error.message}`, 'error');
+        });
+    </script>
+</body>
+</html>

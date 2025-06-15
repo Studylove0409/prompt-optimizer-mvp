@@ -15,6 +15,8 @@ class ExpertInterviewManager {
     }
 
     initializeElements() {
+        console.log('开始初始化专家访谈DOM元素...');
+        
         // 主要容器
         this.expertSection = document.getElementById('expertInterviewSection');
         
@@ -47,17 +49,32 @@ class ExpertInterviewManager {
         this.expertOptimizedPrompt = document.getElementById('expertOptimizedPrompt');
         
         // 检查关键元素是否存在
+        const missingElements = [];
         if (!this.expertSection) {
-            console.error('专家访谈区域元素未找到: expertInterviewSection');
+            missingElements.push('expertInterviewSection');
         }
         if (!this.analysisStage) {
-            console.error('分析阶段元素未找到: analysisStage');
+            missingElements.push('analysisStage');
         }
         if (!this.interviewForm) {
-            console.error('访谈表单元素未找到: interviewForm');
+            missingElements.push('interviewForm');
+        }
+        if (!this.analysisStatus) {
+            missingElements.push('analysisStatus');
+        }
+        if (!this.interviewStatus) {
+            missingElements.push('interviewStatus');
+        }
+        if (!this.synthesisStatus) {
+            missingElements.push('synthesisStatus');
         }
         
-        console.log('专家访谈DOM元素初始化完成');
+        if (missingElements.length > 0) {
+            console.error('缺失的DOM元素:', missingElements);
+            throw new Error(`缺失专家访谈必要的DOM元素: ${missingElements.join(', ')}`);
+        }
+        
+        console.log('✅ 专家访谈DOM元素初始化完成');
     }
 
     bindEvents() {
@@ -555,23 +572,90 @@ let expertInterviewManager;
 
 // 等待DOM加载完成后初始化
 function initializeExpertInterview() {
+    console.log('准备初始化专家访谈管理器...');
+    console.log('Document readyState:', document.readyState);
+    
     if (document.readyState === 'loading') {
+        console.log('DOM还在加载中，等待DOMContentLoaded事件...');
         document.addEventListener('DOMContentLoaded', initializeExpertInterview);
         return;
     }
 
     try {
+        console.log('开始创建ExpertInterviewManager实例...');
         expertInterviewManager = new ExpertInterviewManager();
         window.expertInterviewManager = expertInterviewManager;
         
-        console.log('专家访谈管理器初始化成功');
+        console.log('✅ 专家访谈管理器初始化成功');
+        console.log('window.expertInterviewManager:', typeof window.expertInterviewManager);
     } catch (error) {
-        console.error('专家访谈管理器初始化失败:', error);
+        console.error('❌ 专家访谈管理器初始化失败:', error);
+        console.error('错误堆栈:', error.stack);
     }
+}
+
+// 多重初始化策略
+function ensureExpertInterviewInitialized() {
+    console.log('检查专家访谈管理器初始化状态...');
+    console.log('window.expertInterviewManager存在:', !!window.expertInterviewManager);
+    
+    if (!window.expertInterviewManager) {
+        console.log('专家访谈管理器未初始化，尝试重新初始化...');
+        try {
+            initializeExpertInterview();
+            if (window.expertInterviewManager) {
+                console.log('✅ 重新初始化成功');
+            } else {
+                console.log('❌ 重新初始化失败');
+            }
+        } catch (error) {
+            console.error('重新初始化时发生错误:', error);
+        }
+    } else {
+        console.log('✅ 专家访谈管理器已存在');
+    }
+    return !!window.expertInterviewManager;
+}
+
+// 强制重新初始化函数（用于调试）
+function forceReinitializeExpertInterview() {
+    console.log('强制重新初始化专家访谈管理器...');
+    window.expertInterviewManager = null;
+    expertInterviewManager = null;
+    
+    try {
+        initializeExpertInterview();
+        console.log('强制重新初始化结果:', !!window.expertInterviewManager);
+    } catch (error) {
+        console.error('强制重新初始化失败:', error);
+    }
+    
+    return !!window.expertInterviewManager;
 }
 
 // 开始初始化
 initializeExpertInterview();
 
+// DOM加载完成后再次检查
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded 事件触发，检查专家访谈管理器状态...');
+    if (!window.expertInterviewManager) {
+        console.log('DOMContentLoaded时专家访谈管理器仍未初始化，重试...');
+        setTimeout(initializeExpertInterview, 100);
+    }
+});
+
+// 页面完全加载后最后一次检查
+window.addEventListener('load', () => {
+    console.log('Window load 事件触发，最终检查专家访谈管理器状态...');
+    if (!window.expertInterviewManager) {
+        console.log('页面加载完成时专家访谈管理器仍未初始化，最后重试...');
+        setTimeout(initializeExpertInterview, 500);
+    }
+});
+
 // 导出到全局作用域
 window.ExpertInterviewManager = ExpertInterviewManager;
+window.ensureExpertInterviewInitialized = ensureExpertInterviewInitialized;
+window.initializeExpertInterview = initializeExpertInterview;
+window.forceReinitializeExpertInterview = forceReinitializeExpertInterview;
