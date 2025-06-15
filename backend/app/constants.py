@@ -352,7 +352,7 @@ def get_prompt_template_by_mode(mode: str) -> str:
     """根据模式获取对应的提示词模板
     
     Args:
-        mode: 模式名称，可选值: general, business, drawing, academic
+        mode: 模式名称，可选值: general, business, drawing, academic, expert
         
     Returns:
         对应模式的提示词模板
@@ -363,5 +363,8 @@ def get_prompt_template_by_mode(mode: str) -> str:
         return DRAWING_PROMPT_TEMPLATE
     elif mode == "academic":
         return ACADEMIC_PROMPT_TEMPLATE
+    elif mode == "expert":
+        # expert模式直接返回用户原始输入，由前端的智能访谈系统处理
+        return "{user_input_prompt}"
     else:  # general mode
         return META_PROMPT_TEMPLATE_GEMINI  # 默认使用通用模板
