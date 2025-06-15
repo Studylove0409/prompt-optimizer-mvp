@@ -181,6 +181,11 @@
                                             <span class="mode-icon">📚</span>
                                             <span class="mode-name">论文</span>
                                         </button>
+                                        <button class="mode-btn expert-mode" data-mode="expert">
+                                            <span class="mode-icon">🧠</span>
+                                            <span class="mode-name">思考专家</span>
+                                            <span class="mode-badge">限时免费</span>
+                                        </button>
                                     </div>
                                     <!-- 手机端下拉框 -->
                                     <div class="mode-select-container">
@@ -189,6 +194,7 @@
                                             <option value="business">💼 商业</option>
                                             <option value="drawing">🎨 绘画</option>
                                             <option value="academic">📚 论文</option>
+                                            <option value="expert">🧠 思考专家 (限时免费)</option>
                                         </select>
                                         <span class="mode-select-icon">▼</span>
                                     </div>
@@ -269,6 +275,103 @@
                                 </div>
                                 <div class="model-overlay"></div>
                             </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 智能访谈区域 -->
+                <section class="expert-interview-section" id="expertInterviewSection" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="expert-icon">🧠</span>
+                            思考专家模式
+                            <span class="expert-badge">限时免费</span>
+                        </h2>
+                        <p class="section-subtitle">AI 助手将与您进行智能访谈，帮助完善想法并生成专业提示词</p>
+                    </div>
+
+                    <!-- 第一阶段：需求分析 -->
+                    <div class="interview-stage" id="analysisStage">
+                        <div class="stage-header">
+                            <div class="stage-indicator">
+                                <span class="stage-number">1</span>
+                                <span class="stage-title">需求分析</span>
+                            </div>
+                            <div class="stage-status" id="analysisStatus">分析中...</div>
+                        </div>
+                        <div class="stage-content">
+                            <div class="analysis-result" id="analysisResult" style="display: none;">
+                                <p class="analysis-summary">AI 正在分析您的想法，找出可以进一步完善的关键点...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 第二阶段：智能访谈 -->
+                    <div class="interview-stage" id="interviewStage" style="display: none;">
+                        <div class="stage-header">
+                            <div class="stage-indicator">
+                                <span class="stage-number">2</span>
+                                <span class="stage-title">智能访谈</span>
+                            </div>
+                            <div class="stage-status" id="interviewStatus">请回答以下问题以完善您的想法</div>
+                        </div>
+                        <div class="stage-content">
+                            <div class="interview-form" id="interviewForm">
+                                <!-- 动态生成的问题表单将插入这里 -->
+                            </div>
+                            <div class="interview-actions">
+                                <button class="interview-btn secondary" id="interviewBackBtn">返回修改</button>
+                                <button class="interview-btn primary" id="interviewSubmitBtn">提交并生成</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 第三阶段：提示词合成 -->
+                    <div class="interview-stage" id="synthesisStage" style="display: none;">
+                        <div class="stage-header">
+                            <div class="stage-indicator">
+                                <span class="stage-number">3</span>
+                                <span class="stage-title">提示词合成</span>
+                            </div>
+                            <div class="stage-status" id="synthesisStatus">正在生成专业提示词...</div>
+                        </div>
+                        <div class="stage-content">
+                            <div class="synthesis-result" id="synthesisResult" style="display: none;">
+                                <div class="result-content">
+                                    <div id="expertOptimizedPrompt" class="result-text"></div>
+                                </div>
+                                <div class="result-actions">
+                                    <button id="expertCopyBtn" class="action-button primary">
+                                        <span class="button-icon">📋</span>
+                                        <span class="button-text">复制结果</span>
+                                    </button>
+                                    <button id="expertRestartBtn" class="action-button secondary">
+                                        <span class="button-icon">🔄</span>
+                                        <span class="button-text">重新开始</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 进度指示器 -->
+                    <div class="interview-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="interviewProgressFill"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <div class="progress-step active" data-step="1">
+                                <span class="step-number">1</span>
+                                <span class="step-label">分析</span>
+                            </div>
+                            <div class="progress-step" data-step="2">
+                                <span class="step-number">2</span>
+                                <span class="step-label">访谈</span>
+                            </div>
+                            <div class="progress-step" data-step="3">
+                                <span class="step-number">3</span>
+                                <span class="step-label">合成</span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -836,6 +939,7 @@
     <script src="history.js"></script>
     <script src="user-dropdown.js"></script>
     <script src="profile-modal.js"></script>
+    <script src="expert-interview.js"></script>
 
     <script src="script.js"></script>
     <script src="particles.js"></script>

@@ -119,6 +119,18 @@ async function optimizePrompt() {
     const selectedMode = getSelectedMode();
     console.log('当前选择的模式:', selectedMode);
 
+    // 检查是否为专家模式
+    if (selectedMode === 'expert') {
+        // 启动智能访谈流程
+        if (window.expertInterviewManager) {
+            await window.expertInterviewManager.startInterview(originalPrompt);
+        } else {
+            console.error('专家访谈管理器未初始化');
+            showCustomAlert('专家模式暂时不可用，请稍后重试', 'error');
+        }
+        return;
+    }
+
     // 设置优化状态
     isOptimizing = true;
 
@@ -164,6 +176,18 @@ async function quickOptimizePrompt() {
     if (!originalPrompt) {
         showCustomAlert('请输入要优化的提示词', 'warning', 3000);
         throw new Error('没有输入提示词');
+    }
+
+    // 检查是否为专家模式
+    if (selectedMode === 'expert') {
+        // 专家模式不支持快速优化，使用普通流程
+        if (window.expertInterviewManager) {
+            await window.expertInterviewManager.startInterview(originalPrompt);
+        } else {
+            console.error('专家访谈管理器未初始化');
+            showCustomAlert('专家模式暂时不可用，请稍后重试', 'error');
+        }
+        return;
     }
 
     // 设置优化状态
