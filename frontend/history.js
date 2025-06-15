@@ -5,10 +5,18 @@
 class HistoryManager {
     constructor() {
         this.currentPage = 1;
-        this.pageSize = 10;
+        this.pageSize = 15; // 增加每页数量
         this.totalPages = 1;
         this.totalCount = 0;
         this.isLoading = false;
+
+        // 缓存相关
+        this.cache = new Map();
+        this.cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
+
+        // 请求节流
+        this.lastRequestTime = 0;
+        this.requestThrottle = 1000; // 1秒节流
 
         // 日期筛选相关
         this.dateFilter = 'all'; // 'all', 'today', 'week', 'month', 'custom'
@@ -121,14 +129,48 @@ class HistoryManager {
     }
 
     bindCopyEvents() {
-        // 使用事件委托处理复制按钮点击
+        // 使用事件委托处理复制按钮点击和展开按钮点击
         if (this.historyListContainer) {
             this.historyListContainer.addEventListener('click', (e) => {
+                // 处理复制按钮
                 if (e.target.closest('.copy-btn')) {
                     const copyBtn = e.target.closest('.copy-btn');
                     const text = copyBtn.getAttribute('data-text');
                     if (text) {
                         this.copyToClipboard(text, copyBtn);
+                    }
+                }
+                
+                // 处理展开按钮
+                if (e.target.closest('.expand-btn')) {
+                    const expandBtn = e.target.closest('.expand-btn');
+                    const promptText = expandBtn.closest('.prompt-text');
+                    const fullText = promptText.getAttribute('data-full-text');
+                    
+                    if (fullText) {
+                        // 解码HTML实体
+                        const textarea = document.createElement('textarea');
+                        textarea.innerHTML = fullText;
+                        const decodedText = textarea.value;
+                        
+                        promptText.innerHTML = this.escapeHtml(decodedText) + 
+                            '<span class="text-more"> <button class="expand-btn collapse-btn">收起</button></span>';
+                    }
+                }
+                
+                // 处理收起按钮
+                if (e.target.closest('.collapse-btn')) {
+                    const collapseBtn = e.target.closest('.collapse-btn');
+                    const promptText = collapseBtn.closest('.prompt-text');
+                    const fullText = promptText.getAttribute('data-full-text');
+                    
+                    if (fullText) {
+                        // 解码HTML实体
+                        const textarea = document.createElement('textarea');
+                        textarea.innerHTML = fullText;
+                        const decodedText = textarea.value;
+                        
+                        promptText.innerHTML = this.truncateText(decodedText, 200);
                     }
                 }
             });
@@ -141,6 +183,9 @@ class HistoryManager {
 
         // 重置到第一页
         this.currentPage = 1;
+
+        // 清空相关缓存
+        this.clearCache();
 
         // 重新加载数据
         await this.loadHistoryData();
@@ -250,6 +295,24 @@ class HistoryManager {
     async loadHistoryData() {
         if (this.isLoading) return;
 
+        // 请求节流
+        const now = Date.now();
+        if (now - this.lastRequestTime < this.requestThrottle) {
+            return;
+        }
+        this.lastRequestTime = now;
+
+        // 检查缓存
+        const cacheKey = this.getCacheKey();
+        const cached = this.cache.get(cacheKey);
+        if (cached && now - cached.timestamp < this.cacheTimeout) {
+            this.renderHistoryList(cached.data);
+            this.totalCount = cached.totalCount;
+            this.totalPages = cached.totalPages;
+            this.updatePagination();
+            return;
+        }
+
         this.isLoading = true;
         this.showLoading();
 
@@ -271,12 +334,18 @@ class HistoryManager {
                 apiUrl += `&end_date=${this.endDate.toISOString()}`;
             }
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
+
             const response = await fetch(apiUrl, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 if (response.status === 401) {
@@ -291,16 +360,37 @@ class HistoryManager {
             this.totalCount = parseInt(response.headers.get('X-Total-Count') || '0');
             this.totalPages = parseInt(response.headers.get('X-Total-Pages') || '1');
 
+            // 缓存结果
+            this.cache.set(cacheKey, {
+                data: historyData,
+                totalCount: this.totalCount,
+                totalPages: this.totalPages,
+                timestamp: now
+            });
+
             this.renderHistoryList(historyData);
             this.updatePagination();
 
         } catch (error) {
-            console.error('获取历史记录失败:', error);
-            this.showError(error.message);
+            if (error.name === 'AbortError') {
+                console.error('请求超时');
+                this.showError('请求超时，请检查网络连接');
+            } else {
+                console.error('获取历史记录失败:', error);
+                this.showError(error.message);
+            }
         } finally {
             this.isLoading = false;
             this.hideLoading();
         }
+    }
+
+    getCacheKey() {
+        return `${this.currentPage}-${this.pageSize}-${this.dateFilter}-${this.startDate?.toISOString()}-${this.endDate?.toISOString()}`;
+    }
+
+    clearCache() {
+        this.cache.clear();
     }
 
     showLoading() {
@@ -341,10 +431,19 @@ class HistoryManager {
         // 清空容器
         this.historyListContainer.innerHTML = '';
 
-        // 渲染每个历史记录
-        historyData.forEach(item => {
+        // 渲染每个历史记录并添加动画
+        historyData.forEach((item, index) => {
             const card = this.createHistoryCard(item);
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
             this.historyListContainer.appendChild(card);
+            
+            // 添加交错动画
+            setTimeout(() => {
+                card.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
         });
     }
 
@@ -354,6 +453,9 @@ class HistoryManager {
 
         const formattedDate = this.formatDate(item.created_at);
         const modeInfo = this.getModeInfo(item.mode);
+        
+        // 获取使用的模型信息
+        const modelInfo = this.getModelDisplayInfo(item.model_used);
 
         card.innerHTML = `
             <div class="history-card-header">
@@ -362,40 +464,67 @@ class HistoryManager {
                         <span>${modeInfo.icon}</span>
                         <span>${modeInfo.name}</span>
                     </div>
-                    <div class="history-date">${formattedDate}</div>
+                    <div class="model-used-badge">${modelInfo}</div>
                 </div>
+                <div class="history-date">${formattedDate}</div>
             </div>
             <div class="history-content">
                 <div class="prompt-section">
                     <div class="prompt-label">
                         <strong>原始提示词</strong>
-                        <button class="copy-btn" data-text="${this.escapeHtml(item.original_prompt)}">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            复制
-                        </button>
+                        <div class="prompt-actions">
+                            <button class="copy-btn" data-text="${this.escapeHtml(item.original_prompt)}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                复制
+                            </button>
+                        </div>
                     </div>
-                    <div class="prompt-text original">${this.escapeHtml(item.original_prompt)}</div>
+                    <div class="prompt-text original" data-full-text="${this.escapeHtml(item.original_prompt)}">
+                        ${this.truncateText(item.original_prompt, 200)}
+                    </div>
                 </div>
                 <div class="prompt-section">
                     <div class="prompt-label">
                         <strong>优化后的提示词</strong>
-                        <button class="copy-btn" data-text="${this.escapeHtml(item.optimized_prompt)}">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            复制
-                        </button>
+                        <div class="prompt-actions">
+                            <button class="copy-btn" data-text="${this.escapeHtml(item.optimized_prompt)}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                复制
+                            </button>
+                        </div>
                     </div>
-                    <div class="prompt-text optimized">${this.escapeHtml(item.optimized_prompt)}</div>
+                    <div class="prompt-text optimized" data-full-text="${this.escapeHtml(item.optimized_prompt)}">
+                        ${this.truncateText(item.optimized_prompt, 200)}
+                    </div>
                 </div>
             </div>
         `;
 
         return card;
+    }
+
+    truncateText(text, maxLength) {
+        if (text.length <= maxLength) {
+            return this.escapeHtml(text);
+        }
+        
+        const truncated = text.substring(0, maxLength);
+        return `${this.escapeHtml(truncated)}<span class="text-more">... <button class="expand-btn">展开</button></span>`;
+    }
+
+    getModelDisplayInfo(model) {
+        const modelMap = {
+            'deepseek-chat': '普通版',
+            'gemini-2.0-flash': 'Pro版', 
+            'gemini-2.5-flash-preview-05-20': 'Ultra版'
+        };
+        return modelMap[model] || model;
     }
 
     getModeInfo(mode) {
