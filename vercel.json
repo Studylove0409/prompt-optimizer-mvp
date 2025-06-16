@@ -44,6 +44,10 @@
       "dest": "frontend/profile-modal.css"
     },
     {
+      "src": "/thinking-mode.css",
+      "dest": "frontend/thinking-mode.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
