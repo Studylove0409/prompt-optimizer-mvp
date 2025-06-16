@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" href="/img/raphael-ai.jpeg">
     <meta name="theme-color" content="#4285f4">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="thinking-mode.css?v=1">
     <link rel="stylesheet" href="modal-styles.css">
     <link rel="stylesheet" href="auth-success.css">
     <link rel="stylesheet" href="history-modal.css">
@@ -181,6 +182,10 @@
                                             <span class="mode-icon">📚</span>
                                             <span class="mode-name">论文</span>
                                         </button>
+                                        <button class="mode-btn" data-mode="thinking">
+                                            <span class="mode-icon">🧠</span>
+                                            <span class="mode-name">思考</span>
+                                        </button>
                                     </div>
                                     <!-- 手机端下拉框 -->
                                     <div class="mode-select-container">
@@ -189,6 +194,7 @@
                                             <option value="business">💼 商业</option>
                                             <option value="drawing">🎨 绘画</option>
                                             <option value="academic">📚 论文</option>
+                                            <option value="thinking">🧠 思考</option>
                                         </select>
                                         <span class="mode-select-icon">▼</span>
                                     </div>
@@ -302,6 +308,31 @@
                             <button id="clearBtn" class="action-button secondary">
                                 <span class="button-icon">🗑️</span>
                                 <span class="button-text">清空重置</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 思考模式动态表单区域 -->
+                <section class="thinking-form-section" id="thinkingFormSection" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">补充关键信息</h2>
+                        <p class="section-subtitle">请填写以下信息，帮助AI生成更精准的提示词</p>
+                    </div>
+
+                    <div class="thinking-form-container">
+                        <div class="thinking-form-content" id="thinkingFormContent">
+                            <!-- 动态生成的表单字段将插入这里 -->
+                        </div>
+
+                        <div class="thinking-form-actions">
+                            <button id="generateFinalPromptBtn" class="action-button primary">
+                                <span class="button-icon">🚀</span>
+                                <span class="button-text">生成最终提示词</span>
+                            </button>
+                            <button id="skipThinkingBtn" class="action-button secondary">
+                                <span class="button-icon">⏭️</span>
+                                <span class="button-text">跳过此步骤</span>
                             </button>
                         </div>
                     </div>
@@ -430,7 +461,9 @@
 
                         <p class="announcement-item">✨ <strong>无需登录，完全免费使用</strong> - 打开即用，无任何限制</p>
 
-                        <p class="announcement-item">🎯 <strong>新增模式选择功能</strong> - 支持通用、商业、绘画、论文四种专业模式，针对不同场景提供精准优化</p>
+                        <p class="announcement-item">🎯 <strong>新增模式选择功能</strong> - 支持通用、商业、绘画、论文、思考五种专业模式，针对不同场景提供精准优化</p>
+
+                        <p class="announcement-item">🧠 <strong>全新思考模式</strong> - 智能分析您的模糊想法，引导您补充关键信息，生成完美的最终提示词</p>
 
                         <p class="announcement-item">⚡ <strong>ULTRA版模型全面升级</strong> - 采用最新Gemini 2.5模型，响应更快，质量更高，为您提供极致体验</p>
 
@@ -818,7 +851,7 @@
         </div>
     </div>
 
-    <!-- 脚本文件 -->
+   
 
 
 
@@ -827,11 +860,11 @@
 
 
 
-    </style>
+    
     <script src="utils.js"></script>
-    <script src="api.js"></script>
+    <script src="api.js?v=2"></script>
     <script src="auth.js"></script>
-    <script src="ui.js"></script>
+    <script src="ui.js?v=2"></script>
     <script src="modals.js"></script>
     <script src="history.js"></script>
     <script src="user-dropdown.js"></script>

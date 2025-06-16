@@ -532,7 +532,8 @@ class HistoryManager {
             'general': { name: '通用', icon: '🌟' },
             'business': { name: '商业', icon: '💼' },
             'drawing': { name: '绘画', icon: '🎨' },
-            'academic': { name: '学术', icon: '📚' }
+            'academic': { name: '学术', icon: '📚' },
+            'thinking': { name: '思考', icon: '🧠' }
         };
         return modeMap[mode] || { name: '未知', icon: '❓' };
     }

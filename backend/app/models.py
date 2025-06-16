@@ -9,7 +9,7 @@ class PromptRequest(BaseModel):
     """提示词优化请求模型"""
     original_prompt: str = Field(..., max_length=2000, description="原始提示词，最大长度2000")
     model: str = DEFAULT_MODEL
-    mode: str = "general"  # 可选值: general, business, drawing, academic
+    mode: str = "general"  # 可选值: general, business, drawing, academic, thinking
 
 
 class PromptResponse(BaseModel):
@@ -41,3 +41,22 @@ class APIResponse(BaseModel):
     """通用API响应模型"""
     message: str
     version: str
+
+
+class ThinkingAnalysisResponse(BaseModel):
+    """思考模式分析响应模型"""
+    analysis_result: list[dict]  # 分析结果的JSON列表
+    original_prompt: str
+
+
+class ThinkingOptimizationRequest(BaseModel):
+    """思考模式优化请求模型"""
+    original_prompt: str = Field(..., max_length=2000, description="原始提示词")
+    additional_info: dict = Field(..., description="用户补充的关键信息")
+    model: str = DEFAULT_MODEL
+
+
+class KeyInfoItem(BaseModel):
+    """关键信息项模型"""
+    key: str = Field(..., description="关键信息点名称")
+    question: str = Field(..., description="引导性问题")

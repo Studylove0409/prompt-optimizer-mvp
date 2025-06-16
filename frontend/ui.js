@@ -71,7 +71,14 @@ function bindEventListeners() {
         optimizeBtn.addEventListener('click', () => {
             optimizeBtn.classList.remove('pulse-hint');
             addButtonAnimation(optimizeBtn);
-            optimizePrompt();
+
+            // 检查是否是思考模式
+            const selectedMode = getSelectedMode();
+            if (selectedMode === 'thinking') {
+                handleThinkingMode();
+            } else {
+                optimizePrompt();
+            }
         });
     }
 
@@ -114,16 +121,30 @@ function handleKeyboardEvents(e) {
             optimizeBtn.classList.remove('pulse-hint');
             addButtonAnimation(optimizeBtn);
         }
-        quickOptimizePrompt();
+
+        // 检查是否是思考模式
+        const selectedMode = getSelectedMode();
+        if (selectedMode === 'thinking') {
+            handleThinkingMode();
+        } else {
+            quickOptimizePrompt();
+        }
     }
-    // Enter: 普通优化 (使用当前选择的模型)
+    // Enter: 根据当前模式选择相应的处理方式
     else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         if (optimizeBtn) {
             optimizeBtn.classList.remove('pulse-hint');
             addButtonAnimation(optimizeBtn);
         }
-        optimizePrompt();
+
+        // 检查是否是思考模式
+        const selectedMode = getSelectedMode();
+        if (selectedMode === 'thinking') {
+            handleThinkingMode();
+        } else {
+            optimizePrompt();
+        }
     }
     // Shift + Enter: 换行 (默认行为)
 }
@@ -406,8 +427,277 @@ function initPasswordToggles() {
 
 // 注意：UI初始化已移至script.js中统一管理，避免重复初始化
 
+// 思考模式处理函数
+async function handleThinkingMode() {
+    const originalPromptTextarea = document.getElementById('originalPrompt');
+    const originalPrompt = originalPromptTextarea.value.trim();
+    const selectedModel = getSelectedModel();
+
+    if (!originalPrompt) {
+        showCustomAlert('请输入要优化的提示词', 'warning', 3000);
+        return;
+    }
+
+    // 显示加载状态
+    showLoading();
+
+    try {
+        // 第一阶段：分析提示词
+        const analysisData = await analyzeThinkingPrompt(originalPrompt, selectedModel);
+
+        // 隐藏加载状态
+        hideLoading();
+
+        // 显示动态表单
+        showThinkingForm(analysisData.analysis_result, originalPrompt);
+
+    } catch (error) {
+        console.error('思考模式分析失败:', error);
+        hideLoading();
+        showCustomAlert('分析失败，请检查网络连接或稍后重试', 'error', 3500);
+    }
+}
+
+// 显示思考模式动态表单
+function showThinkingForm(analysisResult, originalPrompt) {
+    const thinkingFormSection = document.getElementById('thinkingFormSection');
+    const thinkingFormContent = document.getElementById('thinkingFormContent');
+
+    if (!thinkingFormSection || !thinkingFormContent) {
+        console.error('找不到思考模式表单元素');
+        return;
+    }
+
+    // 清空之前的内容
+    thinkingFormContent.innerHTML = '';
+
+    // 生成动态表单字段
+    analysisResult.forEach((item, index) => {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'thinking-field';
+
+        fieldDiv.innerHTML = `
+            <label class="thinking-field-label" for="thinking-field-${index}">
+                ${item.key}
+            </label>
+            <textarea
+                class="thinking-field-input"
+                id="thinking-field-${index}"
+                placeholder="${item.question}"
+                data-key="${item.key}"
+                rows="2"
+            ></textarea>
+        `;
+
+        thinkingFormContent.appendChild(fieldDiv);
+    });
+
+    // 添加自定义补充信息区域
+    const customInfoSection = document.createElement('div');
+    customInfoSection.className = 'custom-info-section';
+    customInfoSection.innerHTML = `
+        <div class="custom-info-header">
+            <h3 class="custom-info-title">
+                <span class="custom-info-icon">✨</span>
+                自定义补充信息
+            </h3>
+            <p class="custom-info-subtitle">您还可以添加其他重要信息，帮助AI更好地理解您的需求</p>
+        </div>
+        <div class="custom-info-container" id="customInfoContainer">
+            <!-- 自定义信息字段将在这里动态添加 -->
+        </div>
+        <button type="button" class="add-custom-info-btn" id="addCustomInfoBtn">
+            <span class="btn-icon">➕</span>
+            <span class="btn-text">添加自定义信息</span>
+        </button>
+    `;
+
+    thinkingFormContent.appendChild(customInfoSection);
+
+    // 显示表单区域
+    thinkingFormSection.style.display = 'block';
+
+    // 滚动到表单区域
+    thinkingFormSection.scrollIntoView({ behavior: 'smooth' });
+
+    // 绑定按钮事件
+    bindThinkingFormEvents(originalPrompt);
+
+    // 绑定自定义信息相关事件
+    bindCustomInfoEvents();
+}
+
+// 绑定思考模式表单事件
+function bindThinkingFormEvents(originalPrompt) {
+    const generateBtn = document.getElementById('generateFinalPromptBtn');
+    const skipBtn = document.getElementById('skipThinkingBtn');
+
+    if (generateBtn) {
+        generateBtn.onclick = () => generateFinalPrompt(originalPrompt);
+    }
+
+    if (skipBtn) {
+        skipBtn.onclick = () => {
+            // 跳过思考模式，直接生成最终提示词（不传递补充信息）
+            generateFinalPromptWithoutInfo(originalPrompt);
+        };
+    }
+}
+
+// 绑定自定义信息相关事件
+function bindCustomInfoEvents() {
+    const addCustomInfoBtn = document.getElementById('addCustomInfoBtn');
+    if (addCustomInfoBtn) {
+        addCustomInfoBtn.onclick = addCustomInfoField;
+    }
+}
+
+// 添加自定义信息字段
+function addCustomInfoField() {
+    const customInfoContainer = document.getElementById('customInfoContainer');
+    if (!customInfoContainer) return;
+
+    const fieldIndex = customInfoContainer.children.length;
+    const customFieldDiv = document.createElement('div');
+    customFieldDiv.className = 'custom-info-field';
+    customFieldDiv.innerHTML = `
+        <div class="custom-field-inputs">
+            <input
+                type="text"
+                class="custom-field-key"
+                placeholder="信息类型（如：目标用户、使用场景等）"
+                data-index="${fieldIndex}"
+                maxlength="20"
+            />
+            <textarea
+                class="custom-field-value"
+                placeholder="详细描述这个信息..."
+                data-index="${fieldIndex}"
+                rows="2"
+            ></textarea>
+        </div>
+        <button type="button" class="remove-custom-field-btn" onclick="removeCustomInfoField(this)">
+            <span class="remove-icon">✕</span>
+        </button>
+    `;
+
+    customInfoContainer.appendChild(customFieldDiv);
+
+    // 聚焦到新添加的字段
+    const keyInput = customFieldDiv.querySelector('.custom-field-key');
+    if (keyInput) {
+        keyInput.focus();
+    }
+}
+
+// 移除自定义信息字段
+function removeCustomInfoField(button) {
+    const fieldDiv = button.closest('.custom-info-field');
+    if (fieldDiv) {
+        fieldDiv.remove();
+    }
+}
+
+// 生成最终提示词
+async function generateFinalPrompt(originalPrompt) {
+    const selectedModel = getSelectedModel();
+
+    // 收集用户填写的信息
+    const additionalInfo = {};
+
+    // 收集AI生成的问题的回答
+    const thinkingFields = document.querySelectorAll('.thinking-field-input');
+    thinkingFields.forEach(field => {
+        const key = field.dataset.key;
+        const value = field.value.trim();
+        if (value) {
+            additionalInfo[key] = value;
+        }
+    });
+
+    // 收集自定义补充信息
+    const customFields = document.querySelectorAll('.custom-info-field');
+    customFields.forEach(field => {
+        const keyInput = field.querySelector('.custom-field-key');
+        const valueInput = field.querySelector('.custom-field-value');
+
+        if (keyInput && valueInput) {
+            const key = keyInput.value.trim();
+            const value = valueInput.value.trim();
+
+            if (key && value) {
+                additionalInfo[key] = value;
+            }
+        }
+    });
+
+    // 显示加载状态
+    showLoading();
+
+    try {
+        // 第二阶段：基于补充信息优化提示词
+        const optimizationData = await optimizeThinkingPrompt(originalPrompt, additionalInfo, selectedModel);
+
+        // 隐藏加载状态和表单
+        hideLoading();
+        hideThinkingForm();
+
+        // 显示结果
+        showResult(optimizationData.optimized_prompt, optimizationData.model_used);
+
+        // 显示成功提示
+        showCustomAlert('思考模式优化成功！', 'success', 2000);
+
+    } catch (error) {
+        console.error('思考模式优化失败:', error);
+        hideLoading();
+        showCustomAlert('优化失败，请检查网络连接或稍后重试', 'error', 3500);
+    }
+}
+
+// 跳过思考模式，直接生成最终提示词（不传递补充信息）
+async function generateFinalPromptWithoutInfo(originalPrompt) {
+    const selectedModel = getSelectedModel();
+
+    // 显示加载状态
+    showLoading();
+
+    try {
+        // 第二阶段：基于空的补充信息优化提示词
+        const optimizationData = await optimizeThinkingPrompt(originalPrompt, {}, selectedModel);
+
+        // 隐藏加载状态和表单
+        hideLoading();
+        hideThinkingForm();
+
+        // 显示结果
+        showResult(optimizationData.optimized_prompt, optimizationData.model_used);
+
+        // 显示成功提示
+        showCustomAlert('思考模式优化成功！', 'success', 2000);
+
+    } catch (error) {
+        console.error('思考模式优化失败:', error);
+        hideLoading();
+        showCustomAlert('思考模式优化失败，请稍后重试', 'error', 3500);
+    }
+}
+
+// 隐藏思考模式表单
+function hideThinkingForm() {
+    const thinkingFormSection = document.getElementById('thinkingFormSection');
+    if (thinkingFormSection) {
+        thinkingFormSection.style.display = 'none';
+    }
+}
+
 // 导出函数到全局作用域
 window.updateCharCount = updateCharCount;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.initPasswordToggles = initPasswordToggles;
+window.handleThinkingMode = handleThinkingMode;
+window.showThinkingForm = showThinkingForm;
+window.hideThinkingForm = hideThinkingForm;
+window.addCustomInfoField = addCustomInfoField;
+window.removeCustomInfoField = removeCustomInfoField;

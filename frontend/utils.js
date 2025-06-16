@@ -153,7 +153,7 @@ function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
 // 获取选中的模型
 function getSelectedModel() {
     const selectedRadio = document.querySelector('input[name="model"]:checked');
-    return selectedRadio ? selectedRadio.value : 'deepseek-chat';
+    return selectedRadio ? selectedRadio.value : 'gemini-2.0-flash';
 }
 
 // 获取当前选择的模式

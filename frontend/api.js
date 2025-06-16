@@ -1,9 +1,24 @@
 // API调用模块
 
 // API 基础URL - 根据环境自动选择
-const API_BASE_URL = window.location.protocol === 'file:'
-    ? 'http://localhost:8000/api'  // 本地开发环境
-    : '/api';                      // 部署环境（相对路径）
+const API_BASE_URL = (() => {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isFileProtocol = window.location.protocol === 'file:';
+
+    console.log('当前环境检测:');
+    console.log('- hostname:', window.location.hostname);
+    console.log('- protocol:', window.location.protocol);
+    console.log('- isLocalhost:', isLocalhost);
+    console.log('- isFileProtocol:', isFileProtocol);
+
+    if (isLocalhost || isFileProtocol) {
+        console.log('使用本地开发环境API: http://localhost:8000/api');
+        return 'http://localhost:8000/api';
+    } else {
+        console.log('使用部署环境API: /api');
+        return '/api';
+    }
+})();
 
 // API调用的基础配置
 const API_CONFIG = {
@@ -34,6 +49,8 @@ async function getAuthToken() {
 // 通用API调用函数
 async function apiCall(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log('API_BASE_URL:', API_BASE_URL);
+    console.log('完整请求URL:', url);
 
     // 获取认证令牌
     const token = await getAuthToken();
@@ -357,9 +374,43 @@ function clearAll() {
     }
 }
 
+// 思考模式第一阶段：分析提示词
+async function analyzeThinkingPrompt(originalPrompt, model) {
+    const requestBody = {
+        original_prompt: originalPrompt,
+        model: model,
+        mode: 'thinking'
+    };
+
+    console.log('发送思考模式分析请求:', requestBody);
+
+    return await apiCall('/thinking/analyze', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+    });
+}
+
+// 思考模式第二阶段：基于补充信息优化提示词
+async function optimizeThinkingPrompt(originalPrompt, additionalInfo, model) {
+    const requestBody = {
+        original_prompt: originalPrompt,
+        additional_info: additionalInfo,
+        model: model
+    };
+
+    console.log('发送思考模式优化请求:', requestBody);
+
+    return await apiCall('/thinking/optimize', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+    });
+}
+
 // 导出函数到全局作用域
 window.optimizePrompt = optimizePrompt;
 window.quickOptimizePrompt = quickOptimizePrompt;
+window.analyzeThinkingPrompt = analyzeThinkingPrompt;
+window.optimizeThinkingPrompt = optimizeThinkingPrompt;
 window.copyToClipboard = copyToClipboard;
 window.clearAll = clearAll;
 window.showLoading = showLoading;
