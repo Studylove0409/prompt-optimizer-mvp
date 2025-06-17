@@ -467,8 +467,54 @@ async function handleThinkingMode() {
     }
 }
 
+// 预设选项配置
+const fieldOptions = {
+    // 通用字段
+    "目标用户": ["开发者/程序员", "设计师/创意工作者", "学生/研究者", "商务人士", "普通用户", "AI工程师", "教师/培训师", "内容创作者"],
+    "输出格式": ["详细文本", "结构化列表", "代码示例", "步骤指南", "创意内容", "分析报告", "对话形式", "图表说明"],
+    "语调风格": ["专业正式", "友好亲切", "简洁直接", "详细解释", "创意有趣", "学术严谨", "实用导向", "启发引导"],
+    "技术水平": ["初学者", "有一定经验", "较为熟练", "专业级别", "专家水平"],
+    "难度要求": ["基础入门", "中等难度", "进阶水平", "专业级别", "专家级别"],
+    "内容类型": ["教程指南", "问题解答", "创意文案", "技术分析", "策略规划", "总结归纳", "比较分析", "案例研究"],
+    
+    // 学习相关字段
+    "学习目标": ["找工作/求职", "兴趣爱好", "项目开发", "学术研究", "技能提升", "转行准备", "创业需要", "考试准备"],
+    "基础水平": ["零基础", "有其他语言基础", "有Java基础", "有编程思维", "计算机专业背景", "自学过编程", "培训班经历", "工作经验"],
+    "学习路径": ["在线视频课程", "实体书籍", "实战项目", "培训班", "大学课程", "导师指导", "自学摸索", "社区交流"],
+    "时间投入": ["每天1-2小时", "每天3-4小时", "每天5小时以上", "周末集中学习", "工作日晚上", "全职学习", "碎片时间", "寒暑假集中"],
+    "实践经验": ["Web开发项目", "移动应用开发", "游戏开发", "数据分析", "算法练习", "开源项目", "企业项目", "个人作品集"],
+    
+    // 创作相关字段
+    "创作目标": ["商业用途", "个人兴趣", "学习练习", "作品集", "比赛参赛", "客户需求", "团队协作", "技能展示"],
+    "创作风格": ["现代简约", "古典优雅", "科技未来", "自然清新", "温馨可爱", "专业商务", "艺术抽象", "复古怀旧"],
+    "应用场景": ["社交媒体", "商业宣传", "个人博客", "学术论文", "产品介绍", "教学材料", "演示文稿", "印刷品"],
+    
+    // 分析相关字段  
+    "分析深度": ["概览总结", "详细分析", "深度研究", "对比评估", "趋势预测", "原因探究", "解决方案", "实施建议"],
+    "分析角度": ["技术角度", "商业角度", "用户角度", "市场角度", "成本角度", "风险角度", "发展角度", "创新角度"],
+    
+    // 创业/商业相关字段
+    "目标人群": ["学生群体", "上班族", "退休人员", "家庭主妇", "自由职业者", "企业主", "年轻创业者", "专业人士"],
+    "风险偏好": ["低风险稳健型", "中等风险平衡型", "高风险激进型", "保守谨慎型", "积极进取型", "风险厌恶型", "投机冒险型", "稳中求进型"],
+    "启动资金": ["5万以下", "5-10万", "10-20万", "20-50万", "50-100万", "100万以上", "资金有限", "资金充足"],
+    "兴趣领域": ["科技互联网", "教育培训", "餐饮服务", "健康养生", "文化创意", "金融投资", "电商零售", "旅游休闲"],
+    "技能特长": ["技术开发", "市场营销", "设计创意", "管理协调", "沟通表达", "数据分析", "项目管理", "客户服务"],
+    
+    // 其他常见字段
+    "经验水平": ["新手入门", "初级水平", "中级水平", "高级水平", "专家级别"],
+    "预期目标": ["短期收益", "长期发展", "技能提升", "经验积累", "人脉拓展", "品牌建立", "市场占有", "创新突破"],
+    "资源需求": ["人力资源", "资金支持", "技术支持", "市场渠道", "合作伙伴", "办公场地", "设备工具", "专业指导"],
+    
+    // 个人和收益相关字段
+    "个人情况": ["技术背景", "管理经验", "销售经验", "创意设计", "数据分析", "教育培训", "服务行业", "多技能复合"],
+    "期望收益": ["1-3个月见效", "3-6个月见效", "6-12个月见效", "1年以上长期", "快速回本", "稳定增长", "高收益高风险", "保本微利"]
+};
+
 // 显示思考模式动态表单
 function showThinkingForm(analysisResult, originalPrompt) {
+    console.log('🎯 showThinkingForm called with analysisResult:', analysisResult);
+    console.log('🎯 Quick options enabled version - v2.0');
+    
     const thinkingFormSection = document.getElementById('thinkingFormSection');
     const thinkingFormContent = document.getElementById('thinkingFormContent');
 
@@ -485,18 +531,48 @@ function showThinkingForm(analysisResult, originalPrompt) {
         const fieldDiv = document.createElement('div');
         fieldDiv.className = 'thinking-field';
 
-        fieldDiv.innerHTML = `
-            <label class="thinking-field-label" for="thinking-field-${index}">
-                ${item.key}
-            </label>
-            <textarea
-                class="thinking-field-input"
-                id="thinking-field-${index}"
-                placeholder="${item.question}"
-                data-key="${item.key}"
-                rows="2"
-            ></textarea>
-        `;
+        // 检查是否有预设选项
+        const hasOptions = fieldOptions[item.key];
+        console.log(`🔍 Field "${item.key}" hasOptions:`, hasOptions);
+        
+        if (hasOptions) {
+            console.log(`✅ 为字段 "${item.key}" 生成快速选择按钮`);
+            // 生成按钮选择界面
+            fieldDiv.innerHTML = `
+                <label class="thinking-field-label">
+                    ${item.key}
+                </label>
+                <div class="thinking-field-description">${item.question}</div>
+                <div class="quick-options-container" data-field-index="${index}">
+                    ${hasOptions.map(option => `
+                        <button type="button" class="quick-option-btn" data-value="${option}">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+                <textarea
+                    class="thinking-field-input"
+                    id="thinking-field-${index}"
+                    placeholder="或输入自定义内容..."
+                    data-key="${item.key}"
+                    rows="2"
+                ></textarea>
+            `;
+        } else {
+            // 生成普通文本输入
+            fieldDiv.innerHTML = `
+                <label class="thinking-field-label" for="thinking-field-${index}">
+                    ${item.key}
+                </label>
+                <textarea
+                    class="thinking-field-input"
+                    id="thinking-field-${index}"
+                    placeholder="${item.question}"
+                    data-key="${item.key}"
+                    rows="2"
+                ></textarea>
+            `;
+        }
 
         thinkingFormContent.appendChild(fieldDiv);
     });
@@ -534,6 +610,73 @@ function showThinkingForm(analysisResult, originalPrompt) {
 
     // 绑定自定义信息相关事件
     bindCustomInfoEvents();
+
+    // 绑定快速选择按钮事件
+    bindQuickOptionEvents();
+}
+
+// 绑定快速选择按钮事件
+function bindQuickOptionEvents() {
+    // 获取所有快速选择按钮
+    const quickOptionBtns = document.querySelectorAll('.quick-option-btn');
+    
+    quickOptionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 获取对应的textarea
+            const container = this.closest('.thinking-field');
+            const textarea = container.querySelector('.thinking-field-input');
+            const optionsContainer = this.closest('.quick-options-container');
+            
+            // 移除其他按钮的选中状态
+            optionsContainer.querySelectorAll('.quick-option-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            
+            // 添加当前按钮的选中状态
+            this.classList.add('selected');
+            
+            // 将选中的值填入textarea
+            textarea.value = this.dataset.value;
+            
+            // 触发输入事件（如果有其他监听器需要）
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            // 添加点击动画效果
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // 为textarea添加输入监听，清除按钮选中状态（当用户手动输入时）
+    const textareas = document.querySelectorAll('.thinking-field .thinking-field-input');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            const container = this.closest('.thinking-field');
+            const optionsContainer = container.querySelector('.quick-options-container');
+            
+            if (optionsContainer) {
+                // 检查当前值是否匹配某个按钮
+                const buttons = optionsContainer.querySelectorAll('.quick-option-btn');
+                let matchFound = false;
+                
+                buttons.forEach(btn => {
+                    if (btn.dataset.value === this.value) {
+                        btn.classList.add('selected');
+                        matchFound = true;
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+                
+                // 如果没有匹配的按钮，清除所有选中状态
+                if (!matchFound) {
+                    buttons.forEach(btn => btn.classList.remove('selected'));
+                }
+            }
+        });
+    });
 }
 
 // 绑定思考模式表单事件
