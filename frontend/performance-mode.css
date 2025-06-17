@@ -1,0 +1,85 @@
+/* 性能优化模式样式 - 轻量级版本 */
+
+/* 禁用复杂的过渡动画 */
+.performance-mode * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 简化背景效果 */
+.performance-mode body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+/* 简化阴影效果 */
+.performance-mode .thinking-form-section,
+.performance-mode .input-section,
+.performance-mode .output-section,
+.performance-mode .model-selection {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* 简化按钮效果 */
+.performance-mode .quick-option-btn {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: none !important;
+}
+
+.performance-mode .quick-option-btn:hover {
+    background: #f1f5f9 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.performance-mode .quick-option-btn.selected {
+    background: #3b82f6 !important;
+    color: white !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 简化模型卡片 */
+.performance-mode .model-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: none !important;
+}
+
+.performance-mode .model-card:hover {
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 禁用粒子背景 */
+.performance-mode #particleCanvas {
+    display: none !important;
+}
+
+/* 简化导航栏 */
+.performance-mode .navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 性能模式指示器 */
+.performance-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #f59e0b;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 9999;
+    font-weight: 500;
+}
