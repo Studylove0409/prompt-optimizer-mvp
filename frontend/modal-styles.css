@@ -127,6 +127,117 @@
     50% { opacity: 0.6; }
 }
 
+/* 思考模式特殊样式 - 让它更加显眼和特别 */
+.mode-btn[data-mode="thinking"] {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    animation: thinking-pulse 3s ease-in-out infinite;
+}
+
+.mode-btn[data-mode="thinking"]::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+    border-radius: 17px;
+    z-index: -1;
+    opacity: 0;
+    animation: thinking-border-glow 2s ease-in-out infinite;
+}
+
+.mode-btn[data-mode="thinking"]:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 50%, #ec4899 100%);
+}
+
+.mode-btn[data-mode="thinking"].active {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 50%, #ec4899 100%);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.mode-btn[data-mode="thinking"].active::before {
+    opacity: 1;
+}
+
+.mode-btn[data-mode="thinking"] .mode-icon {
+    font-size: 16px;
+    animation: thinking-brain-pulse 2s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+.mode-btn[data-mode="thinking"] .mode-name {
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    letter-spacing: 0.5px;
+}
+
+.mode-btn[data-mode="thinking"].active .mode-name {
+    letter-spacing: 0.8px;
+    font-weight: 700;
+}
+
+/* 思考模式特殊动画效果 */
+@keyframes thinking-pulse {
+    0%, 100% { 
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    50% { 
+        transform: scale(1.06);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+}
+
+@keyframes thinking-border-glow {
+    0%, 100% { 
+        opacity: 0;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.6;
+        transform: scale(1.02);
+    }
+}
+
+@keyframes thinking-brain-pulse {
+    0%, 100% { 
+        transform: scale(1);
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+    50% { 
+        transform: scale(1.1);
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* 思考模式激活时的特殊光晕效果 */
+.mode-btn[data-mode="thinking"].active::after {
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.2) 50%, rgba(240, 147, 251, 0.1) 70%, rgba(255,255,255,0) 100%);
+    animation: thinking-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes thinking-glow-pulse {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+}
+
 /* 手机端下拉框样式 */
 .mode-select-container {
     display: none;
@@ -171,6 +282,24 @@
     font-size: 14px;
 }
 
+/* 下拉框中思考模式选项的特殊样式 */
+.mode-select option[value="thinking"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+/* 当思考模式被选中时，下拉框的特殊样式 */
+.mode-select:has(option[value="thinking"]:checked),
+.mode-select[data-selected="thinking"] {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 50%, rgba(240, 147, 251, 0.15) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    font-weight: 700;
+    color: #5a67d8;
+}
+
 @media (max-width: 768px) {
     .mode-selector {
         order: -1;
@@ -207,6 +336,24 @@
     
     .mode-btn {
         padding: 5px 12px;
+    }
+    
+    /* 移动端思考模式下拉框的特殊样式 */
+    .mode-select[data-selected="thinking"] {
+        animation: mobile-thinking-pulse 2s ease-in-out infinite;
+        box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+    }
+}
+
+/* 移动端思考模式脉冲动画 */
+@keyframes mobile-thinking-pulse {
+    0%, 100% { 
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 3px 12px rgba(102, 126, 234, 0.4);
+    }
+    50% { 
+        border-color: rgba(102, 126, 234, 0.8);
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.6);
     }
 }
 

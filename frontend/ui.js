@@ -288,6 +288,8 @@ function initModeSelection() {
             // 同步下拉框的值
             if (modeSelect) {
                 modeSelect.value = btn.dataset.mode;
+                // 同时更新下拉框的data-selected属性
+                modeSelect.setAttribute('data-selected', btn.dataset.mode);
             }
         });
     });
@@ -305,7 +307,14 @@ function initModeSelection() {
             if (targetBtn) {
                 targetBtn.classList.add('active');
             }
+            
+            // 为下拉框设置选中模式的数据属性，用于特殊样式
+            modeSelect.setAttribute('data-selected', selectedMode);
         });
+        
+        // 初始化时也设置默认选中的模式
+        const initialMode = modeSelect.value || 'general';
+        modeSelect.setAttribute('data-selected', initialMode);
     }
 }
 
