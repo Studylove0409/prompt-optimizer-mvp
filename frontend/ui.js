@@ -535,10 +535,13 @@ const fieldOptions = {
     "预期成果": ["知识掌握", "技能提升", "问题解决", "效率提高", "创新思路", "实践应用", "理论理解", "全面发展"]
 };
 
-// 字段匹配函数 - 支持模糊匹配和同义词
-function findFieldOptions(fieldKey) {
+// 字段匹配函数 - 支持智能匹配和内容分析
+function findFieldOptions(fieldKey, fieldQuestion = '') {
+    console.log(`🔍 匹配分析 - 字段: "${fieldKey}", 问题: "${fieldQuestion}"`);
+    
     // 直接匹配
     if (fieldOptions[fieldKey]) {
+        console.log(`✅ 直接匹配成功: ${fieldKey}`);
         return fieldOptions[fieldKey];
     }
     
@@ -599,16 +602,47 @@ function findFieldOptions(fieldKey) {
     
     // 检查同义词匹配
     if (synonymMap[fieldKey] && fieldOptions[synonymMap[fieldKey]]) {
+        console.log(`✅ 同义词匹配成功: ${fieldKey} -> ${synonymMap[fieldKey]}`);
         return fieldOptions[synonymMap[fieldKey]];
     }
     
-    // 关键词包含匹配
+    // 关键词包含匹配（字段名称）
     for (const [key, options] of Object.entries(fieldOptions)) {
         if (fieldKey.includes(key) || key.includes(fieldKey)) {
+            console.log(`✅ 关键词匹配成功: ${fieldKey} <-> ${key}`);
             return options;
         }
     }
     
+    // 智能内容匹配（基于问题描述）
+    const questionContent = (fieldKey + ' ' + fieldQuestion).toLowerCase();
+    
+    // 根据问题内容的关键词来匹配
+    const contentMatchers = {
+        "目标用户": ["用户", "受众", "人群", "对象", "读者", "观众"],
+        "输出格式": ["格式", "形式", "样式", "呈现", "展示", "输出"],
+        "语调风格": ["语调", "风格", "语言", "表达", "沟通", "语气", "口吻"],
+        "技术水平": ["水平", "程度", "级别", "能力", "熟练", "基础"],
+        "难度要求": ["难度", "复杂", "深度", "深浅"],
+        "应用场景": ["场景", "环境", "情况", "情境", "用途"],
+        "时间投入": ["时间", "周期", "期限", "频率"],
+        "学习路径": ["学习", "路径", "方式", "渠道", "途径"],
+        "实践经验": ["经验", "实践", "项目", "案例", "实战"],
+        "创作风格": ["创作", "设计", "美学", "视觉"],
+        "内容类型": ["类型", "内容", "主题", "方向"],
+        "使用目的": ["目的", "目标", "用意", "意图"],
+        "背景信息": ["背景", "情况", "现状", "基础信息"],
+        "期望效果": ["效果", "结果", "期望", "希望", "想要"]
+    };
+    
+    for (const [optionKey, keywords] of Object.entries(contentMatchers)) {
+        if (fieldOptions[optionKey] && keywords.some(keyword => questionContent.includes(keyword))) {
+            console.log(`✅ 内容匹配成功: "${questionContent}" -> ${optionKey}`);
+            return fieldOptions[optionKey];
+        }
+    }
+    
+    console.log(`⚠️ 无匹配，使用默认选项`);
     // 默认通用选项
     return ["请选择", "基础水平", "中等水平", "高级水平", "专家水平", "其他"];
 }
@@ -645,9 +679,13 @@ function showThinkingForm(analysisResult, originalPrompt) {
         fieldDiv.style.setProperty('--index', index + 1);
 
         // 检查是否有预设选项（使用智能匹配）
-        const hasOptions = findFieldOptions(item.key);
-        console.log(`🔍 Field "${item.key}" hasOptions:`, hasOptions);
-        console.log(`✅ 为字段 "${item.key}" 生成快速选择按钮`);
+        const hasOptions = findFieldOptions(item.key, item.question);
+        console.log(`🔍 字段分析结果:`, {
+            fieldKey: item.key,
+            fieldQuestion: item.question,
+            matchedOptions: hasOptions,
+            isDefaultOptions: hasOptions.includes("基础水平")
+        });
         
         // 现在所有字段都会有选项，至少有默认选项
         // 生成按钮选择界面
