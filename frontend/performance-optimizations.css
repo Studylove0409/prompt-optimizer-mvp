@@ -1,0 +1,108 @@
+/* 性能优化CSS补丁 */
+/* 优先级高，覆盖现有的性能消耗样式 */
+
+/* 导航栏性能优化 */
+.navbar {
+    /* 移除高强度模糊效果 */
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* 启用硬件加速 */
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 优化所有模态弹窗的模糊效果 */
+.thinking-modal-backdrop,
+.help-modal,
+.business-modal,
+.announcement-modal,
+.history-modal,
+.profile-modal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 为模态弹窗容器添加硬件加速 */
+.thinking-modal-container,
+.help-modal-content,
+.business-modal-content,
+.announcement-modal-content,
+.history-modal-content,
+.profile-modal-content {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 优化输入框性能 */
+.thinking-field-input,
+.form-input,
+.prompt-textarea {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 优化动画性能 - 只使用transform和opacity */
+.action-button {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.action-button:hover {
+    transform: translateY(-2px) translateZ(0);
+}
+
+/* 优化粒子背景性能 */
+#particleCanvas {
+    /* 启用硬件加速 */
+    will-change: transform;
+    transform: translateZ(0);
+    /* 简化背景渐变 */
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+}
+
+/* 优化滚动性能 */
+.thinking-modal-body,
+.main-content,
+.section-content {
+    /* 使用硬件加速滚动 */
+    -webkit-overflow-scrolling: touch;
+    will-change: scroll-position;
+}
+
+/* 减少不必要的动画 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 为低性能设备优化 */
+@media (max-width: 768px), (max-height: 768px) {
+    /* 移动设备进一步优化 */
+    .thinking-modal-container {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .action-button:hover {
+        transform: none !important;
+    }
+    
+    .quick-option-btn:hover {
+        transform: none !important;
+    }
+}
+
+/* CPU性能保护 */
+@media (max-resolution: 1.5dppx) {
+    /* 低分辨率设备优化 */
+    .thinking-modal-container,
+    .action-button,
+    .quick-option-btn {
+        transition: none !important;
+        animation: none !important;
+    }
+}

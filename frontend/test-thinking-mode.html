@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>思考模式级联问答测试</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="thinking-cascading-modal.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .test-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            resize: vertical;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .result-area {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .result-area h3 {
+            margin-top: 0;
+            color: #374151;
+        }
+        .result-content {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 思考模式级联问答测试</h1>
+        <p>测试新的级联问答功能，体验更智能的交互式提示词优化</p>
+        
+        <div class="input-section">
+            <label for="testPrompt">输入要优化的提示词：</label>
+            <textarea id="testPrompt" class="test-input" rows="4" placeholder="例如：帮我写一个产品介绍"></textarea>
+            
+            <label for="testModel">选择模型：</label>
+            <select id="testModel" class="test-input">
+                <option value="deepseek-chat">DeepSeek Chat (快速)</option>
+                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash</option>
+            </select>
+            
+            <button id="startThinkingBtn" class="test-button">🚀 开始思考模式</button>
+        </div>
+        
+        <div id="resultArea" class="result-area" style="display: none;">
+            <h3>优化结果</h3>
+            <div id="resultContent" class="result-content"></div>
+        </div>
+    </div>
+
+    <!-- 思考模式级联问答弹框 -->
+    <div class="thinking-cascading-modal" id="thinkingCascadingModal">
+        <div class="thinking-cascading-backdrop"></div>
+        <div class="thinking-cascading-content">
+            <div class="thinking-header">
+                <div class="thinking-title">
+                    <div class="ai-avatar">🤖</div>
+                    <h3>智能优化助手</h3>
+                </div>
+                <div class="thinking-progress">
+                    <span class="progress-text">第 <span id="currentStep">1</span> 个问题</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <button class="close-modal" id="closeThinkingModal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="thinking-question-area">
+                <div class="question-bubble">
+                    <p id="currentQuestion">正在准备问题...</p>
+                    <div class="ai-reasoning" id="aiReasoning" style="display: none;">
+                        <small id="reasoningText"></small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="thinking-answer-area">
+                <div class="answer-input-container">
+                    <textarea 
+                        id="currentAnswer" 
+                        placeholder="请输入你的回答..."
+                        rows="3"
+                    ></textarea>
+                    <select id="currentAnswerSelect" style="display: none;">
+                        <!-- 动态生成的选项 -->
+                    </select>
+                </div>
+                
+                <div class="thinking-actions">
+                    <button id="skipBtn" class="btn-secondary">
+                        <span>跳过问题</span>
+                    </button>
+                    <button id="submitAnswerBtn" class="btn-primary">
+                        <span>提交回答</span>
+                        <div class="btn-loading" style="display: none;"></div>
+                    </button>
+                    <button id="finalizeBtn" class="btn-success" style="display: none;">
+                        <span>完成并优化</span>
+                        <div class="btn-loading" style="display: none;"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 已回答问题的摘要 -->
+            <div class="answered-summary" id="answeredSummary" style="display: none;">
+                <div class="summary-header">
+                    <h4>已收集的信息</h4>
+                    <button class="summary-toggle" id="summaryToggle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="summary-content" id="summaryContent">
+                    <!-- 动态生成的已回答问题摘要 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简化版级联问题管理器 - 仅用于测试
+        class TestCascadingQuestionManager {
+            constructor(originalPrompt, model) {
+                this.originalPrompt = originalPrompt;
+                this.model = model;
+                this.conversationHistory = [];
+                this.currentQuestion = null;
+                this.isLoading = false;
+                this.modal = document.getElementById('thinkingCascadingModal');
+                this.initializeElements();
+                this.bindEvents();
+            }
+            
+            initializeElements() {
+                this.elements = {
+                    currentStep: document.getElementById('currentStep'),
+                    progressFill: document.getElementById('progressFill'),
+                    currentQuestion: document.getElementById('currentQuestion'),
+                    aiReasoning: document.getElementById('aiReasoning'),
+                    reasoningText: document.getElementById('reasoningText'),
+                    currentAnswer: document.getElementById('currentAnswer'),
+                    currentAnswerSelect: document.getElementById('currentAnswerSelect'),
+                    skipBtn: document.getElementById('skipBtn'),
+                    submitAnswerBtn: document.getElementById('submitAnswerBtn'),
+                    finalizeBtn: document.getElementById('finalizeBtn'),
+                    answeredSummary: document.getElementById('answeredSummary'),
+                    summaryContent: document.getElementById('summaryContent'),
+                    summaryToggle: document.getElementById('summaryToggle'),
+                    closeBtn: document.getElementById('closeThinkingModal')
+                };
+            }
+            
+            bindEvents() {
+                this.elements.submitAnswerBtn.addEventListener('click', () => this.submitCurrentAnswer());
+                this.elements.skipBtn.addEventListener('click', () => this.skipCurrentQuestion());
+                this.elements.finalizeBtn.addEventListener('click', () => this.finalizeOptimization());
+                this.elements.closeBtn.addEventListener('click', () => this.closeModal());
+                
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal || e.target.classList.contains('thinking-cascading-backdrop')) {
+                        this.closeModal();
+                    }
+                });
+                
+                this.elements.currentAnswer.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.submitCurrentAnswer();
+                    }
+                });
+                
+                this.elements.currentAnswerSelect.addEventListener('change', () => {
+                    setTimeout(() => this.submitCurrentAnswer(), 300);
+                });
+            }
+            
+            async start() {
+                this.showModal();
+                await this.getNextQuestion();
+            }
+            
+            showModal() {
+                this.modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeModal() {
+                this.modal.classList.remove('show');
+                document.body.style.overflow = '';
+                this.conversationHistory = [];
+                this.currentQuestion = null;
+                this.isLoading = false;
+            }
+            
+            async callAPI(endpoint, data) {
+                const response = await fetch(`http://localhost:8000/api${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `API错误: ${response.status}`);
+                }
+                
+                return await response.json();
+            }
+            
+            async getNextQuestion() {
+                if (this.isLoading) return;
+                
+                this.setLoading(true);
+                
+                try {
+                    const response = await this.callAPI('/thinking/next-question', {
+                        original_prompt: this.originalPrompt,
+                        conversation_history: this.conversationHistory,
+                        model: this.model
+                    });
+                    
+                    this.setLoading(false);
+                    
+                    if (response.has_next_question) {
+                        this.currentQuestion = response.question;
+                        this.displayQuestion(response.question, response.reasoning);
+                        this.updateProgress(response.progress);
+                        this.updateActionButtons(response.can_finalize);
+                    } else {
+                        await this.finalizeOptimization();
+                    }
+                    
+                } catch (error) {
+                    this.setLoading(false);
+                    console.error('获取下一个问题失败:', error);
+                    alert('获取问题失败，请稍后重试');
+                }
+            }
+            
+            displayQuestion(questionData, reasoning) {
+                this.elements.currentQuestion.textContent = questionData.question;
+                
+                if (reasoning) {
+                    this.elements.reasoningText.textContent = reasoning;
+                    this.elements.aiReasoning.style.display = 'block';
+                } else {
+                    this.elements.aiReasoning.style.display = 'none';
+                }
+                
+                this.setupInputControl(questionData);
+            }
+            
+            setupInputControl(questionData) {
+                if (questionData.type === 'select') {
+                    this.elements.currentAnswer.style.display = 'none';
+                    this.elements.currentAnswerSelect.style.display = 'block';
+                    
+                    this.elements.currentAnswerSelect.innerHTML = '<option value="">请选择...</option>';
+                    questionData.options.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option;
+                        optionElement.textContent = option;
+                        this.elements.currentAnswerSelect.appendChild(optionElement);
+                    });
+                    
+                    this.elements.currentAnswerSelect.focus();
+                } else {
+                    this.elements.currentAnswer.style.display = 'block';
+                    this.elements.currentAnswerSelect.style.display = 'none';
+                    
+                    this.elements.currentAnswer.placeholder = questionData.placeholder || '请输入你的回答...';
+                    this.elements.currentAnswer.value = '';
+                    this.elements.currentAnswer.focus();
+                }
+            }
+            
+            updateProgress(progress) {
+                this.elements.currentStep.textContent = progress.current;
+                const percentage = (progress.current / progress.estimated_total) * 100;
+                this.elements.progressFill.style.width = `${Math.min(percentage, 100)}%`;
+            }
+            
+            updateActionButtons(canFinalize) {
+                if (canFinalize && this.conversationHistory.length >= 2) {
+                    this.elements.finalizeBtn.style.display = 'block';
+                } else {
+                    this.elements.finalizeBtn.style.display = 'none';
+                }
+            }
+            
+            async submitCurrentAnswer() {
+                if (this.isLoading || !this.currentQuestion) return;
+                
+                const answer = this.getCurrentAnswer();
+                if (!answer.trim()) {
+                    alert('请先回答当前问题');
+                    return;
+                }
+                
+                this.conversationHistory.push({
+                    question: this.currentQuestion.question,
+                    answer: answer,
+                    importance: this.currentQuestion.importance
+                });
+                
+                this.clearCurrentInput();
+                this.updateSummary();
+                await this.getNextQuestion();
+            }
+            
+            async skipCurrentQuestion() {
+                if (this.isLoading || !this.currentQuestion) return;
+                
+                this.conversationHistory.push({
+                    question: this.currentQuestion.question,
+                    answer: '(已跳过)',
+                    importance: this.currentQuestion.importance
+                });
+                
+                this.updateSummary();
+                await this.getNextQuestion();
+            }
+            
+            getCurrentAnswer() {
+                if (this.elements.currentAnswerSelect.style.display !== 'none') {
+                    return this.elements.currentAnswerSelect.value;
+                } else {
+                    return this.elements.currentAnswer.value;
+                }
+            }
+            
+            clearCurrentInput() {
+                this.elements.currentAnswer.value = '';
+                this.elements.currentAnswerSelect.value = '';
+            }
+            
+            updateSummary() {
+                if (this.conversationHistory.length === 0) {
+                    this.elements.answeredSummary.style.display = 'none';
+                    return;
+                }
+                
+                this.elements.answeredSummary.style.display = 'block';
+                
+                const summaryHTML = this.conversationHistory.map(item => `
+                    <div class="summary-item">
+                        <div class="summary-question">${item.question}</div>
+                        <div class="summary-answer">${item.answer}</div>
+                    </div>
+                `).join('');
+                
+                this.elements.summaryContent.innerHTML = summaryHTML;
+            }
+            
+            async finalizeOptimization() {
+                if (this.isLoading) return;
+                
+                if (this.conversationHistory.length === 0) {
+                    alert('请至少回答一个问题');
+                    return;
+                }
+                
+                this.setLoading(true, '正在生成优化结果...');
+                
+                try {
+                    const response = await this.callAPI('/thinking/finalize', {
+                        original_prompt: this.originalPrompt,
+                        conversation_history: this.conversationHistory,
+                        model: this.model
+                    });
+                    
+                    this.setLoading(false);
+                    this.closeModal();
+                    
+                    // 显示结果
+                    this.showResult(response.optimized_prompt, response.model_used);
+                    
+                } catch (error) {
+                    this.setLoading(false);
+                    console.error('完成优化失败:', error);
+                    alert('优化失败，请稍后重试');
+                }
+            }
+            
+            showResult(optimizedPrompt, modelUsed) {
+                const resultArea = document.getElementById('resultArea');
+                const resultContent = document.getElementById('resultContent');
+                
+                resultContent.textContent = `模型: ${modelUsed}\n\n优化后的提示词:\n${optimizedPrompt}`;
+                resultArea.style.display = 'block';
+                resultArea.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            setLoading(isLoading, message = '') {
+                this.isLoading = isLoading;
+                
+                const submitBtn = this.elements.submitAnswerBtn;
+                const finalizeBtn = this.elements.finalizeBtn;
+                
+                if (isLoading) {
+                    submitBtn.disabled = true;
+                    finalizeBtn.disabled = true;
+                    
+                    const loadingElements = [
+                        submitBtn.querySelector('.btn-loading'),
+                        finalizeBtn.querySelector('.btn-loading')
+                    ];
+                    
+                    loadingElements.forEach(el => {
+                        if (el) el.style.display = 'block';
+                    });
+                    
+                    if (message) {
+                        const submitSpan = submitBtn.querySelector('span');
+                        const finalizeSpan = finalizeBtn.querySelector('span');
+                        if (submitSpan) submitSpan.textContent = message;
+                        if (finalizeSpan) finalizeSpan.textContent = message;
+                    }
+                } else {
+                    submitBtn.disabled = false;
+                    finalizeBtn.disabled = false;
+                    
+                    const loadingElements = [
+                        submitBtn.querySelector('.btn-loading'),
+                        finalizeBtn.querySelector('.btn-loading')
+                    ];
+                    
+                    loadingElements.forEach(el => {
+                        if (el) el.style.display = 'none';
+                    });
+                    
+                    const submitSpan = submitBtn.querySelector('span');
+                    const finalizeSpan = finalizeBtn.querySelector('span');
+                    if (submitSpan) submitSpan.textContent = '提交回答';
+                    if (finalizeSpan) finalizeSpan.textContent = '完成并优化';
+                }
+            }
+        }
+
+        // 初始化测试界面
+        document.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('startThinkingBtn');
+            const promptInput = document.getElementById('testPrompt');
+            const modelSelect = document.getElementById('testModel');
+            
+            startBtn.addEventListener('click', async () => {
+                const prompt = promptInput.value.trim();
+                const model = modelSelect.value;
+                
+                if (!prompt) {
+                    alert('请输入要优化的提示词');
+                    return;
+                }
+                
+                const manager = new TestCascadingQuestionManager(prompt, model);
+                await manager.start();
+            });
+            
+            // 设置默认测试内容
+            promptInput.value = "帮我写一个产品介绍";
+        });
+    </script>
+</body>
+</html>

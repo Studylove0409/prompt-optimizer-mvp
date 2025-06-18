@@ -511,74 +511,160 @@ const fieldOptions = {
     
     // 编程学习相关字段
     "编程基础": ["零基础新手", "HTML/CSS基础", "JavaScript基础", "Java基础", "C/C++基础", "其他语言基础", "有编程思维", "计算机专业"],
-    "学习资源": ["在线视频课程", "官方文档", "技术书籍", "编程实战", "开源项目", "训练营/培训", "导师指导", "社区论坛"]
+    "学习资源": ["在线视频课程", "官方文档", "技术书籍", "编程实战", "开源项目", "训练营/培训", "导师指导", "社区论坛"],
+    
+    // 常见字段的别名和变体
+    "使用场景": ["工作学习", "生活娱乐", "商业应用", "学术研究", "个人项目", "团队协作", "教学培训", "创意设计"],
+    "使用目的": ["工作需要", "学习提升", "兴趣爱好", "项目开发", "研究分析", "内容创作", "问题解决", "技能训练"],
+    "受众群体": ["学生群体", "职场人士", "技术开发者", "创意工作者", "管理人员", "普通用户", "专业人士", "初学者"],
+    "主要目标": ["提高效率", "学习新技能", "解决问题", "创作内容", "分析数据", "制定计划", "优化流程", "增长知识"],
+    "期望效果": ["快速上手", "深入理解", "实用性强", "创意丰富", "逻辑清晰", "简单易懂", "专业权威", "全面详细"],
+    "背景信息": ["完全新手", "有一定基础", "专业背景", "跨领域学习", "实际应用", "理论研究", "教学需要", "工作应用"],
+    "相关经验": ["无相关经验", "少量经验", "一定经验", "丰富经验", "专业经验", "跨领域经验", "理论经验", "实践经验"],
+    "知识背景": ["零基础", "基础了解", "中等水平", "较深了解", "专业水平", "专家级", "跨学科", "实践为主"],
+    "应用领域": ["教育培训", "商业应用", "技术开发", "创意设计", "数据分析", "内容创作", "项目管理", "日常生活"],
+    "复杂程度": ["简单易懂", "中等难度", "较为复杂", "高度复杂", "专业级别", "入门级别", "进阶级别", "专家级别"],
+    "详细程度": ["简要概述", "基本介绍", "详细说明", "深入分析", "全面解析", "重点突出", "步骤详细", "案例丰富"],
+    "时间要求": ["立即可用", "短期内", "中期目标", "长期规划", "快速了解", "逐步学习", "深入研究", "持续改进"],
+    "格式要求": ["文字说明", "列表格式", "图表展示", "步骤指导", "案例分析", "对比说明", "问答形式", "结构化"],
+    
+    // 更多通用字段
+    "目标对象": ["学生", "职场新人", "专业人士", "管理者", "技术人员", "创意工作者", "普通用户", "专家学者"],
+    "应用范围": ["个人使用", "团队协作", "企业应用", "教育机构", "研究领域", "创业项目", "日常生活", "专业工作"],
+    "重点关注": ["实用性", "创新性", "可操作性", "理论深度", "案例丰富", "逻辑清晰", "简单易懂", "专业权威"],
+    "预期成果": ["知识掌握", "技能提升", "问题解决", "效率提高", "创新思路", "实践应用", "理论理解", "全面发展"]
 };
+
+// 字段匹配函数 - 支持模糊匹配和同义词
+function findFieldOptions(fieldKey) {
+    // 直接匹配
+    if (fieldOptions[fieldKey]) {
+        return fieldOptions[fieldKey];
+    }
+    
+    // 同义词匹配映射
+    const synonymMap = {
+        "目标人群": "目标用户",
+        "受众": "目标用户", 
+        "用户群体": "目标用户",
+        "目标受众": "目标用户",
+        "用户类型": "目标用户",
+        
+        "输出样式": "输出格式",
+        "回复格式": "输出格式",
+        "展示格式": "输出格式",
+        "呈现方式": "输出格式",
+        
+        "语言风格": "语调风格",
+        "表达方式": "语调风格",
+        "沟通风格": "语调风格",
+        "写作风格": "语调风格",
+        
+        "专业水平": "技术水平",
+        "能力水平": "技术水平",
+        "熟练程度": "技术水平",
+        
+        "内容难度": "难度要求",
+        "复杂度": "难度要求",
+        
+        "学习方式": "学习路径",
+        "学习渠道": "学习路径",
+        
+        "时间安排": "时间投入",
+        "学习时间": "时间投入",
+        
+        "项目经验": "实践经验",
+        "实际经验": "实践经验",
+        "工作经验": "实践经验",
+        
+        "设计风格": "创作风格",
+        "视觉风格": "创作风格",
+        
+        "使用环境": "应用场景",
+        "应用环境": "应用场景",
+        "使用情境": "应用场景",
+        
+        "目的": "使用目的",
+        "目标": "主要目标",
+        "期望": "期望效果",
+        "背景": "背景信息",
+        "经验": "相关经验",
+        "基础": "知识背景",
+        "领域": "应用领域",
+        "难度": "复杂程度",
+        "详细": "详细程度",
+        "时间": "时间要求",
+        "格式": "格式要求"
+    };
+    
+    // 检查同义词匹配
+    if (synonymMap[fieldKey] && fieldOptions[synonymMap[fieldKey]]) {
+        return fieldOptions[synonymMap[fieldKey]];
+    }
+    
+    // 关键词包含匹配
+    for (const [key, options] of Object.entries(fieldOptions)) {
+        if (fieldKey.includes(key) || key.includes(fieldKey)) {
+            return options;
+        }
+    }
+    
+    // 默认通用选项
+    return ["请选择", "基础水平", "中等水平", "高级水平", "专家水平", "其他"];
+}
 
 // 显示思考模式动态表单
 function showThinkingForm(analysisResult, originalPrompt) {
     console.log('🎯 showThinkingForm called with analysisResult:', analysisResult);
-    console.log('🎯 Quick options enabled version - v2.0');
+    console.log('🎯 Modal version - v3.0');
     
-    const thinkingFormSection = document.getElementById('thinkingFormSection');
-    const thinkingFormContent = document.getElementById('thinkingFormContent');
+    // 使用新的模态弹窗元素
+    const thinkingModal = document.getElementById('thinkingModal');
+    const thinkingModalContent = document.getElementById('thinkingModalContent');
 
-    if (!thinkingFormSection || !thinkingFormContent) {
-        console.error('找不到思考模式表单元素');
+    if (!thinkingModal || !thinkingModalContent) {
+        console.error('找不到思考模式模态弹窗元素');
         return;
     }
 
     // 清空之前的内容
-    thinkingFormContent.innerHTML = '';
+    thinkingModalContent.innerHTML = '';
 
     // 生成动态表单字段
     analysisResult.forEach((item, index) => {
         const fieldDiv = document.createElement('div');
         fieldDiv.className = 'thinking-field';
+        fieldDiv.style.setProperty('--index', index + 1);
 
-        // 检查是否有预设选项
-        const hasOptions = fieldOptions[item.key];
+        // 检查是否有预设选项（使用智能匹配）
+        const hasOptions = findFieldOptions(item.key);
         console.log(`🔍 Field "${item.key}" hasOptions:`, hasOptions);
+        console.log(`✅ 为字段 "${item.key}" 生成快速选择按钮`);
         
-        if (hasOptions) {
-            console.log(`✅ 为字段 "${item.key}" 生成快速选择按钮`);
-            // 生成按钮选择界面
-            fieldDiv.innerHTML = `
-                <label class="thinking-field-label">
-                    ${item.key}
-                </label>
-                <div class="thinking-field-description">${item.question}</div>
-                <div class="quick-options-container" data-field-index="${index}">
-                    ${hasOptions.map(option => `
-                        <button type="button" class="quick-option-btn" data-value="${option}">
-                            ${option}
-                        </button>
-                    `).join('')}
-                </div>
-                <textarea
-                    class="thinking-field-input"
-                    id="thinking-field-${index}"
-                    placeholder="或输入自定义内容..."
-                    data-key="${item.key}"
-                    rows="2"
-                ></textarea>
-            `;
-        } else {
-            // 生成普通文本输入
-            fieldDiv.innerHTML = `
-                <label class="thinking-field-label" for="thinking-field-${index}">
-                    ${item.key}
-                </label>
-                <textarea
-                    class="thinking-field-input"
-                    id="thinking-field-${index}"
-                    placeholder="${item.question}"
-                    data-key="${item.key}"
-                    rows="2"
-                ></textarea>
-            `;
-        }
+        // 现在所有字段都会有选项，至少有默认选项
+        // 生成按钮选择界面
+        fieldDiv.innerHTML = `
+            <label class="thinking-field-label">
+                ${item.key}
+            </label>
+            <div class="thinking-field-description">${item.question}</div>
+            <div class="quick-options-container" data-field-index="${index}">
+                ${hasOptions.map(option => `
+                    <button type="button" class="quick-option-btn" data-value="${option}">
+                        ${option}
+                    </button>
+                `).join('')}
+            </div>
+            <textarea
+                class="thinking-field-input"
+                id="thinking-field-${index}"
+                placeholder="或输入自定义内容..."
+                data-key="${item.key}"
+                rows="2"
+            ></textarea>
+        `;
 
-        thinkingFormContent.appendChild(fieldDiv);
+        thinkingModalContent.appendChild(fieldDiv);
     });
 
     // 添加自定义补充信息区域
@@ -601,16 +687,20 @@ function showThinkingForm(analysisResult, originalPrompt) {
         </button>
     `;
 
-    thinkingFormContent.appendChild(customInfoSection);
+    thinkingModalContent.appendChild(customInfoSection);
 
-    // 显示表单区域
-    thinkingFormSection.style.display = 'block';
+    // 显示模态弹窗（替代原来的页面区域显示和滚动）
+    thinkingModal.style.display = 'block';
+    thinkingModal.classList.add('show');
+    
+    // 防止背景滚动
+    document.body.style.overflow = 'hidden';
 
-    // 滚动到表单区域
-    thinkingFormSection.scrollIntoView({ behavior: 'smooth' });
-
-    // 绑定按钮事件
-    bindThinkingFormEvents(originalPrompt);
+    // 绑定按钮事件（使用新的按钮ID）
+    bindThinkingModalEvents(originalPrompt);
+    
+    // 绑定关闭事件
+    bindThinkingModalCloseEvents();
 
     // 绑定自定义信息相关事件
     bindCustomInfoEvents();
@@ -683,7 +773,7 @@ function bindQuickOptionEvents() {
     });
 }
 
-// 绑定思考模式表单事件
+// 绑定思考模式表单事件（原版本）
 function bindThinkingFormEvents(originalPrompt) {
     const generateBtn = document.getElementById('generateFinalPromptBtn');
     const skipBtn = document.getElementById('skipThinkingBtn');
@@ -698,6 +788,288 @@ function bindThinkingFormEvents(originalPrompt) {
             generateFinalPromptWithoutInfo(originalPrompt);
         };
     }
+}
+
+// 显示思考模式模态弹窗加载状态（性能优化版本）
+function showThinkingModalLoading() {
+    // 使用HTML中已有的加载状态元素，而不是动态创建
+    const existingLoadingOverlay = document.getElementById('thinkingModalLoading');
+    
+    if (!existingLoadingOverlay) {
+        return;
+    }
+
+    // 显示已有的加载遮罩层
+    existingLoadingOverlay.style.display = 'flex';
+
+    // 同时将按钮设置为加载状态
+    const generateBtn = document.getElementById('generateFinalPromptModalBtn');
+    if (generateBtn) {
+        generateBtn.classList.add('loading');
+        generateBtn.disabled = true;
+    }
+
+    // 页面聚焦到进度条区域
+    setTimeout(() => {
+        const progressContent = existingLoadingOverlay.querySelector('.thinking-loading-content');
+        if (progressContent) {
+            progressContent.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+    }, 300);
+
+    // 启动进度模拟
+    simulateThinkingProgress();
+}
+
+// 隐藏思考模式模态弹窗加载状态（性能优化版本）
+function hideThinkingModalLoading() {
+    // 使用HTML中已有的加载状态元素
+    const loadingOverlay = document.getElementById('thinkingModalLoading');
+    const generateBtn = document.getElementById('generateFinalPromptModalBtn');
+    const progressFill = document.getElementById('thinkingProgressFill');
+    const progressText = document.getElementById('thinkingProgressText');
+    
+    // 清理进度定时器
+    if (window.thinkingProgressInterval) {
+        clearInterval(window.thinkingProgressInterval);
+        window.thinkingProgressInterval = null;
+    }
+    
+    // 完成时显示100%进度
+    if (progressFill && progressText) {
+        progressFill.style.width = '100%';
+        progressText.textContent = '优化完成！ 100%';
+        
+        // 延迟隐藏加载遮罩，让用户看到完成状态
+        setTimeout(() => {
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+            
+            // 完成后延迟滚动到结果区域
+            setTimeout(() => {
+                scrollToOptimizedResult();
+            }, 500);
+            
+        }, 1200);
+    } else {
+        // 如果找不到进度元素，直接隐藏
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+        
+        // 仍然尝试滚动到结果
+        setTimeout(() => {
+            scrollToOptimizedResult();
+        }, 300);
+    }
+
+    if (generateBtn) {
+        generateBtn.classList.remove('loading');
+        generateBtn.disabled = false;
+    }
+}
+
+// 滚动到优化结果区域（性能优化版本）
+function scrollToOptimizedResult() {
+    // 先尝试滚动到优化结果区域
+    const resultSection = document.getElementById('resultSection');
+    const optimizedPromptTextarea = document.getElementById('optimizedPrompt');
+    
+    if (resultSection && resultSection.style.display !== 'none') {
+        resultSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+        
+        // 可选：聚焦到优化后的文本框
+        if (optimizedPromptTextarea) {
+            setTimeout(() => {
+                optimizedPromptTextarea.focus();
+            }, 800);
+        }
+    } else {
+        // 如果结果区域不可见，滚动到页面底部或主要内容区域
+        const mainContainer = document.querySelector('.main-container');
+        if (mainContainer) {
+            window.scrollTo({
+                top: mainContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+// 模拟思考进度（性能优化版本）
+function simulateThinkingProgress() {
+    // 等待加载状态显示完成再开始进度更新
+    setTimeout(() => {
+        const progressFill = document.getElementById('thinkingProgressFill');
+        const progressText = document.getElementById('thinkingProgressText');
+        
+        if (!progressFill || !progressText) {
+            return;
+        }
+        
+        // 初始状态设置为0%
+        progressFill.style.width = '0%';
+        progressText.textContent = '开始分析... 0%';
+        
+        const progressSteps = [
+            { progress: 8, text: '启动AI分析引擎...' },
+            { progress: 18, text: '分析提示词结构...' },
+            { progress: 32, text: '识别关键优化点...' },
+            { progress: 45, text: '整合用户需求...' },
+            { progress: 58, text: '生成优化策略...' },
+            { progress: 72, text: '调整语言风格...' },
+            { progress: 85, text: '精细化内容优化...' },
+            { progress: 95, text: '最终质量检查...' }
+        ];
+        
+        let stepIndex = 0;
+        
+        // 立即开始第一步
+        setTimeout(() => {
+            if (stepIndex < progressSteps.length && progressFill && progressText) {
+                const step = progressSteps[stepIndex];
+                
+                progressFill.style.width = step.progress + '%';
+                progressText.textContent = step.text + ' ' + step.progress + '%';
+                
+                stepIndex++;
+            }
+        }, 500);
+        
+        // 设置定时器继续后续步骤
+        window.thinkingProgressInterval = setInterval(() => {
+            const currentProgressFill = document.getElementById('thinkingProgressFill');
+            const currentProgressText = document.getElementById('thinkingProgressText');
+            
+            if (!currentProgressFill || !currentProgressText) {
+                clearInterval(window.thinkingProgressInterval);
+                return;
+            }
+            
+            if (stepIndex < progressSteps.length) {
+                const step = progressSteps[stepIndex];
+                
+                currentProgressFill.style.width = step.progress + '%';
+                currentProgressText.textContent = step.text + ' ' + step.progress + '%';
+                
+                stepIndex++;
+            } else {
+                // 在95%停留，显示即将完成状态
+                currentProgressFill.style.width = '95%';
+                currentProgressText.textContent = '即将完成... 95%';
+            }
+        }, 800);
+        
+    }, 400);
+}
+
+// 绑定思考模式模态弹窗事件（新版本）
+function bindThinkingModalEvents(originalPrompt) {
+    const generateBtn = document.getElementById('generateFinalPromptModalBtn');
+    const skipBtn = document.getElementById('skipThinkingModalBtn');
+
+    if (generateBtn) {
+        generateBtn.onclick = async () => {
+            // 立即显示加载状态，提供用户反馈
+            showThinkingModalLoading();
+            
+            try {
+                // 生成最终提示词
+                await generateFinalPrompt(originalPrompt);
+                
+                // 隐藏加载状态并关闭模态弹窗
+                hideThinkingModalLoading();
+                closeThinkingModal();
+                
+            } catch (error) {
+                console.error('生成最终提示词失败:', error);
+                
+                // 隐藏加载状态
+                hideThinkingModalLoading();
+                
+                // 显示错误提示但不关闭模态弹窗，让用户可以重试
+                showCustomAlert('生成失败，请检查网络连接或稍后重试', 'error', 3500);
+            }
+        };
+    }
+
+    if (skipBtn) {
+        skipBtn.onclick = () => {
+            // 跳过思考模式，直接生成最终提示词（不传递补充信息）
+            generateFinalPromptWithoutInfo(originalPrompt);
+            closeThinkingModal();
+        };
+    }
+
+    // 绑定快速选择按钮事件
+    bindQuickOptionEvents();
+}
+
+// 绑定思考模式模态弹窗关闭事件
+function bindThinkingModalCloseEvents() {
+    const thinkingModal = document.getElementById('thinkingModal');
+    const closeBtn = document.getElementById('closeThinkingModal');
+    const backdrop = thinkingModal?.querySelector('.thinking-modal-backdrop');
+
+    // 点击关闭按钮
+    if (closeBtn) {
+        closeBtn.onclick = closeThinkingModal;
+    }
+
+    // 点击背景遮罩关闭
+    if (backdrop) {
+        backdrop.onclick = closeThinkingModal;
+    }
+
+    // ESC键关闭
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && thinkingModal && thinkingModal.style.display === 'block') {
+            closeThinkingModal();
+        }
+    });
+}
+
+// 关闭思考模式模态弹窗
+function closeThinkingModal() {
+    const thinkingModal = document.getElementById('thinkingModal');
+    if (thinkingModal) {
+        thinkingModal.style.display = 'none';
+        thinkingModal.classList.remove('show');
+        // 恢复背景滚动
+        document.body.style.overflow = '';
+    }
+}
+
+// 绑定快速选择按钮事件
+function bindQuickOptionEvents() {
+    const quickOptionBtns = document.querySelectorAll('.quick-option-btn');
+    quickOptionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const container = this.closest('.quick-options-container');
+            const fieldIndex = container.dataset.fieldIndex;
+            const textareaId = `thinking-field-${fieldIndex}`;
+            const textarea = document.getElementById(textareaId);
+            
+            if (textarea) {
+                // 设置文本框值
+                textarea.value = this.dataset.value;
+                
+                // 更新按钮选中状态
+                container.querySelectorAll('.quick-option-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // 触发输入事件以进行任何必要的验证
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    });
 }
 
 // 绑定自定义信息相关事件
@@ -794,9 +1166,14 @@ async function generateFinalPrompt(originalPrompt) {
         // 第二阶段：基于补充信息优化提示词
         const optimizationData = await optimizeThinkingPrompt(originalPrompt, additionalInfo, selectedModel);
 
-        // 隐藏加载状态和表单
+        // 隐藏加载状态
         hideLoading();
-        hideThinkingForm();
+        
+        // 如果是原页面表单模式，隐藏表单（模态弹窗模式下不需要隐藏）
+        const thinkingFormSection = document.getElementById('thinkingFormSection');
+        if (thinkingFormSection && thinkingFormSection.style.display !== 'none') {
+            hideThinkingForm();
+        }
 
         // 显示结果
         showResult(optimizationData.optimized_prompt, optimizationData.model_used);
@@ -822,9 +1199,14 @@ async function generateFinalPromptWithoutInfo(originalPrompt) {
         // 第二阶段：基于空的补充信息优化提示词
         const optimizationData = await optimizeThinkingPrompt(originalPrompt, {}, selectedModel);
 
-        // 隐藏加载状态和表单
+        // 隐藏加载状态
         hideLoading();
-        hideThinkingForm();
+        
+        // 如果是原页面表单模式，隐藏表单（模态弹窗模式下不需要隐藏）
+        const thinkingFormSection = document.getElementById('thinkingFormSection');
+        if (thinkingFormSection && thinkingFormSection.style.display !== 'none') {
+            hideThinkingForm();
+        }
 
         // 显示结果
         showResult(optimizationData.optimized_prompt, optimizationData.model_used);
@@ -854,6 +1236,10 @@ window.closeModal = closeModal;
 window.initPasswordToggles = initPasswordToggles;
 window.handleThinkingMode = handleThinkingMode;
 window.showThinkingForm = showThinkingForm;
+window.bindThinkingModalEvents = bindThinkingModalEvents;
+window.bindThinkingModalCloseEvents = bindThinkingModalCloseEvents;
+window.closeThinkingModal = closeThinkingModal;
 window.hideThinkingForm = hideThinkingForm;
 window.addCustomInfoField = addCustomInfoField;
 window.removeCustomInfoField = removeCustomInfoField;
+window.findFieldOptions = findFieldOptions;

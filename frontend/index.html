@@ -9,12 +9,14 @@
     <meta name="theme-color" content="#4285f4">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="thinking-mode.css?v=4">
+    <link rel="stylesheet" href="thinking-modal.css?v=4">
     <link rel="stylesheet" href="modal-styles.css?v=3">
-    <link rel="stylesheet" href="performance-mode.css">
     <link rel="stylesheet" href="auth-success.css">
     <link rel="stylesheet" href="history-modal.css">
     <link rel="stylesheet" href="user-dropdown.css">
     <link rel="stylesheet" href="profile-modal.css">
+    <!-- 性能优化CSS -->
+    <link rel="stylesheet" href="performance-optimizations.css?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -314,8 +316,8 @@
                     </div>
                 </section>
 
-                <!-- 思考模式动态表单区域 -->
-                <section class="thinking-form-section" id="thinkingFormSection" style="display: none;">
+                <!-- 思考模式动态表单区域（已弃用，使用模态弹窗代替） -->
+                <section class="thinking-form-section" id="thinkingFormSection" style="display: none !important;">
                     <div class="section-header">
                         <h2 class="section-title">补充关键信息</h2>
                         <p class="section-subtitle">请填写以下信息，帮助AI生成更精准的提示词</p>
@@ -852,6 +854,57 @@
         </div>
     </div>
 
+    <!-- 思考模式专用模态弹窗 -->
+    <div class="thinking-modal" id="thinkingModal" style="display: none;">
+        <div class="thinking-modal-backdrop"></div>
+        <div class="thinking-modal-container">
+            <div class="thinking-modal-header">
+                <div class="thinking-modal-title">
+                    <span class="thinking-icon">🧠</span>
+                    <h2>智能提示词优化</h2>
+                </div>
+                <p class="thinking-modal-subtitle">请填写以下信息，帮助AI生成更精准的提示词</p>
+                <button class="thinking-modal-close" id="closeThinkingModal" type="button">×</button>
+            </div>
+            
+            <div class="thinking-modal-body">
+                <div class="thinking-form-content" id="thinkingModalContent">
+                    <!-- 动态生成的表单字段将插入这里 -->
+                </div>
+                
+                <!-- 模态弹窗内的加载状态 -->
+                <div class="thinking-modal-loading" id="thinkingModalLoading" style="display: none;">
+                    <div class="thinking-loading-content">
+                        <div class="thinking-loading-animation">
+                            <div class="thinking-loading-spinner"></div>
+                        </div>
+                        <h3 class="thinking-loading-title" id="thinkingLoadingTitle">正在生成最终提示词...</h3>
+                        <p class="thinking-loading-subtitle" id="thinkingLoadingSubtitle">AI正在基于您的补充信息优化提示词，请稍候</p>
+                        <div class="thinking-loading-progress">
+                            <div class="thinking-progress-bar">
+                                <div class="thinking-progress-fill" id="thinkingProgressFill"></div>
+                            </div>
+                            <div class="thinking-progress-text" id="thinkingProgressText">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="thinking-modal-footer">
+                <div class="thinking-form-actions">
+                    <button id="generateFinalPromptModalBtn" class="action-button primary">
+                        <span class="button-icon">🚀</span>
+                        <span class="button-text">生成最终提示词</span>
+                    </button>
+                    <button id="skipThinkingModalBtn" class="action-button secondary">
+                        <span class="button-icon">⏭️</span>
+                        <span class="button-text">跳过此步骤</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
    
 
 
@@ -865,7 +918,7 @@
     <script src="utils.js"></script>
     <script src="api.js?v=2"></script>
     <script src="auth.js"></script>
-    <script src="ui.js?v=9"></script>
+    <script src="ui.js?v=11"></script>
     <script src="modals.js"></script>
     <script src="history.js"></script>
     <script src="user-dropdown.js"></script>
@@ -873,6 +926,5 @@
 
     <script src="script.js"></script>
     <script src="particles.js"></script>
-    <script src="performance-controller.js"></script>
 </body>
 </html>
