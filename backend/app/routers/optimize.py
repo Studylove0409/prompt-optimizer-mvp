@@ -6,7 +6,7 @@ from typing import Optional
 
 from ..limiter import limiter
 from ..config import get_settings, Settings
-from ..models import PromptRequest, PromptResponse, ThinkingAnalysisResponse, ThinkingOptimizationRequest
+from ..models import PromptRequest, PromptResponse, ThinkingAnalysisResponse, ThinkingOptimizationRequest, QuickOptionsRequest, QuickOptionsResponse
 from ..services.prompt_service import PromptService
 from ..auth import get_optional_user, User
 
@@ -59,3 +59,19 @@ async def optimize_thinking_prompt(
 
     prompt_service = PromptService(settings)
     return await prompt_service.optimize_thinking_prompt(request_body, user, client_ip)
+
+
+@router.post("/generate-quick-options", response_model=QuickOptionsResponse)
+@limiter.limit(lambda: get_settings().rate_limit)
+async def generate_quick_options(
+    request: Request,
+    request_body: QuickOptionsRequest,
+    settings: Settings = Depends(get_settings),
+    user: Optional[User] = Depends(get_optional_user)
+):
+    """使用Gemini生成快速选择选项"""
+    # 获取客户端IP地址
+    client_ip = request.client.host if request.client else "unknown"
+
+    prompt_service = PromptService(settings)
+    return await prompt_service.generate_quick_options(request_body, user, client_ip)

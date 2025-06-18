@@ -9,7 +9,7 @@ import re
 
 from ..config import Settings
 from ..constants import SUPPORTED_MODELS, get_meta_prompt_template, get_prompt_template_by_mode, get_thinking_optimization_template
-from ..models import PromptRequest, PromptResponse, ThinkingAnalysisResponse, ThinkingOptimizationRequest
+from ..models import PromptRequest, PromptResponse, ThinkingAnalysisResponse, ThinkingOptimizationRequest, QuickOptionsRequest, QuickOptionsResponse
 from ..auth import User
 from .llm_service import LLMService
 from .supabase_service import SupabaseService
@@ -226,5 +226,70 @@ class PromptService:
             error_detail = f"思考模式优化失败: {str(e)}"
             print(f"错误详情: {error_detail}")
             raise HTTPException(status_code=500, detail=error_detail)
+    
+    async def generate_quick_options(self, request: QuickOptionsRequest, user: Optional[User] = None, client_ip: str = "unknown") -> QuickOptionsResponse:
+        """使用Gemini生成快速选择选项"""
+        try:
+            # 构建Gemini的提示词
+            system_prompt = """你是一个专业的UI/UX设计师和用户体验专家。你的任务是为给定的表单字段问题生成3-5个最相关、实用的快速选择选项。
+
+要求：
+1. 选项要简洁明了，每个选项不超过8个字符
+2. 选项要实用且符合中国用户习惯
+3. 选项要有明显区别，不能重复或相似
+4. 选项要按照重要性或常用程度排序
+5. 返回纯文本，每行一个选项，不要序号或特殊符号
+6. 最多返回5个选项"""
+
+            user_prompt = f"""字段名称：{request.field_key}
+问题描述：{request.question}
+
+请为这个问题生成适合的快速选择选项："""
+
+            # 构建消息列表
+            messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user", 
+                    "content": user_prompt
+                }
+            ]
+            
+            # 调用Gemini API - 使用支持的模型
+            response = await self.llm_service.call_llm_api("gemini-2.0-flash", messages)
+            
+            # 解析返回的选项
+            options_text = response.strip()
+            options = [option.strip() for option in options_text.split('\n') if option.strip()]
+            
+            # 确保至少有3个选项，最多5个选项
+            if len(options) < 3:
+                # 如果选项太少，添加一些通用选项
+                default_options = ["基础", "中等", "高级"]
+                options.extend(default_options[:3-len(options)])
+            elif len(options) > 5:
+                # 如果选项太多，只取前5个
+                options = options[:5]
+            
+            return QuickOptionsResponse(
+                options=options,
+                field_key=request.field_key,
+                question=request.question
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            error_detail = f"生成快速选项失败: {str(e)}"
+            print(f"错误详情: {error_detail}")
+            # 失败时返回默认选项
+            return QuickOptionsResponse(
+                options=["基础水平", "中等水平", "高级水平", "专家水平", "其他"],
+                field_key=request.field_key,
+                question=request.question
+            )
 
 

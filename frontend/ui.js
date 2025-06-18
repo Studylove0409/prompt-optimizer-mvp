@@ -647,6 +647,82 @@ function findFieldOptions(fieldKey, fieldQuestion = '') {
     return ["请选择", "基础水平", "中等水平", "高级水平", "专家水平", "其他"];
 }
 
+// 使用Gemini API为特定字段生成快速选择选项
+async function generateOptionsForField(item, index) {
+    try {
+        console.log(`🚀 为字段 "${item.key}" 生成AI选项...`);
+        
+        // 调用Gemini API生成选项
+        const response = await generateQuickOptions(item.key, item.question);
+        
+        console.log(`✅ 字段 "${item.key}" AI选项生成成功:`, response.options);
+        
+        // 更新对应的选项容器
+        const optionsContainer = document.querySelector(`[data-field-index="${index}"]`);
+        if (optionsContainer) {
+            // 替换loading为实际选项
+            optionsContainer.innerHTML = response.options.map(option => `
+                <button type="button" class="quick-option-btn" data-value="${option}">
+                    ${option}
+                </button>
+            `).join('');
+            
+            // 重新绑定事件
+            bindQuickOptionEventsForContainer(optionsContainer);
+        }
+        
+    } catch (error) {
+        console.error(`❌ 字段 "${item.key}" AI选项生成失败:`, error);
+        
+        // 失败时使用备用选项
+        const fallbackOptions = findFieldOptions(item.key, item.question);
+        const optionsContainer = document.querySelector(`[data-field-index="${index}"]`);
+        if (optionsContainer) {
+            optionsContainer.innerHTML = fallbackOptions.map(option => `
+                <button type="button" class="quick-option-btn" data-value="${option}">
+                    ${option}
+                </button>
+            `).join('');
+            
+            bindQuickOptionEventsForContainer(optionsContainer);
+        }
+    }
+}
+
+// 为特定容器绑定快速选择按钮事件
+function bindQuickOptionEventsForContainer(container) {
+    const buttons = container.querySelectorAll('.quick-option-btn');
+    
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // 获取对应的textarea
+            const fieldContainer = this.closest('.thinking-field');
+            const textarea = fieldContainer.querySelector('.thinking-field-input');
+            const optionsContainer = this.closest('.quick-options-container');
+            
+            // 移除其他按钮的选中状态
+            optionsContainer.querySelectorAll('.quick-option-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            
+            // 添加当前按钮的选中状态
+            this.classList.add('selected');
+            
+            // 将选中的值填入textarea
+            textarea.value = this.dataset.value;
+            
+            // 触发输入事件
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            
+            // 添加点击动画效果
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+}
+
 // 显示思考模式动态表单
 function showThinkingForm(analysisResult, originalPrompt) {
     console.log('🎯 showThinkingForm called with analysisResult:', analysisResult);
@@ -673,33 +749,22 @@ function showThinkingForm(analysisResult, originalPrompt) {
     thinkingModalContent.innerHTML = '';
 
     // 生成动态表单字段
-    analysisResult.forEach((item, index) => {
+    analysisResult.forEach(async (item, index) => {
         const fieldDiv = document.createElement('div');
         fieldDiv.className = 'thinking-field';
         fieldDiv.style.setProperty('--index', index + 1);
 
-        // 检查是否有预设选项（使用智能匹配）
-        const hasOptions = findFieldOptions(item.key, item.question);
-        console.log(`🔍 字段分析结果:`, {
-            fieldKey: item.key,
-            fieldQuestion: item.question,
-            matchedOptions: hasOptions,
-            isDefaultOptions: hasOptions.includes("基础水平")
-        });
-        
-        // 现在所有字段都会有选项，至少有默认选项
-        // 生成按钮选择界面
+        // 先生成基础结构（带loading状态）
         fieldDiv.innerHTML = `
             <label class="thinking-field-label">
                 ${item.key}
             </label>
             <div class="thinking-field-description">${item.question}</div>
             <div class="quick-options-container" data-field-index="${index}">
-                ${hasOptions.map(option => `
-                    <button type="button" class="quick-option-btn" data-value="${option}">
-                        ${option}
-                    </button>
-                `).join('')}
+                <div class="options-loading">
+                    <span class="loading-spinner">⚪</span>
+                    <span>AI正在生成选项...</span>
+                </div>
             </div>
             <textarea
                 class="thinking-field-input"
@@ -711,6 +776,9 @@ function showThinkingForm(analysisResult, originalPrompt) {
         `;
 
         thinkingModalContent.appendChild(fieldDiv);
+        
+        // 异步调用API生成选项
+        generateOptionsForField(item, index);
     });
 
     // 添加自定义补充信息区域

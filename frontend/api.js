@@ -390,6 +390,22 @@ async function analyzeThinkingPrompt(originalPrompt, model) {
     });
 }
 
+// 使用Gemini生成快速选择选项
+async function generateQuickOptions(fieldKey, question) {
+    const requestBody = {
+        field_key: fieldKey,
+        question: question,
+        model: 'gemini-2.0-flash'
+    };
+    
+    console.log('🚀 发送快速选项生成请求:', requestBody);
+    
+    return await apiCall('/generate-quick-options', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+    });
+}
+
 // 思考模式第二阶段：基于补充信息优化提示词
 async function optimizeThinkingPrompt(originalPrompt, additionalInfo, model) {
     const requestBody = {
@@ -411,6 +427,7 @@ window.optimizePrompt = optimizePrompt;
 window.quickOptimizePrompt = quickOptimizePrompt;
 window.analyzeThinkingPrompt = analyzeThinkingPrompt;
 window.optimizeThinkingPrompt = optimizeThinkingPrompt;
+window.generateQuickOptions = generateQuickOptions;
 window.copyToClipboard = copyToClipboard;
 window.clearAll = clearAll;
 window.showLoading = showLoading;

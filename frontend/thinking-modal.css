@@ -641,3 +641,27 @@
     opacity: 1 !important;
 }
 
+/* 快速选项加载状态 */
+.options-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(102, 126, 234, 0.05);
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+    border-radius: 12px;
+    color: #667eea;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.loading-spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+

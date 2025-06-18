@@ -60,3 +60,17 @@ class KeyInfoItem(BaseModel):
     """关键信息项模型"""
     key: str = Field(..., description="关键信息点名称")
     question: str = Field(..., description="引导性问题")
+
+
+class QuickOptionsRequest(BaseModel):
+    """快速选择选项生成请求模型"""
+    field_key: str = Field(..., description="字段关键字")
+    question: str = Field(..., description="问题描述")
+    model: str = "gemini-2.0-flash"
+
+
+class QuickOptionsResponse(BaseModel):
+    """快速选择选项生成响应模型"""
+    options: list[str] = Field(..., description="生成的快速选择选项")
+    field_key: str
+    question: str
