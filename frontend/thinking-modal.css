@@ -628,6 +628,16 @@
 
 /* 模态弹窗显示状态 */
 .thinking-modal.show {
-    display: block;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10001 !important;
+}
+
+/* 确保模态弹窗在所有情况下都能显示 */
+.thinking-modal[style*="display: block"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 

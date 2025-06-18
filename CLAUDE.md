@@ -10,45 +10,61 @@ This is a prompt optimization MVP built with FastAPI backend and vanilla JavaScr
 
 ### Backend Development
 ```bash
-# Install dependencies
-cd backend
+# Install dependencies (from project root)
 pip install -r requirements.txt
 
-# Start development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# From project root
+# Start development server (from project root)
 python -m uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Alternative from backend directory  
+cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend Development
 ```bash
-# Serve frontend locally
-cd frontend
-python -m http.server 3000
+# Serve frontend locally (from project root)
+cd frontend && python -m http.server 3000
+
+# Access at http://localhost:3000
 ```
 
-### Testing API Endpoints
+### Testing and Validation
 ```bash
 # Test optimization endpoints
 python test_api_endpoints.py
 python test_cascading_api.py
+
+# Validate environment setup
+python -c "from backend.app.config import get_settings; print('Config loaded successfully')"
 ```
 
 ## Architecture
 
 ### Backend Structure
-- **FastAPI App**: Modular router-based architecture
-- **Authentication**: Supabase Auth with JWT tokens
-- **Rate Limiting**: SlowAPI middleware for request throttling
-- **Services**: Abstracted service layer for business logic
+- **FastAPI App**: Modular router-based architecture with separated concerns
+- **Configuration**: Centralized settings in `backend/app/config.py` with environment variable management
+- **Authentication**: Supabase Auth with JWT tokens and user profile management
+- **Rate Limiting**: SlowAPI middleware for request throttling (configurable via RATE_LIMIT env var)
+- **Services Layer**: 
+  - `cascading_question_service.py` - Thinking mode intelligent Q&A logic
+  - `llm_service.py` - LLM API integration (DeepSeek & Gemini)
+  - `prompt_service.py` - Prompt optimization logic
+  - `supabase_service.py` - Database operations
 - **Routers**: Separated endpoints (health, models, optimize, history, user, debug)
+- **Models**: Pydantic models for request/response validation
 
 ### Frontend Architecture
-- **Modular JS**: Separated concerns (api.js, auth.js, ui.js, modals.js, etc.)
+- **Modular JS**: Separated concerns across multiple files:
+  - `api.js` - API communication layer
+  - `auth.js` - Authentication management
+  - `ui.js` - UI interaction handlers
+  - `modals.js` - Modal dialog management
+  - `thinking-cascading.js` - Thinking mode cascade logic
+  - `performance-controller.js` - Performance optimization
 - **No Framework**: Pure vanilla JavaScript with modern ES6+ features
-- **Authentication**: JWT token-based with Supabase
-- **State Management**: Simple global state objects
+- **Authentication**: JWT token-based with Supabase integration
+- **State Management**: Simple global state objects and localStorage persistence
+- **Responsive Design**: CSS Grid/Flexbox with mobile-first approach
 
 ### Database Schema (Supabase)
 Three main tables:
@@ -72,31 +88,90 @@ RATE_LIMIT=5/minute  # Optional, defaults to 5/minute
 
 ## Key Features
 
-### Thinking Mode
-- Cascading question system for prompt refinement
-- Step-by-step optimization process
-- Implemented in `backend/app/services/cascading_question_service.py`
-- Frontend: `thinking-cascading.js` and related CSS
+### Thinking Mode (Cascading Questions)
+- Intelligent cascading question system for iterative prompt refinement
+- Question bank with categories: target_audience, main_goal, output_format, context_background, etc.
+- Question dependencies and priority system
+- Step-by-step optimization process with progress tracking
+- Backend: `backend/app/services/cascading_question_service.py`
+- Frontend: `thinking-cascading.js` with modal interface (`thinking-cascading-modal.css`)
 
-### Authentication System
-- Supabase Auth integration
-- JWT token management
-- User profiles and history tracking
+### Multi-Model Support
+- **DeepSeek Integration**: Chat and Reasoner models via OpenAI-compatible API
+- **Gemini Integration**: Google's Gemini models via alternative endpoint
+- **Model Selection**: User can choose between fast (Chat) and deep reasoning (Reasoner) models
+- **Meta-prompt System**: Configurable optimization templates in `constants.py`
+
+### Authentication & User Management
+- Supabase Auth integration with social login support
+- JWT token management with refresh token handling
+- User profiles with subscription tracking
 - Guest session support for anonymous users
+- History tracking per user/session
 
-### API Rate Limiting
-- Configured via SlowAPI middleware
-- Per-IP request limiting
-- Configurable rate limits via environment variables
+### Performance & Rate Limiting
+- SlowAPI middleware for request throttling (default: 5/minute)
+- Performance mode toggle for resource optimization
+- Configurable rate limits via RATE_LIMIT environment variable
+- Lazy loading and caching strategies
 
 ## Deployment
 
 ### Vercel Configuration
-- Backend deployed as Python serverless functions
-- Frontend served as static files
-- Configured routes in `vercel.json` for proper file serving
+- **Backend**: Deployed as Python serverless functions (@vercel/python)
+- **Frontend**: Served as static files (@vercel/static)
+- **Routing**: Configured in `vercel.json` with explicit routes for all CSS/JS files
+- **API Routing**: All backend routes prefixed with `/api/` and routed to `backend/app/main.py`
+- **Static Assets**: Individual routes for each CSS/JS file to ensure proper serving
+- **SPA Routing**: Fallback route `"src": "/(.*)", "dest": "frontend/index.html"` for client-side routing
+
+### Environment Variables (Production)
+Set these in Vercel dashboard:
+- `MY_LLM_API_KEY` - DeepSeek API key
+- `GEMINI_API_KEY` - Google Gemini API key  
+- `SUPABASE_URL` - Supabase project URL
+- `SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_JWT_SECRET` - JWT signing secret
+- `RATE_LIMIT` - API rate limiting (optional, defaults to "5/minute")
 
 ### Important Notes
-- All API routes prefixed with `/api/`
-- Static assets properly routed in Vercel config
-- Environment variables must be set in Vercel dashboard
+- Requirements are in project root `requirements.txt`, not in backend folder
+- API endpoints automatically prefixed with `/api/` via routing
+- Frontend uses environment detection for API base URL (localhost vs deployed)
+- All static assets have explicit routes in `vercel.json` for proper content-type headers
+
+## Code Organization Patterns
+
+### Backend Patterns
+- **Router Organization**: Each router handles a specific domain (optimize, history, user, etc.)
+- **Service Layer**: Business logic abstracted into services, imported by routers
+- **Configuration Management**: Single source of truth in `config.py` with `@lru_cache()` for performance
+- **Error Handling**: Consistent HTTP exception handling across all endpoints
+- **Pydantic Models**: Request/response validation in `models.py`
+
+### Frontend Patterns  
+- **Module Pattern**: Each JS file exports specific functionality (API calls, UI handlers, etc.)
+- **Event-Driven**: DOM events and custom events for component communication
+- **State Management**: Global objects + localStorage for persistence
+- **Environment Detection**: Automatic API URL switching based on context
+- **Performance Optimization**: Lazy loading, debouncing, and caching strategies
+
+### File Structure Logic
+```
+backend/app/
+├── main.py          # FastAPI app setup, middleware, router inclusion
+├── config.py        # Environment variables and settings
+├── models.py        # Pydantic data models
+├── constants.py     # Static content (meta-prompts, etc.)
+├── routers/         # API endpoint definitions
+└── services/        # Business logic implementation
+
+frontend/
+├── index.html       # Main application entry point
+├── script.js        # Main application logic
+├── api.js           # API communication layer
+├── auth.js          # Authentication handling
+├── ui.js            # UI interaction handlers
+├── thinking-*.js    # Thinking mode specific logic
+└── *.css           # Modular stylesheets per feature
+```

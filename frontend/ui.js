@@ -616,14 +616,22 @@ function findFieldOptions(fieldKey) {
 // 显示思考模式动态表单
 function showThinkingForm(analysisResult, originalPrompt) {
     console.log('🎯 showThinkingForm called with analysisResult:', analysisResult);
-    console.log('🎯 Modal version - v3.0');
+    console.log('🎯 Modal version - v4.0 DEBUG');
     
     // 使用新的模态弹窗元素
     const thinkingModal = document.getElementById('thinkingModal');
     const thinkingModalContent = document.getElementById('thinkingModalContent');
 
+    console.log('🔍 Modal elements check:', {
+        thinkingModal: !!thinkingModal,
+        thinkingModalContent: !!thinkingModalContent,
+        modalDisplay: thinkingModal?.style.display,
+        modalClassList: thinkingModal?.classList.toString()
+    });
+
     if (!thinkingModal || !thinkingModalContent) {
-        console.error('找不到思考模式模态弹窗元素');
+        console.error('❌ 找不到思考模式模态弹窗元素');
+        alert('错误：找不到模态弹窗元素，请刷新页面重试');
         return;
     }
 
@@ -690,11 +698,18 @@ function showThinkingForm(analysisResult, originalPrompt) {
     thinkingModalContent.appendChild(customInfoSection);
 
     // 显示模态弹窗（替代原来的页面区域显示和滚动）
+    console.log('📱 显示模态弹窗...');
     thinkingModal.style.display = 'block';
     thinkingModal.classList.add('show');
     
     // 防止背景滚动
     document.body.style.overflow = 'hidden';
+    
+    console.log('✅ 模态弹窗状态更新完成:', {
+        display: thinkingModal.style.display,
+        classList: thinkingModal.classList.toString(),
+        bodyOverflow: document.body.style.overflow
+    });
 
     // 绑定按钮事件（使用新的按钮ID）
     bindThinkingModalEvents(originalPrompt);
