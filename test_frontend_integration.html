@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速选项API测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .test-input {
+            margin-bottom: 15px;
+        }
+        .test-input label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        .test-input input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .options-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .option-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🧪 快速选项生成API测试</h1>
+        
+        <div class="test-input">
+            <label for="fieldKey">字段关键字：</label>
+            <input type="text" id="fieldKey" placeholder="例如：target_audience" value="target_audience">
+        </div>
+        
+        <div class="test-input">
+            <label for="question">问题描述：</label>
+            <input type="text" id="question" placeholder="例如：您的目标用户群体是什么？" value="您的目标用户群体是什么？请描述他们的基本特征">
+        </div>
+        
+        <button class="test-button" onclick="testGenerateOptions()" id="testBtn">
+            🚀 生成快速选项
+        </button>
+        
+        <div class="result-container" id="resultContainer" style="display: none;">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础URL
+        const API_BASE_URL = 'http://localhost:8000/api';
+
+        async function testGenerateOptions() {
+            const fieldKey = document.getElementById('fieldKey').value.trim();
+            const question = document.getElementById('question').value.trim();
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const testBtn = document.getElementById('testBtn');
+
+            if (!fieldKey || !question) {
+                alert('请填写完整的字段关键字和问题描述');
+                return;
+            }
+
+            // 显示loading状态
+            resultContainer.style.display = 'block';
+            resultContent.innerHTML = '<div class="loading">🔄 AI正在生成选项...</div>';
+            testBtn.disabled = true;
+            testBtn.textContent = '⏳ 生成中...';
+
+            try {
+                const requestBody = {
+                    field_key: fieldKey,
+                    question: question,
+                    model: 'gemini-2.0-flash'
+                };
+
+                console.log('🚀 发送请求:', requestBody);
+
+                const response = await fetch(`${API_BASE_URL}/generate-quick-options`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ 生成成功:', result);
+
+                // 显示成功结果
+                const optionsHtml = result.options.map(option => 
+                    `<span class="option-tag">${option}</span>`
+                ).join('');
+
+                resultContent.innerHTML = `
+                    <div class="success">✅ 生成成功！</div>
+                    <div style="margin-top: 10px;">
+                        <strong>字段：</strong>${result.field_key}<br>
+                        <strong>问题：</strong>${result.question}<br>
+                        <strong>生成的选项：</strong>
+                        <div class="options-display">${optionsHtml}</div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('❌ 生成失败:', error);
+                resultContent.innerHTML = `
+                    <div class="error">❌ 生成失败</div>
+                    <div style="margin-top: 10px; color: #666; font-size: 13px;">
+                        错误信息：${error.message}
+                    </div>
+                `;
+            } finally {
+                testBtn.disabled = false;
+                testBtn.textContent = '🚀 生成快速选项';
+            }
+        }
+
+        // 预设一些测试案例
+        const testCases = [
+            {
+                fieldKey: 'target_audience',
+                question: '您的目标用户群体是什么？请描述他们的基本特征'
+            },
+            {
+                fieldKey: 'content_style',
+                question: '您希望内容采用什么样的风格和语调？'
+            },
+            {
+                fieldKey: 'difficulty_level',
+                question: '内容的难度级别应该如何设定？'
+            },
+            {
+                fieldKey: 'output_format',
+                question: '您希望输出什么格式的内容？'
+            }
+        ];
+
+        // 添加快速测试按钮
+        setTimeout(() => {
+            const container = document.querySelector('.test-container');
+            const quickTestDiv = document.createElement('div');
+            quickTestDiv.innerHTML = `
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <h3 style="margin-bottom: 15px; color: #333;">🎯 快速测试</h3>
+                    ${testCases.map((testCase, index) => `
+                        <button class="test-button" style="margin: 5px; font-size: 12px; padding: 8px 16px;" 
+                                onclick="loadTestCase(${index})">
+                            测试: ${testCase.fieldKey}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(quickTestDiv);
+        }, 100);
+
+        function loadTestCase(index) {
+            const testCase = testCases[index];
+            document.getElementById('fieldKey').value = testCase.fieldKey;
+            document.getElementById('question').value = testCase.question;
+        }
+
+        console.log('🎉 快速选项API测试页面已加载');
+    </script>
+</body>
+</html>
