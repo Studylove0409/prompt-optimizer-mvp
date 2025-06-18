@@ -699,17 +699,42 @@ function showThinkingForm(analysisResult, originalPrompt) {
 
     // 显示模态弹窗（替代原来的页面区域显示和滚动）
     console.log('📱 显示模态弹窗...');
+    
+    // 多重显示确保机制
     thinkingModal.style.display = 'block';
+    thinkingModal.style.visibility = 'visible';
+    thinkingModal.style.opacity = '1';
+    thinkingModal.style.zIndex = '10001';
     thinkingModal.classList.add('show');
     
     // 防止背景滚动
     document.body.style.overflow = 'hidden';
     
+    // 确保模态弹窗在最顶层
+    thinkingModal.style.position = 'fixed';
+    thinkingModal.style.top = '0';
+    thinkingModal.style.left = '0';
+    thinkingModal.style.width = '100%';
+    thinkingModal.style.height = '100%';
+    
     console.log('✅ 模态弹窗状态更新完成:', {
         display: thinkingModal.style.display,
+        visibility: thinkingModal.style.visibility,
+        opacity: thinkingModal.style.opacity,
+        zIndex: thinkingModal.style.zIndex,
         classList: thinkingModal.classList.toString(),
         bodyOverflow: document.body.style.overflow
     });
+    
+    // 额外的延迟确保，防止样式被覆盖
+    setTimeout(() => {
+        if (thinkingModal.style.display !== 'block') {
+            console.warn('⚠️ 模态弹窗被隐藏，强制重新显示');
+            thinkingModal.style.display = 'block';
+            thinkingModal.style.visibility = 'visible';
+            thinkingModal.style.opacity = '1';
+        }
+    }, 100);
 
     // 绑定按钮事件（使用新的按钮ID）
     bindThinkingModalEvents(originalPrompt);

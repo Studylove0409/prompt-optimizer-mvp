@@ -48,6 +48,18 @@
       "dest": "frontend/thinking-mode.css"
     },
     {
+      "src": "/thinking-modal.css",
+      "dest": "frontend/thinking-modal.css"
+    },
+    {
+      "src": "/performance-optimizations.css",
+      "dest": "frontend/performance-optimizations.css"
+    },
+    {
+      "src": "/thinking-cascading-modal.css",
+      "dest": "frontend/thinking-cascading-modal.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },
@@ -82,6 +94,10 @@
     {
       "src": "/profile-modal.js",
       "dest": "frontend/profile-modal.js"
+    },
+    {
+      "src": "/thinking-cascading.js",
+      "dest": "frontend/thinking-cascading.js"
     },
 
     {

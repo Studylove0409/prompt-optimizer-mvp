@@ -4,7 +4,7 @@
 .thinking-modal {
     display: none;
     position: fixed;
-    z-index: 10001;
+    z-index: 10001 !important;
     left: 0;
     top: 0;
     width: 100%;
