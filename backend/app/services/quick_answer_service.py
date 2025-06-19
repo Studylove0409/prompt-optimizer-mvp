@@ -28,19 +28,18 @@ class QuickAnswerService:
         Returns:
             完整的提示词
         """
-        prompt_template = """你是一位智能AI助手，具备强大的分析和推理能力。请对用户的问题给出详细、准确、有用的回答。
+        prompt_template = """你是一位专业的AI助手。请对用户的问题给出简洁、准确、实用的回答。
 
-**重要要求：**
-1. 请提供完整、详尽的回答，不要匆忙结束
-2. 确保回答的每个部分都充分展开和解释
-3. 如果问题涉及多个方面，请逐一详细回答
-4. 提供具体的例子、步骤或解决方案
-5. 确保回答具有实用价值和可操作性
+**回答要求：**
+1. 直接回答核心问题，避免冗长的铺垫
+2. 提供关键要点和实用建议
+3. 控制回答长度在800-1500字以内
+4. 使用清晰的结构和要点列举
 
 **用户问题：**
 {user_prompt}
 
-请给出完整详细的回答："""
+请给出简洁实用的回答："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -77,6 +76,11 @@ class QuickAnswerService:
         """检查文本是否可能被截断"""
         if not text:
             return False
+        
+        # 检查是否过长（超过50000字符可能存在问题）
+        if len(text) > 50000:
+            print(f"警告：回答过长 ({len(text)} 字符)，可能存在重复或异常")
+            return True
         
         # 检查常见的截断迹象
         truncation_indicators = [
@@ -121,8 +125,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，降低token限制提高速度)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=8000)
+            # 调用LLM API (快速回答模式，进一步降低token限制提高速度)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=4000)
             
             if not response:
                 raise HTTPException(
