@@ -30,12 +30,12 @@ class QuickAnswerService:
         """
         prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
-**字数要求：**
-1. 回答总字数控制在30000字以下
-2. 确保内容详细充实，提供全面深入的分析
-3. 直接回答核心问题，提供完整的解决方案
-4. 使用清晰的结构和逻辑层次
-5. 可以包含详细的步骤、案例和实例
+**回答要求：**
+1. 确保内容详细充实，提供全面深入的分析
+2. 直接回答核心问题，提供完整的解决方案
+3. 使用清晰的结构和逻辑层次
+4. 可以包含详细的步骤、案例和实例
+5. 提供尽可能完整和全面的信息
 
 **内容要求：**
 - 提供深入的分析和详细的解释
@@ -43,11 +43,12 @@ class QuickAnswerService:
 - 使用标题、要点和段落结构化内容
 - 重点突出实用性和可操作性
 - 可以包含详细的背景知识和扩展信息
+- 如有必要，可以提供多个角度的分析
 
 **用户问题：**
 {user_prompt}
 
-请给出详细完整的回答（详尽分析，不超过30000字）："""
+请给出详细完整的回答："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -92,8 +93,8 @@ class QuickAnswerService:
         
         text_length = len(text)
         
-        # 检查是否过长（超过50000字符可能存在异常）
-        if text_length > 50000:
+        # 检查是否过长（超过80000字符可能存在异常）
+        if text_length > 80000:
             print(f"警告：回答异常过长 ({text_length} 字符)，可能存在重复或异常")
             return True
         
@@ -143,8 +144,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，支持3万字以下的详细回答)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=35000)
+            # 调用LLM API (快速回答模式，支持5万字以下的详细回答)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=65000)
             
             if not response:
                 raise HTTPException(
@@ -153,11 +154,11 @@ class QuickAnswerService:
                 )
             
             # 硬性截断：如果响应过长，强制截断到合理长度
-            if len(response) > 45000:  # 约30000字的字符数上限
+            if len(response) > 75000:  # 约50000字的字符数上限
                 print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断")
                 # 找到最后一个完整句子的位置进行截断
-                truncate_pos = 43000  # 保守截断位置
-                for i in range(42000, min(len(response), 45000)):
+                truncate_pos = 73000  # 保守截断位置
+                for i in range(72000, min(len(response), 75000)):
                     if response[i] in ['。', '！', '？', '.', '!', '?']:
                         truncate_pos = i + 1
                         break
