@@ -94,7 +94,7 @@ class QuickAnswerService:
         return any(truncation_indicators)
     
     
-    async def generate_answer(self, prompt: str, model: str = "gemini-2.5-flash-preview-05-20") -> Dict[str, Any]:
+    async def generate_answer(self, prompt: str, model: str = "gemini-2.0-flash") -> Dict[str, Any]:
         """
         生成快速回答
         
@@ -121,8 +121,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，2万字token限制)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=20000)
+            # 调用LLM API (快速回答模式，降低token限制提高速度)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=8000)
             
             if not response:
                 raise HTTPException(

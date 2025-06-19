@@ -262,7 +262,7 @@ async function generateQuickAnswer(prompt) {
         console.log('开始生成快速回答:', prompt);
         
         // 调用API生成回答
-        const response = await generateQuickAnswerAPI(prompt, 'gemini-2.5-flash-preview-05-20');
+        const response = await generateQuickAnswerAPI(prompt, 'gemini-2.0-flash');
         
         if (response && response.success) {
             // 完成进度条（跳到100%）
@@ -707,8 +707,7 @@ function createWordDocument() {
     
     <div class="meta">
         <p>生成时间：${currentDate}</p>
-        <p>使用模型：${window.currentQuickAnswer.model_used}</p>
-        <p>生成工具：智优词 (zhiyouci.com)</p>
+        <p>生成工具：智优词 (xtang.dpdns.org)</p>
     </div>
 </body>
 </html>`;
@@ -736,8 +735,7 @@ ${window.currentQuickAnswer.final_answer}
 
 ---
 生成时间：${currentDate}
-使用模型：${window.currentQuickAnswer.model_used}
-生成工具：智优词 (zhiyouci.com)`;
+生成工具：智优词 (xtang.dpdns.org)`;
     
     const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
