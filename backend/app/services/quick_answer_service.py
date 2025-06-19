@@ -87,7 +87,7 @@ class QuickAnswerService:
     
     
     
-    async def generate_answer(self, prompt: str, model: str = "gemini-2.5-flash-lite-preview-06-17") -> Dict[str, Any]:
+    async def generate_answer(self, prompt: str, model: str = "deepseek-chat") -> Dict[str, Any]:
         """
         生成快速回答
         

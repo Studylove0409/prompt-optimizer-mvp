@@ -121,8 +121,9 @@ class LLMService:
                     return optimized_prompt
                 else:
                     print(f"Gemini响应为空，模型: {model}")
-                    # 对于某些模型，尝试使用备用处理
-                    if model in ["gemini-2.5-pro-preview-03-25", "gemini-2.5-flash-preview-05-20"]:
+                    # 对于快速回答功能，不使用备用模型以避免不一致的行为
+                    # 只对提示词优化功能的某些模型使用备用处理
+                    if model == "gemini-2.5-pro-preview-03-25":
                         print("尝试使用gemini-2.0-flash作为备用")
                         backup_response = client.chat.completions.create(
                             model="gemini-2.0-flash",
@@ -184,16 +185,17 @@ class LLMService:
                     optimized_prompt = message.content.strip()
                     print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
                     
-                    # 如果是因为长度限制被截断，记录警告
+                    # 如果是因为长度限制被截断，记录警告但仍然返回结果
                     if finish_reason == 'length':
-                        print(f"警告：Gemini响应因达到max_tokens限制而被截断")
+                        print(f"警告：Gemini响应因达到max_tokens限制而被截断 (max_tokens: {max_tokens})")
                         print(f"响应结尾50字符: ...{optimized_prompt[-50:]}")
                     
                     return optimized_prompt
                 else:
                     print(f"Gemini响应为空，模型: {model}")
-                    # 对于某些模型，尝试使用备用处理
-                    if model in ["gemini-2.5-pro-preview-03-25", "gemini-2.5-flash-preview-05-20"]:
+                    # 对于快速回答功能，不使用备用模型以避免不一致的行为
+                    # 只对提示词优化功能的某些模型使用备用处理
+                    if model == "gemini-2.5-pro-preview-03-25":
                         print("尝试使用gemini-2.0-flash作为备用")
                         backup_response = client.chat.completions.create(
                             model="gemini-2.0-flash",
