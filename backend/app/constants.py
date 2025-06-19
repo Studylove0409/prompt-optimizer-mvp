@@ -8,7 +8,8 @@ SUPPORTED_MODELS = [
     "deepseek-reasoner", 
     "gemini-2.0-flash",
     "gemini-2.5-pro-preview-03-25",
-    "gemini-2.5-flash-preview-05-20"
+    "gemini-2.5-flash-preview-05-20",
+    "gemini-2.5-flash-lite-preview-06-17"
 ]
 
 # 模型信息
@@ -42,6 +43,12 @@ MODEL_INFO = [
         "name": "Gemini 2.5 Flash Preview",
         "description": "Google最新的Gemini 2.5 Flash预览版，具备极速响应和卓越性能",
         "speed": "fast"
+    },
+    {
+        "id": "gemini-2.5-flash-lite-preview-06-17",
+        "name": "Gemini 2.5 Flash Lite Preview",
+        "description": "Google最新的Gemini 2.5 Flash Lite预览版，专为快速回答优化",
+        "speed": "very_fast"
     }
 ]
 

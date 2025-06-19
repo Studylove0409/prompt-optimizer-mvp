@@ -42,6 +42,19 @@ class LLMService:
             base_url=self.settings.gemini_base_url
         )
     
+    def _create_gemini_quick_client(self) -> OpenAI:
+        """创建Gemini快速回答客户端（使用新的API密钥）"""
+        if not self.settings.gemini_quick_api_key:
+            raise HTTPException(
+                status_code=500,
+                detail="Gemini Quick API密钥未配置：请检查环境变量 GEMINI_QUICK_API_KEY 是否正确设置"
+            )
+        
+        return OpenAI(
+            api_key=self.settings.gemini_quick_api_key,
+            base_url=self.settings.gemini_quick_base_url
+        )
+    
     def _create_system_message(self) -> str:
         """创建系统消息"""
         return ("你是一位顶级的AI提示词优化引擎。你的任务是分析用户提供的原始提示词，"
@@ -246,9 +259,52 @@ class LLMService:
         else:
             return await self.call_deepseek_api(model, messages)
     
+    async def call_gemini_quick_api_with_tokens(self, model: str, messages: list, max_tokens: int) -> str:
+        """调用Gemini Quick API（用于快速回答功能）"""
+        try:
+            client = self._create_gemini_quick_client()
+            
+            print(f"使用Gemini Quick模型: {model}, max_tokens: {max_tokens}")
+            
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=API_TEMPERATURE,
+                max_tokens=max_tokens
+            )
+            
+            # 处理响应
+            if response.choices and len(response.choices) > 0:
+                message = response.choices[0].message
+                if message and message.content and message.content.strip():
+                    optimized_prompt = message.content.strip()
+                    print(f"Gemini Quick响应成功，内容长度: {len(optimized_prompt)}")
+                    return optimized_prompt
+                else:
+                    print(f"Gemini Quick响应为空，模型: {model}")
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Gemini Quick API返回空响应，请稍后重试"
+                    )
+            else:
+                print("Gemini Quick响应格式错误")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Gemini Quick API响应格式错误"
+                )
+                
+        except openai.APIError as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Gemini Quick API调用失败: {str(e)}"
+            )
+
     async def call_llm_api_with_custom_tokens(self, model: str, messages: list, max_tokens: int = API_MAX_TOKENS) -> str:
         """带自定义token限制的LLM API调用接口"""
-        if model.startswith("gemini-"):
+        # 如果是快速回答专用模型，使用专门的API
+        if model == "gemini-2.5-flash-lite-preview-06-17":
+            return await self.call_gemini_quick_api_with_tokens(model, messages, max_tokens)
+        elif model.startswith("gemini-"):
             return await self.call_gemini_api_with_tokens(model, messages, max_tokens)
         else:
             return await self.call_deepseek_api_with_tokens(model, messages, max_tokens)

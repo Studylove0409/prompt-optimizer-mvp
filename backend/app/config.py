@@ -14,6 +14,8 @@ class Settings:
         # API密钥
         self.my_llm_api_key = os.getenv("MY_LLM_API_KEY", "")
         self.gemini_api_key = os.getenv("GEMINI_API_KEY", "")
+        # 新增的Gemini API密钥（用于快速回答功能）
+        self.gemini_quick_api_key = os.getenv("GEMINI_QUICK_API_KEY", "AIzaSyA_QAQF2eBUl-kpX8_P1rmU7vvrakTFuJs")
 
         # Supabase配置
         self.supabase_url = os.getenv("SUPABASE_URL", "")
@@ -23,6 +25,8 @@ class Settings:
         # API配置
         self.deepseek_base_url = "https://api.deepseek.com/v1"
         self.gemini_base_url = "https://www.chataiapi.com/v1"
+        # 新的Gemini API基础URL（Google官方API）
+        self.gemini_quick_base_url = "https://generativelanguage.googleapis.com/v1beta"
 
         # 应用配置
         self.app_title = "智优词 API"
@@ -56,5 +60,10 @@ def get_settings() -> Settings:
         print("警告：GEMINI_API_KEY 环境变量未设置或为空")
     else:
         print(f"Gemini API密钥已加载：{settings.gemini_api_key[:10]}...")
+    
+    if not settings.gemini_quick_api_key:
+        print("警告：GEMINI_QUICK_API_KEY 环境变量未设置或为空")
+    else:
+        print(f"Gemini Quick API密钥已加载：{settings.gemini_quick_api_key[:10]}...")
     
     return settings

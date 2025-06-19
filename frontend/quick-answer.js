@@ -262,7 +262,7 @@ async function generateQuickAnswer(prompt) {
         console.log('开始生成快速回答:', prompt);
         
         // 调用API生成回答
-        const response = await generateQuickAnswerAPI(prompt, 'gemini-2.0-flash');
+        const response = await generateQuickAnswerAPI(prompt, 'gemini-2.5-flash-lite-preview-06-17');
         
         if (response && response.success) {
             // 完成进度条（跳到100%）

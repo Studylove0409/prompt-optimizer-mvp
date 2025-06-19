@@ -114,7 +114,7 @@ class QuickAnswerService:
         return any(truncation_indicators)
     
     
-    async def generate_answer(self, prompt: str, model: str = "gemini-2.0-flash") -> Dict[str, Any]:
+    async def generate_answer(self, prompt: str, model: str = "gemini-2.5-flash-lite-preview-06-17") -> Dict[str, Any]:
         """
         生成快速回答
         
