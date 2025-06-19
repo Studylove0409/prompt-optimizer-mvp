@@ -221,16 +221,16 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，使用智能重试机制)
-            max_tokens = 16000
+            # 调用LLM API (快速回答模式，使用50000 tokens支持长回答)
+            max_tokens = 50000
             print(f"开始调用快速回答API，模型: {model}，max_tokens: {max_tokens}")
             response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
             
-            # 使用更严格的截断检测进行重试判断
+            # 使用更严格的截断检测进行重试判断（保留重试机制以防万一）
             initial_truncated = self._check_if_truncated(response)
-            if initial_truncated and max_tokens < 24000:
+            if initial_truncated and max_tokens < 65000:
                 print("初始响应被检测为截断，尝试使用更高token限制重新生成...")
-                max_tokens = 24000  # 增加token限制
+                max_tokens = 65000  # 进一步增加token限制
                 try:
                     retry_response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
                     print(f"重试完成，新响应长度: {len(retry_response)} 字符")
@@ -266,9 +266,9 @@ class QuickAnswerService:
                 else:
                     print(f"响应看起来完整，最后100字符: {last_100}")
             
-            # 硬性截断：如果响应过长，强制截断到30,000字限制
+            # 硬性截断：如果响应过长，强制截断到合理长度（保持30,000字限制）
             if len(response) > 45000:  # 约30000字的字符数上限
-                print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断")
+                print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断到30000字以内")
                 # 找到最后一个完整句子的位置进行截断
                 truncate_pos = 43000  # 保守截断位置，确保在30000字以内
                 for i in range(42000, min(len(response), 45000)):
