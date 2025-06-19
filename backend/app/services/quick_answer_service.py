@@ -30,19 +30,22 @@ class QuickAnswerService:
         """
         prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
-**严格要求：**
-1. 回答字数必须严格控制在1000-5000字之间
-2. 不要超出5000字，一旦接近5000字立即结束回答
-3. 直接回答核心问题，提供关键要点和实用建议
-4. 使用清晰的结构：标题、要点列举、具体例子
-5. 确保内容精炼有用，避免冗余重复
+**绝对限制 - 必须遵守：**
+1. 回答总字数不得超过4000字
+2. 当达到3500字时必须立即结束回答
+3. 不要写冗长的列表、表格或重复内容
+4. 直接回答核心问题，提供3-5个关键要点
+5. 每个要点控制在500-800字内
 
-**重要提醒：请严格控制字数，不要超过5000字！**
+**格式要求：**
+- 使用简洁的标题和段落结构
+- 避免过多的细节展开
+- 重点突出实用性和可操作性
 
 **用户问题：**
 {user_prompt}
 
-请给出详细回答（严格控制在1000-5000字内）："""
+请给出精准回答（总字数不超过4000字）："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -138,14 +141,26 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，严格的token限制确保不超过5000字)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=5500)
+            # 调用LLM API (快速回答模式，极严格的token限制)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=3000)
             
             if not response:
                 raise HTTPException(
                     status_code=500,
                     detail="AI模型返回空响应"
                 )
+            
+            # 硬性截断：如果响应过长，强制截断到合理长度
+            if len(response) > 6000:  # 约4000字的字符数上限
+                print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断")
+                # 找到最后一个完整句子的位置进行截断
+                truncate_pos = 5500  # 保守截断位置
+                for i in range(5000, min(len(response), 6000)):
+                    if response[i] in ['。', '！', '？', '.', '!', '?']:
+                        truncate_pos = i + 1
+                        break
+                response = response[:truncate_pos]
+                print(f"截断后长度: {len(response)} 字符")
             
             # 添加调试信息
             print(f"快速回答响应长度: {len(response)}")
