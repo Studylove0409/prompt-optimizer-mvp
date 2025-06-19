@@ -149,8 +149,9 @@
     border: 2px solid #e8efff;
     /* 使思维过程区域可折叠，为最终回答节省空间 */
     flex-shrink: 0;
-    max-height: 200px; /* 限制思维过程区域的最大高度 */
-    overflow: hidden;
+    min-height: 160px; /* 确保有足够高度显示进度条 */
+    max-height: 220px; /* 稍微增加高度确保进度条可见 */
+    overflow: visible; /* 改为visible确保内容不被裁剪 */
     transition: max-height 0.3s ease;
 }
 
@@ -182,7 +183,10 @@
     border-radius: 12px;
     padding: 20px;
     border: 1px solid #e2e8f0;
-    min-height: 120px;
+    min-height: 140px; /* 增加最小高度确保进度条可见 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* 思维加载状态 */
@@ -222,11 +226,11 @@
 .progress-container {
     width: 100%;
     max-width: 300px;
-    margin: 0 auto;
+    margin: 16px auto 0; /* 增加上边距，确保与上方元素有间距 */
     position: relative;
     background: #e2e8f0;
     border-radius: 12px;
-    height: 8px;
+    height: 10px; /* 稍微增加高度使其更明显 */
     overflow: hidden;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -242,12 +246,13 @@
 
 .progress-text {
     position: absolute;
-    top: 15px;
+    top: 16px; /* 调整位置适应新的进度条高度 */
     left: 50%;
     transform: translateX(-50%);
-    font-size: 14px;
+    font-size: 12px; /* 稍微减小字体以适应紧凑布局 */
     color: #667eea;
     font-weight: 600;
+    white-space: nowrap; /* 防止文字换行 */
 }
 
 /* 思维文本 */
@@ -624,7 +629,8 @@
     
     .thinking-process-section {
         padding: 16px;
-        max-height: 150px; /* 移动端进一步压缩思维过程高度 */
+        min-height: 140px; /* 确保移动端也有足够高度 */
+        max-height: 180px; /* 增加移动端高度确保进度条可见 */
     }
     
     .final-answer-section {
