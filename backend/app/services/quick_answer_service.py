@@ -28,18 +28,19 @@ class QuickAnswerService:
         Returns:
             完整的提示词
         """
-        prompt_template = """你是一位专业的AI助手。请对用户的问题给出简洁、准确、实用的回答。
+        prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
 **回答要求：**
-1. 直接回答核心问题，避免冗长的铺垫
-2. 提供关键要点和实用建议
-3. 控制回答长度在800-1500字以内
-4. 使用清晰的结构和要点列举
+1. 直接回答核心问题，提供充分的细节和解释
+2. 详细阐述关键要点，提供具体的例子和实用建议
+3. 回答长度必须在1000-5000字之间，确保内容充实
+4. 使用清晰的结构，包含多个段落和要点列举
+5. 深入分析问题的各个方面，提供全面的解答
 
 **用户问题：**
 {user_prompt}
 
-请给出简洁实用的回答："""
+请给出详细完整的回答（1000-5000字）："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -77,9 +78,16 @@ class QuickAnswerService:
         if not text:
             return False
         
-        # 检查是否过长（超过50000字符可能存在问题）
-        if len(text) > 50000:
-            print(f"警告：回答过长 ({len(text)} 字符)，可能存在重复或异常")
+        text_length = len(text)
+        
+        # 检查是否过长（超过20000字符可能存在问题）
+        if text_length > 20000:
+            print(f"警告：回答过长 ({text_length} 字符)，可能存在重复或异常")
+            return True
+        
+        # 检查是否过短（少于800字符可能未达到1000字要求）
+        if text_length < 800:
+            print(f"警告：回答过短 ({text_length} 字符)，可能被截断")
             return True
         
         # 检查常见的截断迹象
@@ -89,9 +97,7 @@ class QuickAnswerService:
             # 以数字或字母结尾（可能是列表项被截断）
             text.rstrip()[-1:].isalnum(),
             # 以标点符号结尾但不是句号等完整句子标点
-            text.rstrip().endswith((',', '，', '-', '、')),
-            # 长度过短（少于50字符可能是被严重截断）
-            len(text.strip()) < 50
+            text.rstrip().endswith((',', '，', '-', '、'))
         ]
         
         # 如果有任何截断指标为True，认为可能被截断
@@ -125,8 +131,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，进一步降低token限制提高速度)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=4000)
+            # 调用LLM API (快速回答模式，适中的token限制支持1000-5000字回答)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=7000)
             
             if not response:
                 raise HTTPException(
