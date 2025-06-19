@@ -30,17 +30,19 @@ class QuickAnswerService:
         """
         prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
-**回答要求：**
-1. 直接回答核心问题，提供充分的细节和解释
-2. 详细阐述关键要点，提供具体的例子和实用建议
-3. 回答长度必须在1000-5000字之间，确保内容充实
-4. 使用清晰的结构，包含多个段落和要点列举
-5. 深入分析问题的各个方面，提供全面的解答
+**严格要求：**
+1. 回答字数必须严格控制在1000-5000字之间
+2. 不要超出5000字，一旦接近5000字立即结束回答
+3. 直接回答核心问题，提供关键要点和实用建议
+4. 使用清晰的结构：标题、要点列举、具体例子
+5. 确保内容精炼有用，避免冗余重复
+
+**重要提醒：请严格控制字数，不要超过5000字！**
 
 **用户问题：**
 {user_prompt}
 
-请给出详细完整的回答（1000-5000字）："""
+请给出详细回答（严格控制在1000-5000字内）："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -58,7 +60,12 @@ class QuickAnswerService:
         
         # 直接将整个响应作为最终答案，无需思考过程
         final_answer = response.strip()
-        thinking_process = "✅ AI分析完成"
+        
+        # 统计实际字数（去除空格和标点的字符数）
+        word_count = len(response.replace(' ', '').replace('\n', '').replace('\t', ''))
+        print(f"实际字数统计: {word_count}")
+        
+        thinking_process = f"✅ AI分析完成（字数：{word_count}）"
         
         # 检查回答是否可能被截断
         is_truncated = self._check_if_truncated(final_answer)
@@ -80,9 +87,9 @@ class QuickAnswerService:
         
         text_length = len(text)
         
-        # 检查是否过长（超过20000字符可能存在问题）
-        if text_length > 20000:
-            print(f"警告：回答过长 ({text_length} 字符)，可能存在重复或异常")
+        # 检查是否过长（超过6000字符违反要求）
+        if text_length > 6000:
+            print(f"警告：回答过长 ({text_length} 字符)，超出5000字要求")
             return True
         
         # 检查是否过短（少于800字符可能未达到1000字要求）
@@ -131,8 +138,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，适中的token限制支持1000-5000字回答)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=7000)
+            # 调用LLM API (快速回答模式，严格的token限制确保不超过5000字)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=5500)
             
             if not response:
                 raise HTTPException(
