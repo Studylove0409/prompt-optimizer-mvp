@@ -314,10 +314,8 @@ class LLMService:
 
     async def call_llm_api_with_custom_tokens(self, model: str, messages: list, max_tokens: int = API_MAX_TOKENS) -> str:
         """带自定义token限制的LLM API调用接口"""
-        # 如果是快速回答专用模型，使用专门的API
-        if model == "gemini-2.5-flash-lite-preview-06-17":
-            return await self.call_gemini_quick_api_with_tokens(model, messages, max_tokens)
-        elif model.startswith("gemini-"):
+        # 统一使用标准的API调用，不再使用Google官方API
+        if model.startswith("gemini-"):
             return await self.call_gemini_api_with_tokens(model, messages, max_tokens)
         else:
             return await self.call_deepseek_api_with_tokens(model, messages, max_tokens)

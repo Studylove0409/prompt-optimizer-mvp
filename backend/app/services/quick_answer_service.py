@@ -64,18 +64,12 @@ class QuickAnswerService:
         Returns:
             包含thinking_process和final_answer的字典
         """
-        print(f"快速回答响应长度: {len(response)}")
-        
         # 直接将整个响应作为最终答案，无需思考过程
         final_answer = response.strip()
         
-        # 统计实际字数（去除空格和标点的字符数）
-        word_count = len(response.replace(' ', '').replace('\n', '').replace('\t', ''))
-        print(f"实际字数统计: {word_count}")
-        
-        thinking_process = f"✅ AI分析完成（字数：{word_count}）"
-        
-        print(f"解析结果 - 最终回答长度: {len(final_answer)}")
+        # 快速字数统计，避免多次字符串替换
+        response_length = len(response)
+        thinking_process = f"✅ AI分析完成（字数：{response_length}）"
         
         return {
             "thinking_process": thinking_process,
@@ -124,9 +118,6 @@ class QuickAnswerService:
                 )
             
             print(f"API调用成功，响应长度: {len(response)} 字符")
-            print(f"响应前200字符: {response[:200]}...")
-            if len(response) > 200:
-                print(f"响应后100字符: ...{response[-100:]}")
             
             # 解析响应
             parsed_result = self._parse_response(response)
