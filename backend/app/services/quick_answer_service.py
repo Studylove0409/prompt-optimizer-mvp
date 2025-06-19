@@ -30,23 +30,24 @@ class QuickAnswerService:
         """
         prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
-**字数要求 - 严格执行：**
-1. 回答总字数必须控制在1000-10000字之间
-2. 当达到9000字时必须立即结束回答
-3. 确保内容详细充实，但不要过度冗余
-4. 直接回答核心问题，提供全面的分析和建议
-5. 使用清晰的结构和逻辑层次
+**字数要求：**
+1. 回答总字数控制在30000字以下
+2. 确保内容详细充实，提供全面深入的分析
+3. 直接回答核心问题，提供完整的解决方案
+4. 使用清晰的结构和逻辑层次
+5. 可以包含详细的步骤、案例和实例
 
 **内容要求：**
 - 提供深入的分析和详细的解释
 - 包含具体的例子、步骤或解决方案
 - 使用标题、要点和段落结构化内容
 - 重点突出实用性和可操作性
+- 可以包含详细的背景知识和扩展信息
 
 **用户问题：**
 {user_prompt}
 
-请给出详细完整的回答（1000-10000字）："""
+请给出详细完整的回答（详尽分析，不超过30000字）："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -91,13 +92,13 @@ class QuickAnswerService:
         
         text_length = len(text)
         
-        # 检查是否过长（超过12000字符违反要求）
-        if text_length > 12000:
-            print(f"警告：回答过长 ({text_length} 字符)，超出10000字要求")
+        # 检查是否过长（超过50000字符可能存在异常）
+        if text_length > 50000:
+            print(f"警告：回答异常过长 ({text_length} 字符)，可能存在重复或异常")
             return True
         
-        # 检查是否过短（少于800字符可能未达到1000字要求）
-        if text_length < 800:
+        # 检查是否过短（少于500字符可能被截断）
+        if text_length < 500:
             print(f"警告：回答过短 ({text_length} 字符)，可能被截断")
             return True
         
@@ -142,8 +143,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，支持1万字以下的详细回答)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=12000)
+            # 调用LLM API (快速回答模式，支持3万字以下的详细回答)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=35000)
             
             if not response:
                 raise HTTPException(
@@ -152,11 +153,11 @@ class QuickAnswerService:
                 )
             
             # 硬性截断：如果响应过长，强制截断到合理长度
-            if len(response) > 15000:  # 约10000字的字符数上限
+            if len(response) > 45000:  # 约30000字的字符数上限
                 print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断")
                 # 找到最后一个完整句子的位置进行截断
-                truncate_pos = 14000  # 保守截断位置
-                for i in range(13000, min(len(response), 15000)):
+                truncate_pos = 43000  # 保守截断位置
+                for i in range(42000, min(len(response), 45000)):
                     if response[i] in ['。', '！', '？', '.', '!', '?']:
                         truncate_pos = i + 1
                         break
