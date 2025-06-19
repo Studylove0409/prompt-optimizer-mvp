@@ -30,22 +30,23 @@ class QuickAnswerService:
         """
         prompt_template = """你是一位专业的AI助手。请对用户的问题给出详细、准确、实用的回答。
 
-**绝对限制 - 必须遵守：**
-1. 回答总字数不得超过4000字
-2. 当达到3500字时必须立即结束回答
-3. 不要写冗长的列表、表格或重复内容
-4. 直接回答核心问题，提供3-5个关键要点
-5. 每个要点控制在500-800字内
+**字数要求 - 严格执行：**
+1. 回答总字数必须控制在1000-10000字之间
+2. 当达到9000字时必须立即结束回答
+3. 确保内容详细充实，但不要过度冗余
+4. 直接回答核心问题，提供全面的分析和建议
+5. 使用清晰的结构和逻辑层次
 
-**格式要求：**
-- 使用简洁的标题和段落结构
-- 避免过多的细节展开
+**内容要求：**
+- 提供深入的分析和详细的解释
+- 包含具体的例子、步骤或解决方案
+- 使用标题、要点和段落结构化内容
 - 重点突出实用性和可操作性
 
 **用户问题：**
 {user_prompt}
 
-请给出精准回答（总字数不超过4000字）："""
+请给出详细完整的回答（1000-10000字）："""
 
         return prompt_template.format(user_prompt=user_prompt)
     
@@ -90,9 +91,9 @@ class QuickAnswerService:
         
         text_length = len(text)
         
-        # 检查是否过长（超过6000字符违反要求）
-        if text_length > 6000:
-            print(f"警告：回答过长 ({text_length} 字符)，超出5000字要求")
+        # 检查是否过长（超过12000字符违反要求）
+        if text_length > 12000:
+            print(f"警告：回答过长 ({text_length} 字符)，超出10000字要求")
             return True
         
         # 检查是否过短（少于800字符可能未达到1000字要求）
@@ -141,8 +142,8 @@ class QuickAnswerService:
                 }
             ]
             
-            # 调用LLM API (快速回答模式，极严格的token限制)
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=3000)
+            # 调用LLM API (快速回答模式，支持1万字以下的详细回答)
+            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=12000)
             
             if not response:
                 raise HTTPException(
@@ -151,11 +152,11 @@ class QuickAnswerService:
                 )
             
             # 硬性截断：如果响应过长，强制截断到合理长度
-            if len(response) > 6000:  # 约4000字的字符数上限
+            if len(response) > 15000:  # 约10000字的字符数上限
                 print(f"警告：响应过长 ({len(response)} 字符)，执行强制截断")
                 # 找到最后一个完整句子的位置进行截断
-                truncate_pos = 5500  # 保守截断位置
-                for i in range(5000, min(len(response), 6000)):
+                truncate_pos = 14000  # 保守截断位置
+                for i in range(13000, min(len(response), 15000)):
                     if response[i] in ['。', '！', '？', '.', '!', '?']:
                         truncate_pos = i + 1
                         break
