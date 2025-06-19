@@ -177,19 +177,9 @@ class LLMService:
                 choice = response.choices[0]
                 message = choice.message
                 
-                # 检查响应是否因为长度限制被截断
-                finish_reason = getattr(choice, 'finish_reason', None)
-                print(f"Gemini API响应完成原因: {finish_reason}")
-                
                 if message and message.content and message.content.strip():
                     optimized_prompt = message.content.strip()
                     print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
-                    
-                    # 如果是因为长度限制被截断，记录警告但仍然返回结果
-                    if finish_reason == 'length':
-                        print(f"警告：Gemini响应因达到max_tokens限制而被截断 (max_tokens: {max_tokens})")
-                        print(f"响应结尾50字符: ...{optimized_prompt[-50:]}")
-                    
                     return optimized_prompt
                 else:
                     print(f"Gemini响应为空，模型: {model}")
@@ -299,19 +289,9 @@ class LLMService:
                 choice = response.choices[0]
                 message = choice.message
                 
-                # 检查响应是否因为长度限制被截断
-                finish_reason = getattr(choice, 'finish_reason', None)
-                print(f"API响应完成原因: {finish_reason}")
-                
                 if message and message.content and message.content.strip():
                     optimized_prompt = message.content.strip()
                     print(f"Gemini Quick响应成功，内容长度: {len(optimized_prompt)}")
-                    
-                    # 如果是因为长度限制被截断，记录警告
-                    if finish_reason == 'length':
-                        print(f"警告：响应因达到max_tokens限制而被截断 (max_tokens: {max_tokens})")
-                        print(f"响应结尾50字符: ...{optimized_prompt[-50:]}")
-                    
                     return optimized_prompt
                 else:
                     print(f"Gemini Quick响应为空，模型: {model}")
