@@ -422,7 +422,8 @@ THINKING_OPTIMIZATION_TEMPLATE = """
 # API调用配置
 API_TIMEOUT = 180  # 增加到180秒支持5万字长内容生成
 API_TEMPERATURE = 0.5
-API_MAX_TOKENS = 2000
+API_MAX_TOKENS = 2000  # 普通优化用的token限制
+API_MAX_TOKENS_THINKING = 8000  # 思考模式专用的更高token限制
 
 # 辅助函数
 def is_gemini_model(model: str) -> bool:

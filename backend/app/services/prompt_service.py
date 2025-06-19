@@ -142,7 +142,7 @@ class PromptService:
                 }
             ]
 
-            # 调用LLM API
+            # 调用LLM API（思考模式分析阶段使用标准token限制）
             response_text = await self.llm_service.call_llm_api(request.model, messages)
 
             # 提取JSON数据
@@ -190,8 +190,8 @@ class PromptService:
                 }
             ]
 
-            # 调用LLM API
-            optimized_prompt = await self.llm_service.call_llm_api(request.model, messages)
+            # 调用LLM API（思考模式最终优化阶段使用更高token限制）
+            optimized_prompt = await self.llm_service.call_llm_api_thinking(request.model, messages)
 
             # 保存历史记录（支持已登录用户和匿名用户）
             if user and user.id:

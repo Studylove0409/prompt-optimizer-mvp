@@ -395,7 +395,7 @@ async function generateQuickOptions(fieldKey, question) {
     const requestBody = {
         field_key: fieldKey,
         question: question,
-        model: 'gemini-2.0-flash'
+        model: 'gemini-2.0-flash-lite'
     };
     
     console.log('🚀 发送快速选项生成请求:', requestBody);

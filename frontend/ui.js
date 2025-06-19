@@ -585,6 +585,57 @@ const fieldOptions = {
     "预期成果": ["知识掌握", "技能提升", "问题解决", "效率提高", "创新思路", "实践应用", "理论理解", "全面发展"]
 };
 
+// 判断字段是否应该支持多选
+function shouldFieldSupportMultiSelect(fieldKey, fieldQuestion = '') {
+    // 明确支持多选的字段类型
+    const multiSelectFields = [
+        // 通用多选字段
+        '目标用户', '目标人群', '受众群体', '用户类型', '目标受众',
+        '输出格式', '展示格式', '呈现方式', '回复格式',
+        '技能特长', '相关经验', '实践经验', '项目经验',
+        '学习资源', '学习渠道', '学习路径',
+        '应用场景', '使用场景', '应用环境', '使用情境',
+        '兴趣领域', '应用领域', '关注领域',
+        '资源需求', '需要资源', '支持资源',
+        '创作风格', '设计风格', '视觉风格',
+        '分析角度', '分析方向', '考虑角度',
+        
+        // 编程学习相关
+        '编程基础', '技术背景', '开发经验',
+        '学习目标', '发展方向', '职业规划',
+        
+        // 创业商业相关
+        '启动资金', '资金来源', '投资方式',
+        '风险偏好', '投资偏好', '策略偏好',
+        
+        // 内容创作相关
+        '内容类型', '创作类型', '文章类型',
+        '发布平台', '推广渠道', '营销渠道'
+    ];
+    
+    // 检查字段名称直接匹配
+    if (multiSelectFields.some(field => fieldKey.includes(field) || field.includes(fieldKey))) {
+        console.log(`✅ 字段 "${fieldKey}" 支持多选（名称匹配）`);
+        return true;
+    }
+    
+    // 基于问题内容的关键词匹配
+    const questionContent = (fieldKey + ' ' + fieldQuestion).toLowerCase();
+    const multiSelectKeywords = [
+        '哪些', '什么', '包括', '涉及', '选择', '类型', '方式', '渠道', '平台',
+        '多个', '几种', '不同', '各种', '多种', '分别', '或者', '以及'
+    ];
+    
+    if (multiSelectKeywords.some(keyword => questionContent.includes(keyword))) {
+        console.log(`✅ 字段 "${fieldKey}" 支持多选（内容匹配）`);
+        return true;
+    }
+    
+    // 默认单选
+    console.log(`⚪ 字段 "${fieldKey}" 使用单选模式`);
+    return false;
+}
+
 // 字段匹配函数 - 支持智能匹配和内容分析
 function findFieldOptions(fieldKey, fieldQuestion = '') {
     console.log(`🔍 匹配分析 - 字段: "${fieldKey}", 问题: "${fieldQuestion}"`);
@@ -697,10 +748,12 @@ function findFieldOptions(fieldKey, fieldQuestion = '') {
     return ["请选择", "基础水平", "中等水平", "高级水平", "专家水平", "其他"];
 }
 
-// 使用Gemini API为特定字段生成快速选择选项
-async function generateOptionsForField(item, index) {
+// 使用Gemini API为特定字段生成快速选择选项（带重试机制）
+async function generateOptionsForField(item, index, retryCount = 0) {
+    const maxRetries = 2;
+    
     try {
-        console.log(`🚀 为字段 "${item.key}" 生成AI选项...`);
+        console.log(`🚀 为字段 "${item.key}" 生成AI选项... (尝试 ${retryCount + 1}/${maxRetries + 1})`);
         
         // 调用Gemini API生成选项
         const response = await generateQuickOptions(item.key, item.question);
@@ -724,7 +777,19 @@ async function generateOptionsForField(item, index) {
     } catch (error) {
         console.error(`❌ 字段 "${item.key}" AI选项生成失败:`, error);
         
+        // 如果是429错误且还有重试次数，则等待后重试
+        if (error.message.includes('429') && retryCount < maxRetries) {
+            const delay = Math.min(5000 * Math.pow(2, retryCount), 15000); // 调试模式：更快重试
+            console.log(`⏰ 速率限制，${delay/1000}秒后重试字段 "${item.key}"`);
+            
+            setTimeout(() => {
+                generateOptionsForField(item, index, retryCount + 1);
+            }, delay);
+            return;
+        }
+        
         // 失败时使用备用选项
+        console.log(`🔄 字段 "${item.key}" 使用备用选项`);
         const fallbackOptions = findFieldOptions(item.key, item.question);
         const optionsContainer = document.querySelector(`[data-field-index="${index}"]`);
         if (optionsContainer) {
@@ -739,6 +804,71 @@ async function generateOptionsForField(item, index) {
     }
 }
 
+// 增强版选项生成（后台静默升级）
+async function generateOptionsForFieldEnhanced(item, index, retryCount = 0) {
+    const maxRetries = 1; // 减少重试次数，避免过多API调用
+    
+    try {
+        console.log(`🤖 后台为字段 "${item.key}" 生成AI选项... (尝试 ${retryCount + 1}/${maxRetries + 1})`);
+        
+        // 显示AI加载指示器
+        const loadingIndicator = document.querySelector(`[data-field-index="${index}"]`)?.parentElement?.querySelector('.ai-loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'block';
+        }
+        
+        // 调用Gemini API生成选项
+        const response = await generateQuickOptions(item.key, item.question);
+        
+        console.log(`✅ 字段 "${item.key}" AI选项生成成功，正在替换:`, response.options);
+        
+        // 更新对应的选项容器
+        const optionsContainer = document.querySelector(`[data-field-index="${index}"]`);
+        if (optionsContainer) {
+            // 平滑替换为AI生成的选项
+            optionsContainer.innerHTML = response.options.map(option => `
+                <button type="button" class="quick-option-btn" data-value="${option}">
+                    ${option}
+                </button>
+            `).join('');
+            
+            // 重新绑定事件
+            bindQuickOptionEventsForContainer(optionsContainer);
+            
+            // 添加升级成功的视觉提示
+            const loadingIndicator = optionsContainer.parentElement?.querySelector('.ai-loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.textContent = '✨ 选项已升级为AI定制版本';
+                loadingIndicator.style.color = '#10b981';
+                setTimeout(() => {
+                    loadingIndicator.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+    } catch (error) {
+        console.log(`⚠️ 字段 "${item.key}" AI选项生成失败（静默处理）:`, error.message);
+        
+        // 隐藏加载指示器，保持预设选项
+        const loadingIndicator = document.querySelector(`[data-field-index="${index}"]`)?.parentElement?.querySelector('.ai-loading-indicator');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
+        
+        // 如果是429错误且还有重试次数，则等待后重试
+        if (error.message.includes('429') && retryCount < maxRetries) {
+            const delay = 15000; // 调试模式：等待15秒后重试
+            console.log(`⏰ 速率限制，${delay/1000}秒后重试字段 "${item.key}"`);
+            
+            setTimeout(() => {
+                generateOptionsForFieldEnhanced(item, index, retryCount + 1);
+            }, delay);
+        }
+        
+        // 静默失败，不影响用户体验，预设选项已经可用
+    }
+}
+
 // 为特定容器绑定快速选择按钮事件
 function bindQuickOptionEventsForContainer(container) {
     const buttons = container.querySelectorAll('.quick-option-btn');
@@ -750,19 +880,19 @@ function bindQuickOptionEventsForContainer(container) {
             const textarea = fieldContainer.querySelector('.thinking-field-input');
             const optionsContainer = this.closest('.quick-options-container');
             
-            // 移除其他按钮的选中状态
-            optionsContainer.querySelectorAll('.quick-option-btn').forEach(b => {
-                b.classList.remove('selected');
-            });
+            // 检查是否启用多选模式
+            const isMultiSelect = fieldContainer.getAttribute('data-multi-select') === 'true';
+            console.log(`🔍 按钮点击 - 字段多选模式: ${isMultiSelect}, 按钮值: ${this.dataset.value}`);
             
-            // 添加当前按钮的选中状态
-            this.classList.add('selected');
-            
-            // 将选中的值填入textarea
-            textarea.value = this.dataset.value;
-            
-            // 触发输入事件
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            if (isMultiSelect) {
+                // 多选模式
+                console.log(`🟢 使用多选处理逻辑`);
+                handleMultiSelectOption(this, textarea, optionsContainer);
+            } else {
+                // 单选模式（原有逻辑）
+                console.log(`🔵 使用单选处理逻辑`);
+                handleSingleSelectOption(this, textarea, optionsContainer);
+            }
             
             // 添加点击动画效果
             this.style.transform = 'scale(0.95)';
@@ -803,32 +933,54 @@ function showThinkingForm(analysisResult, originalPrompt) {
         const fieldDiv = document.createElement('div');
         fieldDiv.className = 'thinking-field';
         fieldDiv.style.setProperty('--index', index + 1);
+        
+        // 判断是否应该启用多选模式
+        const shouldEnableMultiSelect = shouldFieldSupportMultiSelect(item.key, item.question);
+        if (shouldEnableMultiSelect) {
+            fieldDiv.setAttribute('data-multi-select', 'true');
+            console.log(`✅ 字段 "${item.key}" 启用多选模式`);
+        } else {
+            console.log(`⚪ 字段 "${item.key}" 使用单选模式`);
+        }
 
-        // 先生成基础结构（带loading状态）
+        // 立即使用预设选项，然后后台尝试AI生成
+        const fallbackOptions = findFieldOptions(item.key, item.question);
+        
         fieldDiv.innerHTML = `
             <label class="thinking-field-label">
                 ${item.key}
             </label>
             <div class="thinking-field-description">${item.question}</div>
             <div class="quick-options-container" data-field-index="${index}">
-                <div class="options-loading">
-                    <span class="loading-spinner">⚪</span>
-                    <span>AI正在生成选项...</span>
-                </div>
+                ${fallbackOptions.map(option => `
+                    <button type="button" class="quick-option-btn" data-value="${option}">
+                        ${option}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="ai-loading-indicator" style="display: none; font-size: 11px; color: #6b7280; margin-top: 8px;">
+                🤖 AI正在生成更好的选项...
             </div>
             <textarea
                 class="thinking-field-input"
                 id="thinking-field-${index}"
-                placeholder="或输入自定义内容..."
+                placeholder="${shouldEnableMultiSelect ? '可选择多个选项，或输入自定义内容...' : '或输入自定义内容...'}"
                 data-key="${item.key}"
-                rows="2"
+                rows="${shouldEnableMultiSelect ? '3' : '2'}"
             ></textarea>
         `;
 
         thinkingModalContent.appendChild(fieldDiv);
         
-        // 异步调用API生成选项
-        generateOptionsForField(item, index);
+        // 立即绑定预设选项的事件
+        const optionsContainer = fieldDiv.querySelector('.quick-options-container');
+        bindQuickOptionEventsForContainer(optionsContainer);
+        
+        // 错开时间调用AI API，用更好的选项替换预设选项
+        // 调试模式：使用3秒间隔快速测试
+        setTimeout(() => {
+            generateOptionsForFieldEnhanced(item, index);
+        }, index * 3000); // 每个字段间隔3秒
     });
 
     // 添加自定义补充信息区域
@@ -912,24 +1064,21 @@ function bindQuickOptionEvents() {
     
     quickOptionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            // 获取对应的textarea
+            // 获取对应的容器和textarea
             const container = this.closest('.thinking-field');
             const textarea = container.querySelector('.thinking-field-input');
             const optionsContainer = this.closest('.quick-options-container');
             
-            // 移除其他按钮的选中状态
-            optionsContainer.querySelectorAll('.quick-option-btn').forEach(b => {
-                b.classList.remove('selected');
-            });
+            // 检查是否启用多选模式
+            const isMultiSelect = container.getAttribute('data-multi-select') === 'true';
             
-            // 添加当前按钮的选中状态
-            this.classList.add('selected');
-            
-            // 将选中的值填入textarea
-            textarea.value = this.dataset.value;
-            
-            // 触发输入事件（如果有其他监听器需要）
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            if (isMultiSelect) {
+                // 多选模式
+                handleMultiSelectOption(this, textarea, optionsContainer);
+            } else {
+                // 单选模式（原有逻辑）
+                handleSingleSelectOption(this, textarea, optionsContainer);
+            }
             
             // 添加点击动画效果
             this.style.transform = 'scale(0.95)';
@@ -939,33 +1088,128 @@ function bindQuickOptionEvents() {
         });
     });
     
-    // 为textarea添加输入监听，清除按钮选中状态（当用户手动输入时）
+    // 为textarea添加输入监听，同步按钮选中状态
     const textareas = document.querySelectorAll('.thinking-field .thinking-field-input');
     textareas.forEach(textarea => {
         textarea.addEventListener('input', function() {
             const container = this.closest('.thinking-field');
             const optionsContainer = container.querySelector('.quick-options-container');
+            const isMultiSelect = container.getAttribute('data-multi-select') === 'true';
             
             if (optionsContainer) {
-                // 检查当前值是否匹配某个按钮
-                const buttons = optionsContainer.querySelectorAll('.quick-option-btn');
-                let matchFound = false;
-                
-                buttons.forEach(btn => {
-                    if (btn.dataset.value === this.value) {
-                        btn.classList.add('selected');
-                        matchFound = true;
-                    } else {
-                        btn.classList.remove('selected');
-                    }
-                });
-                
-                // 如果没有匹配的按钮，清除所有选中状态
-                if (!matchFound) {
-                    buttons.forEach(btn => btn.classList.remove('selected'));
+                if (isMultiSelect) {
+                    syncMultiSelectButtons(this.value, optionsContainer);
+                } else {
+                    syncSingleSelectButtons(this.value, optionsContainer);
                 }
             }
         });
+    });
+}
+
+// 处理单选选项
+function handleSingleSelectOption(button, textarea, optionsContainer) {
+    // 移除其他按钮的选中状态
+    optionsContainer.querySelectorAll('.quick-option-btn').forEach(b => {
+        b.classList.remove('selected', 'multi-selected');
+    });
+    
+    // 添加当前按钮的选中状态
+    button.classList.add('selected');
+    
+    // 将选中的值填入textarea
+    textarea.value = button.dataset.value;
+    
+    // 触发输入事件
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// 处理多选选项
+function handleMultiSelectOption(button, textarea, optionsContainer) {
+    const buttonValue = button.dataset.value;
+    const currentValues = getMultiSelectValues(textarea.value);
+    const wasSelected = button.classList.contains('multi-selected');
+    
+    console.log(`🔄 多选处理 - 按钮值: "${buttonValue}", 当前选中状态: ${wasSelected}, 当前值: [${currentValues.join(', ')}]`);
+    
+    if (wasSelected) {
+        // 如果已选中，则取消选中
+        button.classList.remove('multi-selected');
+        const newValues = currentValues.filter(value => value !== buttonValue);
+        textarea.value = formatMultiSelectValues(newValues);
+        console.log(`❌ 取消选中 "${buttonValue}", 新值: [${newValues.join(', ')}]`);
+    } else {
+        // 如果未选中，则添加选中
+        button.classList.add('multi-selected');
+        currentValues.push(buttonValue);
+        textarea.value = formatMultiSelectValues(currentValues);
+        console.log(`✅ 添加选中 "${buttonValue}", 新值: [${currentValues.join(', ')}]`);
+    }
+    
+    // 验证CSS类是否正确应用
+    console.log(`🎨 按钮CSS类: ${button.classList.toString()}`);
+    
+    // 触发输入事件
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// 解析多选值（从textarea文本中提取选择的选项）
+function getMultiSelectValues(textValue) {
+    if (!textValue || !textValue.trim()) {
+        return [];
+    }
+    
+    // 支持多种分隔符：中文顿号、中文逗号、英文逗号、分号、换行
+    return textValue
+        .split(/[、，,;\n]/)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
+}
+
+// 格式化多选值（将选择的选项格式化为文本）
+function formatMultiSelectValues(values) {
+    if (!values || values.length === 0) {
+        return '';
+    }
+    
+    // 使用中文逗号分隔，便于阅读
+    return values.join('、');
+}
+
+// 同步单选按钮状态
+function syncSingleSelectButtons(textValue, optionsContainer) {
+    const buttons = optionsContainer.querySelectorAll('.quick-option-btn');
+    let matchFound = false;
+    
+    buttons.forEach(btn => {
+        if (btn.dataset.value === textValue) {
+            btn.classList.add('selected');
+            btn.classList.remove('multi-selected');
+            matchFound = true;
+        } else {
+            btn.classList.remove('selected', 'multi-selected');
+        }
+    });
+    
+    // 如果没有匹配的按钮，清除所有选中状态
+    if (!matchFound) {
+        buttons.forEach(btn => btn.classList.remove('selected', 'multi-selected'));
+    }
+}
+
+// 同步多选按钮状态
+function syncMultiSelectButtons(textValue, optionsContainer) {
+    const selectedValues = getMultiSelectValues(textValue);
+    const buttons = optionsContainer.querySelectorAll('.quick-option-btn');
+    
+    buttons.forEach(btn => {
+        btn.classList.remove('selected'); // 清除单选状态
+        
+        if (selectedValues.includes(btn.dataset.value)) {
+            btn.classList.add('multi-selected');
+        } else {
+            btn.classList.remove('multi-selected');
+        }
     });
 }
 
@@ -1205,7 +1449,7 @@ function bindThinkingModalEvents(originalPrompt) {
     }
 
     // 绑定快速选择按钮事件
-    bindQuickOptionEvents();
+    bindQuickOptionEventsModal();
 }
 
 // 绑定思考模式模态弹窗关闭事件
@@ -1243,8 +1487,8 @@ function closeThinkingModal() {
     }
 }
 
-// 绑定快速选择按钮事件
-function bindQuickOptionEvents() {
+// 绑定快速选择按钮事件（模态弹窗版本）
+function bindQuickOptionEventsModal() {
     const quickOptionBtns = document.querySelectorAll('.quick-option-btn');
     quickOptionBtns.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -1252,17 +1496,19 @@ function bindQuickOptionEvents() {
             const fieldIndex = container.dataset.fieldIndex;
             const textareaId = `thinking-field-${fieldIndex}`;
             const textarea = document.getElementById(textareaId);
+            const fieldContainer = this.closest('.thinking-field');
             
-            if (textarea) {
-                // 设置文本框值
-                textarea.value = this.dataset.value;
+            if (textarea && fieldContainer) {
+                // 检查是否启用多选模式
+                const isMultiSelect = fieldContainer.getAttribute('data-multi-select') === 'true';
                 
-                // 更新按钮选中状态
-                container.querySelectorAll('.quick-option-btn').forEach(b => b.classList.remove('selected'));
-                this.classList.add('selected');
-                
-                // 触发输入事件以进行任何必要的验证
-                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                if (isMultiSelect) {
+                    // 多选模式
+                    handleMultiSelectOption(this, textarea, container);
+                } else {
+                    // 单选模式
+                    handleSingleSelectOption(this, textarea, container);
+                }
             }
         });
     });

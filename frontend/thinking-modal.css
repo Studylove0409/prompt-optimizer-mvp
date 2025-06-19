@@ -231,6 +231,61 @@
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
+/* 多选模式支持 */
+.quick-option-btn.multi-selected {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3) !important;
+    position: relative;
+    transform: translateY(-1px);
+}
+
+.quick-option-btn.multi-selected::after {
+    content: '✓';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    z-index: 3;
+}
+
+.quick-option-btn.multi-selected:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+    transform: translateY(-2px) !important;
+}
+
+.quick-option-btn.multi-selected:active {
+    transform: translateY(-1px) scale(0.98) !important;
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
+}
+
+/* 字段支持多选时的提示样式 */
+.thinking-field[data-multi-select="true"] .thinking-field-label::after {
+    content: ' (可多选)';
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.thinking-field[data-multi-select="true"] .quick-options-container {
+    position: relative;
+}
+
+.thinking-field[data-multi-select="true"] .quick-options-container::before {
+    content: '💡 提示：可以选择多个选项';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 11px;
+    color: #6b7280;
+    font-style: italic;
+}
+
 /* 文本输入框样式 */
 .thinking-field-input {
     width: 100%;

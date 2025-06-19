@@ -7,7 +7,7 @@ import openai
 from fastapi import HTTPException
 
 from ..config import Settings
-from ..constants import API_TIMEOUT, API_TEMPERATURE, API_MAX_TOKENS
+from ..constants import API_TIMEOUT, API_TEMPERATURE, API_MAX_TOKENS, API_MAX_TOKENS_THINKING
 
 
 class LLMService:
@@ -173,10 +173,22 @@ class LLMService:
             
             # 处理响应
             if response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
+                choice = response.choices[0]
+                message = choice.message
+                
+                # 检查响应是否因为长度限制被截断
+                finish_reason = getattr(choice, 'finish_reason', None)
+                print(f"Gemini API响应完成原因: {finish_reason}")
+                
                 if message and message.content and message.content.strip():
                     optimized_prompt = message.content.strip()
                     print(f"Gemini响应成功，内容长度: {len(optimized_prompt)}")
+                    
+                    # 如果是因为长度限制被截断，记录警告
+                    if finish_reason == 'length':
+                        print(f"警告：Gemini响应因达到max_tokens限制而被截断")
+                        print(f"响应结尾50字符: ...{optimized_prompt[-50:]}")
+                    
                     return optimized_prompt
                 else:
                     print(f"Gemini响应为空，模型: {model}")
@@ -259,6 +271,13 @@ class LLMService:
         else:
             return await self.call_deepseek_api(model, messages)
     
+    async def call_llm_api_thinking(self, model: str, messages: list) -> str:
+        """思考模式专用的LLM API调用接口（使用更高的token限制）"""
+        if model.startswith("gemini-"):
+            return await self.call_gemini_api_with_tokens(model, messages, API_MAX_TOKENS_THINKING)
+        else:
+            return await self.call_deepseek_api_with_tokens(model, messages, API_MAX_TOKENS_THINKING)
+    
     async def call_gemini_quick_api_with_tokens(self, model: str, messages: list, max_tokens: int) -> str:
         """调用Gemini Quick API（用于快速回答功能）"""
         try:
@@ -275,10 +294,22 @@ class LLMService:
             
             # 处理响应
             if response.choices and len(response.choices) > 0:
-                message = response.choices[0].message
+                choice = response.choices[0]
+                message = choice.message
+                
+                # 检查响应是否因为长度限制被截断
+                finish_reason = getattr(choice, 'finish_reason', None)
+                print(f"API响应完成原因: {finish_reason}")
+                
                 if message and message.content and message.content.strip():
                     optimized_prompt = message.content.strip()
                     print(f"Gemini Quick响应成功，内容长度: {len(optimized_prompt)}")
+                    
+                    # 如果是因为长度限制被截断，记录警告
+                    if finish_reason == 'length':
+                        print(f"警告：响应因达到max_tokens限制而被截断 (max_tokens: {max_tokens})")
+                        print(f"响应结尾50字符: ...{optimized_prompt[-50:]}")
+                    
                     return optimized_prompt
                 else:
                     print(f"Gemini Quick响应为空，模型: {model}")

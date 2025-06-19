@@ -634,9 +634,87 @@
     transform: translateY(-2px);
 }
 
+/* 多选模式支持 */
+.quick-option-btn.multi-selected {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    box-shadow: 
+        0 6px 20px rgba(16, 185, 129, 0.3),
+        0 3px 8px rgba(0, 0, 0, 0.1),
+        0 1px 0 rgba(255, 255, 255, 0.2) inset !important;
+    transform: translateY(-1px) !important;
+    position: relative;
+}
+
+.quick-option-btn.multi-selected::before {
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 100%) !important;
+}
+
+.quick-option-btn.multi-selected::after {
+    content: '✓';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    z-index: 3;
+}
+
+.quick-option-btn.multi-selected:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    box-shadow: 
+        0 8px 25px rgba(16, 185, 129, 0.4),
+        0 4px 10px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.3) inset !important;
+    transform: translateY(-2px) !important;
+}
+
+.quick-option-btn.multi-selected:active {
+    transform: translateY(-1px) scale(0.98) !important;
+    transition: transform 0.1s ease;
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
+}
+
+/* 字段支持多选时的提示样式 */
+.thinking-field[data-multi-select="true"] .thinking-field-label::after {
+    content: ' (可多选)';
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.thinking-field[data-multi-select="true"] .quick-options-container {
+    position: relative;
+}
+
+.thinking-field[data-multi-select="true"] .quick-options-container::before {
+    content: '💡 提示：可以选择多个选项';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 11px;
+    color: #6b7280;
+    font-style: italic;
+}
+
 .quick-option-btn:active {
     transform: translateY(0) scale(0.98);
     transition: transform 0.1s ease;
+}
+
+/* 确保多选按钮的优先级 */
+.quick-option-btn.multi-selected {
+    z-index: 1;
+}
+
+.quick-option-btn.multi-selected::after {
+    z-index: 2;
 }
 
 /* 快速选择按钮响应式布局 */

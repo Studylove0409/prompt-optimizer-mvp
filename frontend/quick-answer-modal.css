@@ -34,9 +34,9 @@
 /* 弹框容器 */
 .quick-answer-modal-container {
     position: relative;
-    width: 95%;
-    max-width: 1400px; /* 从900px扩展到1400px */
-    max-height: 90vh; /* 从85vh扩展到90vh */
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -117,28 +117,6 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    /* 优化滚动条样式 */
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e0 #f7fafc;
-}
-
-/* Webkit滚动条样式 */
-.quick-answer-modal-body::-webkit-scrollbar {
-    width: 8px;
-}
-
-.quick-answer-modal-body::-webkit-scrollbar-track {
-    background: #f7fafc;
-    border-radius: 4px;
-}
-
-.quick-answer-modal-body::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
-    border-radius: 4px;
-}
-
-.quick-answer-modal-body::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0;
 }
 
 /* 思维过程区域 */
@@ -147,17 +125,6 @@
     border-radius: 16px;
     padding: 24px;
     border: 2px solid #e8efff;
-    /* 使思维过程区域可折叠，为最终回答节省空间 */
-    flex-shrink: 0;
-    min-height: 160px; /* 确保有足够高度显示进度条 */
-    max-height: 220px; /* 稍微增加高度确保进度条可见 */
-    overflow: visible; /* 改为visible确保内容不被裁剪 */
-    transition: max-height 0.3s ease;
-}
-
-/* 思维过程展开状态 */
-.thinking-process-section.expanded {
-    max-height: 400px;
 }
 
 .thinking-process-header {
@@ -183,10 +150,7 @@
     border-radius: 12px;
     padding: 20px;
     border: 1px solid #e2e8f0;
-    min-height: 140px; /* 增加最小高度确保进度条可见 */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    min-height: 120px;
 }
 
 /* 思维加载状态 */
@@ -226,11 +190,11 @@
 .progress-container {
     width: 100%;
     max-width: 300px;
-    margin: 16px auto 0; /* 增加上边距，确保与上方元素有间距 */
+    margin: 0 auto;
     position: relative;
     background: #e2e8f0;
     border-radius: 12px;
-    height: 10px; /* 稍微增加高度使其更明显 */
+    height: 8px;
     overflow: hidden;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -246,13 +210,12 @@
 
 .progress-text {
     position: absolute;
-    top: 16px; /* 调整位置适应新的进度条高度 */
+    top: 15px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 12px; /* 稍微减小字体以适应紧凑布局 */
+    font-size: 14px;
     color: #667eea;
     font-weight: 600;
-    white-space: nowrap; /* 防止文字换行 */
 }
 
 /* 思维文本 */
@@ -270,11 +233,6 @@
     border-radius: 16px;
     padding: 24px;
     border: 2px solid #d1fae5;
-    /* 让最终回答区域占据更多空间 */
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 500px; /* 设置最小高度 */
 }
 
 .final-answer-header {
@@ -298,37 +256,13 @@
 .final-answer-content {
     background: white;
     border-radius: 12px;
-    padding: 24px; /* 增加内边距 */
+    padding: 20px;
     border: 1px solid #a7f3d0;
-    line-height: 1.7; /* 增加行距提升可读性 */
+    line-height: 1.6;
     color: #374151;
-    font-size: 16px; /* 增大字体 */
+    font-size: 15px;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    flex: 1; /* 占据剩余空间 */
-    overflow-y: auto; /* 添加垂直滚动 */
-    /* 优化滚动条样式 */
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e0 #f7fafc;
-}
-
-/* 最终回答内容滚动条样式 */
-.final-answer-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.final-answer-content::-webkit-scrollbar-track {
-    background: #f0fff4;
-    border-radius: 3px;
-}
-
-.final-answer-content::-webkit-scrollbar-thumb {
-    background: #a7f3d0;
-    border-radius: 3px;
-}
-
-.final-answer-content::-webkit-scrollbar-thumb:hover {
-    background: #6ee7b7;
 }
 
 /* Markdown格式化样式 */
@@ -610,9 +544,9 @@
 /* 响应式设计 */
 @media (max-width: 768px) {
     .quick-answer-modal-container {
-        width: 98%;
-        max-height: 95vh; /* 增加移动端高度 */
-        margin: 10px;
+        width: 95%;
+        max-height: 90vh;
+        margin: 20px;
     }
     
     .quick-answer-modal-header {
@@ -624,27 +558,16 @@
     }
     
     .quick-answer-modal-body {
-        padding: 20px; /* 减少移动端内边距 */
+        padding: 24px;
     }
     
-    .thinking-process-section {
-        padding: 16px;
-        min-height: 140px; /* 确保移动端也有足够高度 */
-        max-height: 180px; /* 增加移动端高度确保进度条可见 */
-    }
-    
+    .thinking-process-section,
     .final-answer-section {
-        padding: 16px;
-        min-height: 300px; /* 移动端减少最小高度但仍保持足够空间 */
-    }
-    
-    .final-answer-content {
-        font-size: 15px; /* 移动端稍微减小字体 */
-        padding: 16px;
+        padding: 20px;
     }
     
     .quick-answer-modal-footer {
-        padding: 16px 20px;
+        padding: 20px 24px;
     }
     
     .quick-answer-actions {
@@ -663,18 +586,8 @@
         width: 100%;
         height: 100%;
         max-height: 100vh;
-        border-radius: 0; /* 全屏时移除圆角 */
+        border-radius: 0;
         margin: 0;
-    }
-    
-    .final-answer-section {
-        min-height: 400px; /* 小屏幕上增加最小高度 */
-    }
-    
-    .final-answer-content {
-        font-size: 14px; /* 小屏幕进一步减小字体 */
-        line-height: 1.6;
-        padding: 12px;
     }
     
     .quick-answer-modal-header {
