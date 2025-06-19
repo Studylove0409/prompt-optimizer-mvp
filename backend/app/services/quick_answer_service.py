@@ -156,18 +156,35 @@ class QuickAnswerService:
             has_strong_ending = any(text_stripped.endswith(pattern) for pattern in [
                 '。', '！', '？', '.', '!', '?',  # 强结尾标点
                 '。\n', '！\n', '？\n', '.\n', '!\n', '?\n',  # 带换行的结尾
-                '总结', '总之', '综上所述', '最后', '结论', '概括'  # 结论性词汇
+                '总结', '总之', '综上所述', '最后', '结论', '概括',  # 结论性词汇
+                # 正式文档结尾
+                '此致', '敬礼', '谢谢', '感谢', '祝好', '再见',
+                # 商务邮件结尾
+                '祝您', '祝你', '祝愿', '期待', '联系方式', '日期',
+                # 签名结尾
+                '[您的名字', '[您的', '[姓名', '[公司', '[联系',
+                # 时间日期结尾
+                '年', '月', '日'
             ])
             
             # 检查最后几个句子是否完整
             sentences_in_last_200 = len([char for char in last_200 if char in '。！？.!?'])
             
+            # 检查最后500字符是否包含正式文档的结尾模式
+            last_500 = text_stripped[-500:]
+            has_formal_ending = any(pattern in last_500 for pattern in [
+                '此致', '敬礼', '祝您', '祝你', '谢谢', '感谢',
+                '[您的', '[姓名', '[公司', '[联系方式', '[日期',
+                '生意兴隆', '工作顺利', '身体健康', '万事如意'
+            ])
+            
             # 检查是否以不完整的方式结尾
             ends_abruptly = (
                 len(text_stripped) > 10 and
                 not has_strong_ending and
+                not has_formal_ending and  # 新增：检查正式文档结尾
                 not text_stripped[-1].isspace() and  # 不是以空格结尾
-                text_stripped[-1] not in ['，', ',', '；', ';', '：', ':', '、', ')', '。', '.', '！', '!', '？', '?']  # 不是以标点结尾
+                text_stripped[-1] not in ['，', ',', '；', ';', '：', ':', '、', ')', '。', '.', '！', '!', '？', '?', ']']  # 不是以标点结尾
             )
             
             # 额外检查：是否包含常见的未完成模式
@@ -185,6 +202,7 @@ class QuickAnswerService:
             if ends_abruptly or ends_with_incomplete_pattern:
                 print(f"警告：长文本可能被截断")
                 print(f"  - 强结尾: {has_strong_ending}")
+                print(f"  - 正式文档结尾: {has_formal_ending}")
                 print(f"  - 最后200字符句子数: {sentences_in_last_200}")
                 print(f"  - 以未完成模式结尾: {ends_with_incomplete_pattern}")
                 print(f"  - 最后100字符: {last_200[-100:]}")
@@ -224,13 +242,49 @@ class QuickAnswerService:
             # 调用LLM API (快速回答模式，使用50000 tokens支持长回答)
             max_tokens = 50000
             print(f"开始调用快速回答API，模型: {model}，max_tokens: {max_tokens}")
-            response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
             
-            # 使用更严格的截断检测进行重试判断（保留重试机制以防万一）
+            # 使用特殊的API调用来获取finish_reason
+            try:
+                if model == "gemini-2.5-flash-lite-preview-06-17":
+                    client = self.llm_service._create_gemini_quick_client()
+                    api_response = client.chat.completions.create(
+                        model=model,
+                        messages=messages,
+                        temperature=0.5,
+                        max_tokens=max_tokens
+                    )
+                    response = api_response.choices[0].message.content.strip()
+                    finish_reason = getattr(api_response.choices[0], 'finish_reason', None)
+                    print(f"API响应完成原因: {finish_reason}")
+                else:
+                    response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
+                    finish_reason = None
+            except Exception as e:
+                # 如果特殊调用失败，回退到原来的方法
+                print(f"特殊API调用失败，使用备用方法: {str(e)}")
+                response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
+                finish_reason = None
+            
+            # 使用更严格的截断检测进行重试判断
+            # 如果API正常结束(finish_reason='stop')且内容检测为完整，则不重试
             initial_truncated = self._check_if_truncated(response)
-            if initial_truncated and max_tokens < 65000:
+            api_finished_normally = (finish_reason == 'stop')
+            
+            should_retry = (
+                initial_truncated and 
+                max_tokens < 65000 and 
+                not api_finished_normally  # 新增：API正常结束时不重试
+            )
+            
+            if should_retry:
                 print("初始响应被检测为截断，尝试使用更高token限制重新生成...")
                 max_tokens = 65000  # 进一步增加token限制
+            elif initial_truncated and api_finished_normally:
+                print("内容检测为截断，但API正常结束(finish_reason=stop)，跳过重试")
+            elif not initial_truncated:
+                print("内容检测为完整，无需重试")
+            
+            if should_retry:
                 try:
                     retry_response = await self.llm_service.call_llm_api_with_custom_tokens(model, messages, max_tokens=max_tokens)
                     print(f"重试完成，新响应长度: {len(retry_response)} 字符")
