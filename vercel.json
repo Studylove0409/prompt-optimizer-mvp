@@ -99,7 +99,18 @@
       "src": "/thinking-cascading.js",
       "dest": "frontend/thinking-cascading.js"
     },
-
+    {
+      "src": "/quick-answer.js",
+      "dest": "frontend/quick-answer.js"
+    },
+    {
+      "src": "/quick-answer-modal.css",
+      "dest": "frontend/quick-answer-modal.css"
+    },
+    {
+      "src": "/alert-styles.css",
+      "dest": "frontend/alert-styles.css"
+    },
     {
       "src": "/particles.js",
       "dest": "frontend/particles.js"

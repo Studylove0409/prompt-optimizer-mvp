@@ -407,3 +407,25 @@ window.addEventListener('beforeunload', () => {
         window.particleSystem.destroy();
     }
 });
+
+// 粒子数量由50降到20
+const PARTICLE_COUNT = 20;
+
+// 在动画主循环前加上可见性检测
+let animationId = null;
+function animateParticles() {
+    if (document.hidden) return; // 页面不可见时不绘制
+    // ... existing code ...
+    animationId = requestAnimationFrame(animateParticles);
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (animationId) cancelAnimationFrame(animationId);
+    } else {
+        animateParticles();
+    }
+});
+
+// 初始化时启动动画
+animateParticles();

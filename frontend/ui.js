@@ -272,24 +272,66 @@ function addModelCardEffects() {
     });
 }
 
+// 显示模式切换反馈
+function showModeSelectionFeedback(mode) {
+    console.log('showModeSelectionFeedback called with mode:', mode);
+    
+    const feedbackMessages = {
+        'general': '您已选择通用模式，快速优化您的提示词',
+        'business': '您已选择商业模式，专业商务场景优化',
+        'drawing': '您已选择绘画模式，创意画面描述优化',
+        'academic': '您已选择论文模式，学术规范表达优化',
+        'thinking': '您已选择思考模式，分析我的需求'
+    };
+    
+    const message = feedbackMessages[mode] || '模式已切换';
+    const alertType = mode === 'thinking' ? 'info' : 'success';
+    
+    console.log('Feedback message:', message, 'Type:', alertType);
+    console.log('showCustomAlert function available:', typeof showCustomAlert === 'function');
+    
+    // 使用现有的提示函数显示反馈
+    if (typeof showCustomAlert === 'function') {
+        showCustomAlert(message, alertType, 2500);
+    } else {
+        // 备用方案，如果showCustomAlert不可用
+        console.warn('showCustomAlert function not available, using alert fallback');
+        alert(message);
+    }
+}
+
 // 初始化模式选择功能
 function initModeSelection() {
+    console.log('Initializing mode selection...');
     const modeBtns = document.querySelectorAll('.mode-btn');
     const modeSelect = document.getElementById('modeSelect');
+    
+    console.log('Found mode buttons:', modeBtns.length);
+    console.log('Found mode select dropdown:', !!modeSelect);
 
     // 按钮模式选择
     modeBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // 移除所有按钮的active类
-            modeBtns.forEach(b => b.classList.remove('active'));
-            // 添加当前按钮的active类
-            btn.classList.add('active');
+            const newMode = btn.dataset.mode;
+            const currentActiveBtn = document.querySelector('.mode-btn.active');
+            const currentMode = currentActiveBtn ? currentActiveBtn.dataset.mode : null;
             
-            // 同步下拉框的值
-            if (modeSelect) {
-                modeSelect.value = btn.dataset.mode;
-                // 同时更新下拉框的data-selected属性
-                modeSelect.setAttribute('data-selected', btn.dataset.mode);
+            // 只有当模式确实发生变化时才显示反馈
+            if (newMode !== currentMode) {
+                // 移除所有按钮的active类
+                modeBtns.forEach(b => b.classList.remove('active'));
+                // 添加当前按钮的active类
+                btn.classList.add('active');
+                
+                // 同步下拉框的值
+                if (modeSelect) {
+                    modeSelect.value = btn.dataset.mode;
+                    // 同时更新下拉框的data-selected属性
+                    modeSelect.setAttribute('data-selected', btn.dataset.mode);
+                }
+                
+                // 显示模式切换反馈
+                showModeSelectionFeedback(newMode);
             }
         });
     });
@@ -298,18 +340,26 @@ function initModeSelection() {
     if (modeSelect) {
         modeSelect.addEventListener('change', (e) => {
             const selectedMode = e.target.value;
+            const currentActiveBtn = document.querySelector('.mode-btn.active');
+            const currentMode = currentActiveBtn ? currentActiveBtn.dataset.mode : null;
             
-            // 移除所有按钮的active类
-            modeBtns.forEach(btn => btn.classList.remove('active'));
-            
-            // 找到对应的按钮并添加active类
-            const targetBtn = document.querySelector(`[data-mode="${selectedMode}"]`);
-            if (targetBtn) {
-                targetBtn.classList.add('active');
+            // 只有当模式确实发生变化时才显示反馈
+            if (selectedMode !== currentMode) {
+                // 移除所有按钮的active类
+                modeBtns.forEach(btn => btn.classList.remove('active'));
+                
+                // 找到对应的按钮并添加active类
+                const targetBtn = document.querySelector(`[data-mode="${selectedMode}"]`);
+                if (targetBtn) {
+                    targetBtn.classList.add('active');
+                }
+                
+                // 为下拉框设置选中模式的数据属性，用于特殊样式
+                modeSelect.setAttribute('data-selected', selectedMode);
+                
+                // 显示模式切换反馈
+                showModeSelectionFeedback(selectedMode);
             }
-            
-            // 为下拉框设置选中模式的数据属性，用于特殊样式
-            modeSelect.setAttribute('data-selected', selectedMode);
         });
         
         // 初始化时也设置默认选中的模式
@@ -1389,3 +1439,5 @@ window.hideThinkingForm = hideThinkingForm;
 window.addCustomInfoField = addCustomInfoField;
 window.removeCustomInfoField = removeCustomInfoField;
 window.findFieldOptions = findFieldOptions;
+window.showModeSelectionFeedback = showModeSelectionFeedback;
+window.initUI = initUI;

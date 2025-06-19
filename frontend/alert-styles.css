@@ -1,0 +1,78 @@
+/* 自定义提示框样式 */
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #007AFF;
+    padding: 16px;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.custom-alert.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.custom-alert.success {
+    border-left-color: #34C759;
+}
+
+.custom-alert.error {
+    border-left-color: #FF3B30;
+}
+
+.custom-alert.warning {
+    border-left-color: #FF9500;
+}
+
+.custom-alert.info {
+    border-left-color: #007AFF;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.alert-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.alert-message {
+    flex: 1;
+    font-weight: 500;
+    color: #1D1D1F;
+}
+
+.alert-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #86868B;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.alert-close:hover {
+    background: #F2F2F7;
+    color: #424245;
+}

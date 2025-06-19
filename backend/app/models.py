@@ -74,3 +74,17 @@ class QuickOptionsResponse(BaseModel):
     options: list[str] = Field(..., description="生成的快速选择选项")
     field_key: str
     question: str
+
+
+class QuickAnswerRequest(BaseModel):
+    """快速回答请求模型"""
+    prompt: str = Field(..., max_length=5000, description="优化后的提示词")
+    model: str = "gemini-2.5-pro-preview-03-25"
+
+
+class QuickAnswerResponse(BaseModel):
+    """快速回答响应模型"""
+    thinking_process: str = Field(..., description="AI的思维过程")
+    final_answer: str = Field(..., description="最终回答")
+    model_used: str = Field(..., description="使用的模型")
+    success: bool = True

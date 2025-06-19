@@ -422,12 +422,28 @@ async function optimizeThinkingPrompt(originalPrompt, additionalInfo, model) {
     });
 }
 
+// 快速回答API调用
+async function generateQuickAnswerAPI(prompt, model = 'gemini-2.5-flash-preview-05-20') {
+    const requestBody = {
+        prompt: prompt,
+        model: model
+    };
+
+    console.log('发送快速回答请求:', requestBody);
+
+    return await apiCall('/quick-answer/', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+    });
+}
+
 // 导出函数到全局作用域
 window.optimizePrompt = optimizePrompt;
 window.quickOptimizePrompt = quickOptimizePrompt;
 window.analyzeThinkingPrompt = analyzeThinkingPrompt;
 window.optimizeThinkingPrompt = optimizeThinkingPrompt;
 window.generateQuickOptions = generateQuickOptions;
+window.generateQuickAnswerAPI = generateQuickAnswerAPI;
 window.copyToClipboard = copyToClipboard;
 window.clearAll = clearAll;
 window.showLoading = showLoading;

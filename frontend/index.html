@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="history-modal.css">
     <link rel="stylesheet" href="user-dropdown.css">
     <link rel="stylesheet" href="profile-modal.css">
+    <link rel="stylesheet" href="alert-styles.css">
+    <link rel="stylesheet" href="quick-answer-modal.css">
     <!-- 性能优化CSS -->
     <link rel="stylesheet" href="performance-optimizations.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,6 +25,16 @@
     
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Markdown解析库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    
+    <!-- 代码高亮库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    
+    <!-- 文档生成库 -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
     <!-- Vercel Analytics -->
     <script>
@@ -312,6 +324,10 @@
                             <button id="clearBtn" class="action-button secondary">
                                 <span class="button-icon">🗑️</span>
                                 <span class="button-text">清空重置</span>
+                            </button>
+                            <button id="quickAnswerBtn" class="action-button special">
+                                <span class="button-icon">🧠</span>
+                                <span class="button-text">快速回答</span>
                             </button>
                         </div>
                     </div>
@@ -906,6 +922,82 @@
         </div>
     </div>
 
+    <!-- 快速回答弹框 -->
+    <div class="quick-answer-modal" id="quickAnswerModal" style="display: none;">
+        <div class="quick-answer-modal-backdrop"></div>
+        <div class="quick-answer-modal-container">
+            <div class="quick-answer-modal-header">
+                <div class="quick-answer-modal-title">
+                    <span class="quick-answer-icon">💭</span>
+                    <h2>AI深度思考回答</h2>
+                </div>
+                <p class="quick-answer-modal-subtitle">基于您优化的提示词生成深度回答</p>
+                <button class="quick-answer-modal-close" id="closeQuickAnswerModal" type="button">×</button>
+            </div>
+            
+            <div class="quick-answer-modal-body">
+                <!-- 思维过程展示区 -->
+                <div class="thinking-process-section" id="thinkingProcessSection">
+                    <div class="thinking-process-header">
+                        <span class="thinking-process-icon">🤔</span>
+                        <h3>AI思维过程</h3>
+                    </div>
+                    <div class="thinking-process-content" id="thinkingProcessContent">
+                        <div class="thinking-loading" id="thinkingLoading">
+                            <div class="thinking-spinner"></div>
+                            <p id="thinkingMessage">AI正在深度思考中...</p>
+                            <!-- 进度条 -->
+                            <div class="progress-container" id="progressContainer">
+                                <div class="progress-bar" id="progressBar"></div>
+                                <div class="progress-text" id="progressText">0%</div>
+                            </div>
+                        </div>
+                        <div class="thinking-text" id="thinkingText" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- 最终答案展示区 -->
+                <div class="final-answer-section" id="finalAnswerSection" style="display: none;">
+                    <div class="final-answer-header">
+                        <span class="final-answer-icon">✨</span>
+                        <h3>最终回答</h3>
+                    </div>
+                    <div class="final-answer-content" id="finalAnswerContent">
+                        <!-- 最终答案将在这里显示 -->
+                    </div>
+                </div>
+                
+                <!-- 错误状态显示 -->
+                <div class="quick-answer-error" id="quickAnswerError" style="display: none;">
+                    <div class="error-icon">❌</div>
+                    <h3>生成失败</h3>
+                    <p id="quickAnswerErrorMessage">抱歉，AI回答生成失败，请稍后重试</p>
+                </div>
+            </div>
+            
+            <div class="quick-answer-modal-footer">
+                <div class="quick-answer-actions">
+                    <button id="downloadAnswerBtn" class="action-button special" style="display: none;">
+                        <span class="button-icon">📄</span>
+                        <span class="button-text">下载文档</span>
+                    </button>
+                    <button id="copyAnswerBtn" class="action-button primary" style="display: none;">
+                        <span class="button-icon">📋</span>
+                        <span class="button-text">复制回答</span>
+                    </button>
+                    <button id="regenerateAnswerBtn" class="action-button secondary" style="display: none;">
+                        <span class="button-icon">🔄</span>
+                        <span class="button-text">重新生成</span>
+                    </button>
+                    <button id="closeAnswerModalBtn" class="action-button tertiary">
+                        <span class="button-icon">❌</span>
+                        <span class="button-text">关闭</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
    
 
 
@@ -920,10 +1012,10 @@
     <script src="api.js?v=2"></script>
     <script src="auth.js"></script>
     <script src="ui.js?v=14"></script>
-    <script src="modals.js"></script>
     <script src="history.js"></script>
     <script src="user-dropdown.js"></script>
     <script src="profile-modal.js"></script>
+    <script src="quick-answer.js"></script>
 
     <script src="script.js"></script>
     <script src="particles.js"></script>
