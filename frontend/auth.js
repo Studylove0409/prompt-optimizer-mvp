@@ -530,13 +530,52 @@ async function proceedWithRegistration(e, email, password) {
     }
 
     try {
-        const { error } = await window.supabaseClient.auth.signUp({
+        // 先检查邮箱是否已存在
+        console.log('开始检查邮箱是否已存在:', email);
+        
+        // 获取正确的API基础URL
+        const API_BASE_URL = (() => {
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const isFileProtocol = window.location.protocol === 'file:';
+            
+            if (isLocalhost || isFileProtocol) {
+                return 'http://localhost:8000/api';
+            } else {
+                return '/api';
+            }
+        })();
+        
+        const emailCheckResponse = await fetch(`${API_BASE_URL}/check-email?email=${encodeURIComponent(email)}`);
+        
+        if (emailCheckResponse.ok) {
+            const emailCheckResult = await emailCheckResponse.json();
+            console.log('邮箱检查结果:', emailCheckResult);
+            
+            // 如果邮箱已存在，直接提示用户登录
+            if (emailCheckResult.exists) {
+                showCustomAlert('该邮箱已被注册，请直接登录', 'warning');
+                return;
+            }
+        } else {
+            console.warn('邮箱检查失败，继续正常注册流程');
+        }
+
+        // 如果邮箱不存在或检查失败，继续正常注册流程
+        console.log('开始Supabase注册流程');
+        const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password
         });
 
+        console.log('注册结果:', { data, error });
+
         if (error) {
             throw error;
+        }
+
+        // 检查注册是否真的成功 - 如果用户已存在，Supabase可能返回成功但user为null
+        if (!data.user) {
+            throw new Error('该邮箱可能已被注册，请直接登录或使用其他邮箱');
         }
 
         // 显示注册成功界面
@@ -547,12 +586,32 @@ async function proceedWithRegistration(e, email, password) {
 
     } catch (error) {
         console.error('注册失败:', error);
+        console.error('错误详情:', {
+            message: error.message,
+            code: error.code,
+            status: error.status
+        });
+        
         let errorMessage = '注册失败，请重试';
 
-        if (error.message.includes('User already registered')) {
+        // 检查各种可能的用户已存在错误
+        if (error.message.includes('User already registered') || 
+            error.message.includes('already registered') ||
+            error.message.includes('already exists') ||
+            error.message.includes('already been taken') ||
+            error.message.includes('email address is already registered') ||
+            error.message.includes('email already exists') ||
+            error.message.includes('duplicate') ||
+            error.code === 'user_already_exists' ||
+            error.code === 'email_already_exists' ||
+            error.code === 'signup_disabled' ||
+            error.status === 422 ||
+            error.status === 409) {
             errorMessage = '该邮箱已被注册，请使用其他邮箱或直接登录';
         } else if (error.message.includes('Password should be at least 6 characters')) {
             errorMessage = '密码长度至少为6位';
+        } else if (error.message.includes('Invalid email')) {
+            errorMessage = '邮箱格式不正确';
         }
 
         showCustomAlert(errorMessage, 'error');

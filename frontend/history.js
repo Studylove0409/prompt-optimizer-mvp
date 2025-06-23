@@ -260,13 +260,13 @@ class HistoryManager {
     }
 
     getBaseUrl() {
-        // 检查当前是否在开发环境中
-        if (window.location.protocol === 'file:') {
-            // 如果是直接打开的HTML文件，使用localhost
+        // 与 api.js 保持一致的环境检测逻辑
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const isFileProtocol = window.location.protocol === 'file:';
+
+        if (isLocalhost || isFileProtocol) {
+            // 本地开发环境，后端运行在8000端口
             return 'http://localhost:8000';
-        } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // 如果是本地开发环境
-            return `${window.location.protocol}//${window.location.host}`;
         } else {
             // 生产环境，使用当前域名
             return `${window.location.protocol}//${window.location.host}`;

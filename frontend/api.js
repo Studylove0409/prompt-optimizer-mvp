@@ -145,7 +145,7 @@ async function optimizePrompt() {
     try {
         const data = await optimizePromptAPI(originalPrompt, selectedModel, selectedMode);
 
-        // 显示结果
+        // 显示结果（默认会滚动）
         showResult(data.optimized_prompt, data.model_used);
 
         // 显示成功提示
@@ -192,7 +192,7 @@ async function quickOptimizePrompt() {
     try {
         const data = await optimizePromptAPI(originalPrompt, quickModel, selectedMode);
 
-        // 显示结果
+        // 显示结果（默认会滚动）
         showResult(data.optimized_prompt, data.model_used);
 
         // 显示成功提示（标明是快速优化）
@@ -215,15 +215,25 @@ async function quickOptimizePrompt() {
 function showLoading() {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const optimizeBtn = document.getElementById('optimizeBtn');
+    const originalPromptTextarea = document.getElementById('originalPrompt');
     
     // 使用紧凑型加载指示器
     if (loadingIndicator) {
         loadingIndicator.style.display = 'block';
     }
     
-    // 禁用优化按钮
+    // 禁用优化按钮但保持可视
     if (optimizeBtn) {
         optimizeBtn.disabled = true;
+        optimizeBtn.style.opacity = '0.6';
+    }
+    
+    // 保持输入框焦点，让用户知道可以继续编辑
+    if (originalPromptTextarea) {
+        // 短暂延迟后重新聚焦，避免与按钮点击冲突
+        setTimeout(() => {
+            originalPromptTextarea.focus();
+        }, 100);
     }
 }
 
@@ -240,11 +250,12 @@ function hideLoading() {
     // 恢复按钮状态
     if (optimizeBtn) {
         optimizeBtn.disabled = false;
+        optimizeBtn.style.opacity = '1';
     }
 }
 
 // 显示结果
-function showResult(optimizedPrompt, modelUsed) {
+function showResult(optimizedPrompt, modelUsed, shouldScroll = true) {
     const optimizedPromptDiv = document.getElementById('optimizedPrompt');
     const modelUsedDiv = document.getElementById('modelUsed');
     const outputSection = document.getElementById('outputSection');
@@ -260,11 +271,16 @@ function showResult(optimizedPrompt, modelUsed) {
     if (outputSection) {
         outputSection.style.display = 'block';
 
-        // 滚动到结果区域
-        outputSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
+        // 只有在明确指定要滚动时才滚动到结果区域
+        if (shouldScroll) {
+            // 延迟滚动，让用户看到生成完成的提示
+            setTimeout(() => {
+                outputSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 800); // 延迟800ms后再滚动
+        }
     }
 }
 

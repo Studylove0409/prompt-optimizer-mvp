@@ -253,3 +253,50 @@ class SupabaseService:
         except Exception as e:
             print(f"获取用户订阅信息失败: {e}")
             return {}
+
+    async def check_email_exists(self, email: str) -> dict:
+        """检查邮箱是否已存在，返回详细信息"""
+        try:
+            # 方法1：尝试调用数据库RPC函数来检查（如果有管理员权限）
+            try:
+                result = self.client.rpc('check_user_email_exists', {'email_to_check': email}).execute()
+                if result.data is not None:
+                    exists = bool(result.data)
+                    return {
+                        'exists': exists,
+                        'method': 'rpc_function',
+                        'confidence': 'high',
+                        'message': '邮箱已存在' if exists else '邮箱可用'
+                    }
+            except Exception as rpc_error:
+                error_details = str(rpc_error)
+                if 'Could not find the function' in error_details:
+                    # RPC函数不存在，这是正常的
+                    pass
+                else:
+                    print(f"RPC调用失败: {rpc_error}")
+            
+            # 方法2：实际的解决方案 - 告知前端无法准确检查
+            # 在生产环境中，最佳实践是不暴露用户存在性信息
+            # 让Supabase在实际注册时处理重复邮箱的情况
+            
+            print(f"由于安全限制，无法预先检查邮箱 {email} 是否存在")
+            
+            # 返回一个通用响应，建议用户直接尝试注册
+            return {
+                'exists': False,  # 默认返回不存在，让用户继续注册流程
+                'method': 'security_policy',
+                'confidence': 'low',
+                'message': '邮箱状态未知，请继续注册流程。如果邮箱已存在，系统会在注册时提示。',
+                'note': '由于安全考虑，我们无法预先验证邮箱是否存在。'
+            }
+            
+        except Exception as e:
+            print(f"检查邮箱是否存在时发生错误: {e}")
+            return {
+                'exists': False,
+                'method': 'error_fallback',
+                'confidence': 'low',
+                'message': '无法检查邮箱状态，请继续注册流程',
+                'error': str(e)
+            }

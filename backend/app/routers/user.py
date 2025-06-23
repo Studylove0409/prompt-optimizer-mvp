@@ -1,15 +1,52 @@
 """
 用户相关路由
 """
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from ..config import get_settings, Settings
 from ..auth import get_current_user, User
 from ..services.supabase_service import SupabaseService
 
 router = APIRouter(prefix="/api", tags=["user"])
+
+
+@router.get("/check-email")
+async def check_email_exists(
+    email: str = Query(..., description="要检查的邮箱地址"),
+    settings: Settings = Depends(get_settings)
+) -> Dict[str, Any]:
+    """检查邮箱是否已存在"""
+    try:
+        # 验证邮箱格式
+        if not email or "@" not in email:
+            raise HTTPException(
+                status_code=400,
+                detail="请提供有效的邮箱地址"
+            )
+        
+        # 标准化邮箱地址
+        normalized_email = email.lower().strip()
+        
+        supabase_service = SupabaseService(settings)
+        result = await supabase_service.check_email_exists(normalized_email)
+        
+        # 添加邮箱地址到结果中
+        result["email"] = normalized_email
+        
+        return result
+        
+    except HTTPException:
+        # 重新抛出HTTP异常
+        raise
+    except Exception as e:
+        # 处理其他异常
+        print(f"检查邮箱时发生错误: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="检查邮箱时发生内部错误"
+        )
 
 
 # Pydantic模型定义

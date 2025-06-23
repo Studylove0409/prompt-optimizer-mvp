@@ -102,7 +102,7 @@
                                         <span>个人资料</span>
                                     </a>
 
-                                    <a href="#" class="dropdown-item" id="settingsButton">
+                                    <a href="#" class="dropdown-item" id="settingsButton" style="display: none;">
                                         <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                                             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
                                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/>
@@ -185,9 +185,9 @@
                                             <span class="mode-icon">🌟</span>
                                             <span class="mode-name">通用</span>
                                         </button>
-                                        <button class="mode-btn" data-mode="business">
-                                            <span class="mode-icon">💼</span>
-                                            <span class="mode-name">商业</span>
+                                        <button class="mode-btn" data-mode="thinking">
+                                            <span class="mode-icon">🧠</span>
+                                            <span class="mode-name">思考</span>
                                         </button>
                                         <button class="mode-btn" data-mode="drawing">
                                             <span class="mode-icon">🎨</span>
@@ -197,19 +197,19 @@
                                             <span class="mode-icon">📚</span>
                                             <span class="mode-name">论文</span>
                                         </button>
-                                        <button class="mode-btn" data-mode="thinking">
-                                            <span class="mode-icon">🧠</span>
-                                            <span class="mode-name">思考</span>
+                                        <button class="mode-btn" data-mode="business">
+                                            <span class="mode-icon">💼</span>
+                                            <span class="mode-name">商业</span>
                                         </button>
                                     </div>
                                     <!-- 手机端下拉框 -->
                                     <div class="mode-select-container">
                                         <select class="mode-select" id="modeSelect">
                                             <option value="general" selected>🌟 通用</option>
-                                            <option value="business">💼 商业</option>
+                                            <option value="thinking">🧠 思考</option>
                                             <option value="drawing">🎨 绘画</option>
                                             <option value="academic">📚 论文</option>
-                                            <option value="thinking">🧠 思考</option>
+                                            <option value="business">💼 商业</option>
                                         </select>
                                         <span class="mode-select-icon">▼</span>
                                     </div>
@@ -571,7 +571,7 @@
                                 <span class="checkmark"></span>
                                 记住我
                             </label>
-                            <a href="#" class="forgot-password">忘记密码？</a>
+                            <a href="#" class="forgot-password" style="display: none;">忘记密码？</a>
                         </div>
 
                         <button type="submit" class="auth-submit-btn">
@@ -1009,6 +1009,22 @@
 
     
     <script src="utils.js"></script>
+    
+    <!-- Supabase 客户端初始化 -->
+    <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://njzvtxlieysctiapnpsx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qenZ0eGxpZXlzY3RpYXBucHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk1Mzc0OTEsImV4cCI6MjA2NTExMzQ5MX0.uECZbzE72n1rxoQRhPXe4GfdLfXgaJ853T6dh_ezL7M';
+        
+        // 初始化 Supabase 客户端
+        window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // 触发 Supabase 准备就绪事件
+        window.dispatchEvent(new CustomEvent('supabaseReady'));
+        
+        console.log('Supabase 客户端已初始化');
+    </script>
+    
     <script src="api.js?v=2"></script>
     <script src="auth.js"></script>
     <script src="ui.js?v=14"></script>

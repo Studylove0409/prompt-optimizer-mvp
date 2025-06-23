@@ -72,13 +72,8 @@ function bindEventListeners() {
             optimizeBtn.classList.remove('pulse-hint');
             addButtonAnimation(optimizeBtn);
 
-            // 检查是否是思考模式
-            const selectedMode = getSelectedMode();
-            if (selectedMode === 'thinking') {
-                handleThinkingMode();
-            } else {
-                optimizePrompt();
-            }
+            // 使用防抖的优化函数
+            debouncedOptimizePrompt();
         });
     }
 
@@ -112,6 +107,48 @@ function bindEventListeners() {
     initEmailCopyEvent();
 }
 
+// 防抖函数实现
+function debounce(func, wait, immediate = false) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            timeout = null;
+            if (!immediate) func.apply(this, args);
+        };
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(this, args);
+    };
+}
+
+// 防抖的优化函数
+const debouncedOptimizePrompt = debounce(() => {
+    const selectedMode = getSelectedMode();
+    if (selectedMode === 'thinking') {
+        handleThinkingMode();
+    } else {
+        optimizePrompt();
+    }
+}, 1500); // 1.5秒防抖延迟
+
+// 防抖的快速优化函数
+const debouncedQuickOptimizePrompt = debounce(() => {
+    const selectedMode = getSelectedMode();
+    if (selectedMode === 'thinking') {
+        handleThinkingMode();
+    } else {
+        quickOptimizePrompt();
+    }
+}, 1000); // 1秒防抖延迟
+
+// 防抖提示函数
+function showDebounceHint(delay) {
+    if (typeof showCustomAlert === 'function') {
+        showCustomAlert(`⏳ 为避免频繁请求，将在 ${delay/1000} 秒后执行优化`, 'info', 2000);
+    }
+}
+
 // 处理键盘事件
 function handleKeyboardEvents(e) {
     // Ctrl + Enter: 快速优化 (使用Gemini Flash模型)
@@ -122,13 +159,8 @@ function handleKeyboardEvents(e) {
             addButtonAnimation(optimizeBtn);
         }
 
-        // 检查是否是思考模式
-        const selectedMode = getSelectedMode();
-        if (selectedMode === 'thinking') {
-            handleThinkingMode();
-        } else {
-            quickOptimizePrompt();
-        }
+        // 使用防抖的快速优化
+        debouncedQuickOptimizePrompt();
     }
     // Enter: 根据当前模式选择相应的处理方式
     else if (e.key === 'Enter' && !e.shiftKey) {
@@ -138,13 +170,8 @@ function handleKeyboardEvents(e) {
             addButtonAnimation(optimizeBtn);
         }
 
-        // 检查是否是思考模式
-        const selectedMode = getSelectedMode();
-        if (selectedMode === 'thinking') {
-            handleThinkingMode();
-        } else {
-            optimizePrompt();
-        }
+        // 使用防抖的普通优化
+        debouncedOptimizePrompt();
     }
     // Shift + Enter: 换行 (默认行为)
 }
@@ -748,8 +775,19 @@ function findFieldOptions(fieldKey, fieldQuestion = '') {
     return ["请选择", "基础水平", "中等水平", "高级水平", "专家水平", "其他"];
 }
 
+// 防抖的AI选项生成函数
+const debouncedGenerateOptionsForField = debounce((item, index, retryCount = 0) => {
+    generateOptionsForFieldOriginal(item, index, retryCount);
+}, 2000); // 2秒防抖延迟
+
 // 使用Gemini API为特定字段生成快速选择选项（带重试机制）
 async function generateOptionsForField(item, index, retryCount = 0) {
+    // 使用防抖版本
+    debouncedGenerateOptionsForField(item, index, retryCount);
+}
+
+// 原始的选项生成函数（重命名）
+async function generateOptionsForFieldOriginal(item, index, retryCount = 0) {
     const maxRetries = 2;
     
     try {
@@ -783,7 +821,7 @@ async function generateOptionsForField(item, index, retryCount = 0) {
             console.log(`⏰ 速率限制，${delay/1000}秒后重试字段 "${item.key}"`);
             
             setTimeout(() => {
-                generateOptionsForField(item, index, retryCount + 1);
+                generateOptionsForFieldOriginal(item, index, retryCount + 1);
             }, delay);
             return;
         }
@@ -804,8 +842,19 @@ async function generateOptionsForField(item, index, retryCount = 0) {
     }
 }
 
+// 防抖的增强版选项生成函数
+const debouncedGenerateOptionsForFieldEnhanced = debounce((item, index, retryCount = 0) => {
+    generateOptionsForFieldEnhancedOriginal(item, index, retryCount);
+}, 3000); // 3秒防抖延迟，避免频繁调用
+
 // 增强版选项生成（后台静默升级）
 async function generateOptionsForFieldEnhanced(item, index, retryCount = 0) {
+    // 使用防抖版本
+    debouncedGenerateOptionsForFieldEnhanced(item, index, retryCount);
+}
+
+// 原始的增强版选项生成函数
+async function generateOptionsForFieldEnhancedOriginal(item, index, retryCount = 0) {
     const maxRetries = 1; // 减少重试次数，避免过多API调用
     
     try {
@@ -861,7 +910,7 @@ async function generateOptionsForFieldEnhanced(item, index, retryCount = 0) {
             console.log(`⏰ 速率限制，${delay/1000}秒后重试字段 "${item.key}"`);
             
             setTimeout(() => {
-                generateOptionsForFieldEnhanced(item, index, retryCount + 1);
+                generateOptionsForFieldEnhancedOriginal(item, index, retryCount + 1);
             }, delay);
         }
         
