@@ -362,7 +362,7 @@ function initModeSelection() {
         });
         
         // 初始化时也设置默认选中的模式
-        const initialMode = modeSelect.value || 'general';
+        const initialMode = modeSelect.value || 'thinking';
         modeSelect.setAttribute('data-selected', initialMode);
     }
 }
