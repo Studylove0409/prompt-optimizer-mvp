@@ -1,0 +1,361 @@
+/* 支持我们弹框样式 */
+.support-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.support-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.3);
+    animation: slideUp 0.3s ease-out;
+}
+
+.support-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 28px 16px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+    border-radius: 20px 20px 0 0;
+}
+
+.support-icon {
+    font-size: 28px;
+    animation: heartBeat 2s ease-in-out infinite;
+}
+
+.support-modal-header h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.close-modal {
+    font-size: 28px;
+    color: #64748b;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    background: rgba(248, 113, 113, 0.1);
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+.support-modal-body {
+    padding: 28px;
+}
+
+.support-content-box {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.support-welcome {
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 20px;
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.support-item {
+    margin: 16px 0;
+    color: #475569;
+    line-height: 1.6;
+    font-size: 15px;
+    padding: 12px 16px;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.support-ways {
+    margin-top: 32px;
+}
+
+.support-ways h3 {
+    color: #1e293b;
+    font-size: 20px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.support-way {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.3s ease;
+}
+
+.support-way:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.support-way-icon {
+    font-size: 24px;
+    margin-right: 16px;
+    margin-top: 4px;
+    min-width: 32px;
+    text-align: center;
+}
+
+.support-way-content h4 {
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.support-way-content p {
+    margin: 0 0 12px 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.donation-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.donation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.donation-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.donation-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.donation-btn:hover::before {
+    left: 100%;
+}
+
+.btn-icon {
+    font-size: 16px;
+}
+
+/* 咖啡按钮 */
+.coffee-btn {
+    background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.coffee-btn:hover {
+    box-shadow: 0 8px 20px rgba(139, 69, 19, 0.4);
+}
+
+/* 服务器按钮 */
+.server-btn {
+    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.server-btn:hover {
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+}
+
+/* 共创者按钮 */
+.creator-btn {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    color: #333 !important;
+}
+
+.creator-btn:hover {
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+
+.support-footer {
+    margin-top: 24px;
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    font-size: 15px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.support-modal-footer {
+    padding: 20px 28px 28px;
+    text-align: center;
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 0 0 20px 20px;
+}
+
+.support-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.support-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, -40%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.05); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .support-modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .support-modal-header {
+        padding: 20px 24px 16px;
+    }
+    
+    .support-modal-header h2 {
+        font-size: 20px;
+    }
+    
+    .support-modal-body {
+        padding: 20px;
+    }
+    
+    .support-content-box {
+        padding: 20px;
+    }
+    
+    .support-way {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px;
+    }
+    
+    .support-way-icon {
+        margin: 0 0 12px 0;
+        font-size: 28px;
+    }
+    
+    .donation-buttons {
+        justify-content: center;
+    }
+    
+    .donation-btn {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .support-modal-content {
+        width: 98%;
+        max-height: 95vh;
+    }
+    
+    .support-way {
+        margin-bottom: 16px;
+    }
+    
+    .support-ways h3 {
+        font-size: 18px;
+    }
+}

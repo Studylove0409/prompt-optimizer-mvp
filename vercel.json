@@ -60,6 +60,10 @@
       "dest": "frontend/thinking-cascading-modal.css"
     },
     {
+      "src": "/support-modal.css",
+      "dest": "frontend/support-modal.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },

@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="profile-modal.css">
     <link rel="stylesheet" href="alert-styles.css">
     <link rel="stylesheet" href="quick-answer-modal.css">
+    <link rel="stylesheet" href="support-modal.css">
     <!-- 性能优化CSS -->
     <link rel="stylesheet" href="performance-optimizations.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,6 +61,7 @@
                     <a href="#" class="nav-link" id="helpLink">帮助</a>
                     <a href="#" class="nav-link" id="businessLink">问题反馈</a>
                     <a href="#" class="nav-link" id="announcementLink">公告</a>
+                    <a href="#" class="nav-link" id="supportLink">支持我们</a>
                     <!-- 用户认证按钮 -->
                     <div class="auth-section" id="authSection">
                         <button class="auth-btn login-btn" id="loginBtn">登录/注册</button>
@@ -916,6 +918,81 @@
                         <span class="button-text">跳过此步骤</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 支持我们弹框 -->
+    <div class="support-modal" id="supportModal">
+        <div class="support-modal-content">
+            <div class="support-modal-header">
+                <div class="support-icon">💖</div>
+                <h2>支持我们</h2>
+                <span class="close-modal" id="closeSupportModal">&times;</span>
+            </div>
+            <div class="support-modal-body">
+                <div class="support-content-box">
+                    <div class="support-text">
+                        <p class="support-welcome">💖 <strong>感谢您使用智优词！</strong></p>
+
+                        <p class="support-item">🎯 <strong>我们的使命</strong> - 让AI提示词优化变得简单高效，帮助每个人更好地与AI交流</p>
+
+                        <p class="support-item">✨ <strong>完全免费</strong> - 智优词始终坚持免费使用，无任何隐藏费用</p>
+
+                        <p class="support-item">🚀 <strong>持续改进</strong> - 我们不断优化产品，添加新功能，提升用户体验</p>
+
+                        <div class="support-ways">
+                            <h3>💝 支持方式</h3>
+                            
+                            <div class="support-way">
+                                <div class="support-way-icon">☕️</div>
+                                <div class="support-way-content">
+                                    <h4>请我们喝杯咖啡</h4>
+                                    <p>如果智优词对您有帮助，欢迎请开发团队喝杯咖啡</p>
+                                    <div class="donation-buttons">
+                                        <a href="https://mbd.pub/o/bread/mbd-YZWUmppvag==" target="_blank" class="donation-btn coffee-btn">
+                                            <span class="btn-icon">☕️</span>
+                                            <span>请喝咖啡</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="support-way">
+                                <div class="support-way-icon">🍱</div>
+                                <div class="support-way-content">
+                                    <h4>为我们的服务器加块"硬盘"</h4>
+                                    <p>帮助我们提升服务器性能，为用户提供更好的体验</p>
+                                    <div class="donation-buttons">
+                                        <a href="https://mbd.pub/o/bread/mbd-YZWUmppvbA==" target="_blank" class="donation-btn server-btn">
+                                            <span class="btn-icon">🍱</span>
+                                            <span>支持服务器</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="support-way">
+                                <div class="support-way-icon">🌟</div>
+                                <div class="support-way-content">
+                                    <h4>成为"智优词"的荣誉共创者</h4>
+                                    <p>与我们一起打造更好的AI提示词优化工具</p>
+                                    <div class="donation-buttons">
+                                        <a href="https://mbd.pub/o/bread/mbd-YZWUmppvbQ==" target="_blank" class="donation-btn creator-btn">
+                                            <span class="btn-icon">🌟</span>
+                                            <span>成为共创者</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="support-footer">您的支持是我们前进的动力！🙏</p>
+                    </div>
+                </div>
+            </div>
+            <div class="support-modal-footer">
+                <button class="support-btn" id="continueUsingBtn">继续使用</button>
             </div>
         </div>
     </div>

@@ -19,6 +19,10 @@ let announcementLink;
 let announcementModal;
 let closeAnnouncementModalBtn;
 let startUsingBtn;
+let supportLink;
+let supportModal;
+let closeSupportModalBtn;
+let continueUsingBtn;
 
 // 初始化UI功能
 function initUI() {
@@ -62,6 +66,10 @@ function getDOMElements() {
     announcementModal = document.getElementById('announcementModal');
     closeAnnouncementModalBtn = document.getElementById('closeAnnouncementModal');
     startUsingBtn = document.getElementById('startUsingBtn');
+    supportLink = document.getElementById('supportLink');
+    supportModal = document.getElementById('supportModal');
+    closeSupportModalBtn = document.getElementById('closeSupportModal');
+    continueUsingBtn = document.getElementById('continueUsingBtn');
 }
 
 // 绑定事件监听器
@@ -233,6 +241,25 @@ function initModalEvents() {
         });
     }
 
+    // 支持我们弹框
+    if (supportLink && supportModal && closeSupportModalBtn) {
+        supportLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal(supportModal);
+        });
+
+        closeSupportModalBtn.addEventListener('click', function() {
+            closeModal(supportModal);
+        });
+    }
+
+    // 继续使用按钮
+    if (continueUsingBtn && supportModal) {
+        continueUsingBtn.addEventListener('click', function() {
+            closeModal(supportModal);
+        });
+    }
+
     // 点击弹框外部区域关闭弹框
     window.addEventListener('click', function(e) {
         if (e.target === helpModal) {
@@ -243,6 +270,9 @@ function initModalEvents() {
         }
         if (e.target === announcementModal) {
             closeModal(announcementModal);
+        }
+        if (e.target === supportModal) {
+            closeModal(supportModal);
         }
     });
 
@@ -257,6 +287,9 @@ function initModalEvents() {
             }
             if (announcementModal && announcementModal.style.display === 'block') {
                 closeModal(announcementModal);
+            }
+            if (supportModal && supportModal.style.display === 'block') {
+                closeModal(supportModal);
             }
         }
     });

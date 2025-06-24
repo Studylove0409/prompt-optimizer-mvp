@@ -30,12 +30,13 @@ cd frontend && python -m http.server 3000
 
 ### Testing and Validation
 ```bash
-# Test optimization endpoints
-python test_api_endpoints.py
-python test_cascading_api.py
-
 # Validate environment setup
 python -c "from backend.app.config import get_settings; print('Config loaded successfully')"
+
+# Manual API testing
+curl -X POST "http://localhost:8000/api/optimize" \
+  -H "Content-Type: application/json" \
+  -d '{"original_prompt": "测试提示词", "mode": "general"}'
 ```
 
 ## Architecture
@@ -49,8 +50,9 @@ python -c "from backend.app.config import get_settings; print('Config loaded suc
   - `cascading_question_service.py` - Thinking mode intelligent Q&A logic
   - `llm_service.py` - LLM API integration (DeepSeek & Gemini)
   - `prompt_service.py` - Prompt optimization logic
+  - `quick_answer_service.py` - Quick answer mode processing
   - `supabase_service.py` - Database operations
-- **Routers**: Separated endpoints (health, models, optimize, history, user, debug)
+- **Routers**: Separated endpoints (health, models, optimize, history, user, debug, quick_answer)
 - **Models**: Pydantic models for request/response validation
 
 ### Frontend Architecture
@@ -60,7 +62,9 @@ python -c "from backend.app.config import get_settings; print('Config loaded suc
   - `ui.js` - UI interaction handlers
   - `modals.js` - Modal dialog management
   - `thinking-cascading.js` - Thinking mode cascade logic
-  - `performance-controller.js` - Performance optimization
+  - `quick-answer.js` - Quick answer mode functionality
+  - `particles.js` - Visual effects and animations
+  - `utils.js` - Shared utility functions
 - **No Framework**: Pure vanilla JavaScript with modern ES6+ features
 - **Authentication**: JWT token-based with Supabase integration
 - **State Management**: Simple global state objects and localStorage persistence
@@ -95,6 +99,13 @@ RATE_LIMIT=5/minute  # Optional, defaults to 5/minute
 - Step-by-step optimization process with progress tracking
 - Backend: `backend/app/services/cascading_question_service.py`
 - Frontend: `thinking-cascading.js` with modal interface (`thinking-cascading-modal.css`)
+
+### Quick Answer Mode
+- Fast response system for immediate prompt optimization
+- Simplified workflow for quick iterations
+- Optimized for speed and efficiency
+- Backend: `backend/app/services/quick_answer_service.py`
+- Frontend: `quick-answer.js` with modal interface (`quick-answer-modal.css`)
 
 ### Multi-Model Support
 - **DeepSeek Integration**: Chat and Reasoner models via OpenAI-compatible API
