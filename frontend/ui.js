@@ -143,9 +143,28 @@ function showDebounceHint(delay) {
 
 // 处理键盘事件
 function handleKeyboardEvents(e) {
-    // Enter键只用于换行，不再触发优化
-    // 用户必须使用鼠标点击优化按钮
-    // 所有快捷键功能已移除
+    // Enter键直接触发优化
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        
+        // 检查是否有内容输入
+        const text = originalPromptTextarea.value.trim();
+        if (!text) {
+            return; // 没有内容时不触发
+        }
+        
+        // 添加按钮动画效果
+        if (optimizeBtn) {
+            optimizeBtn.classList.remove('pulse-hint');
+            addButtonAnimation(optimizeBtn);
+            
+            // 触发优化逻辑
+            debouncedOptimizePrompt();
+        }
+        return;
+    }
+    
+    // Shift+Enter用于换行
 }
 
 // 更新字符计数
@@ -754,8 +773,8 @@ const debouncedGenerateOptionsForField = debounce((item, index, retryCount = 0) 
 
 // 使用Gemini API为特定字段生成快速选择选项（带重试机制）
 async function generateOptionsForField(item, index, retryCount = 0) {
-    // 使用防抖版本
-    debouncedGenerateOptionsForField(item, index, retryCount);
+    // 直接调用，移除防抖机制，确保每个字段都能独立执行
+    generateOptionsForFieldOriginal(item, index, retryCount);
 }
 
 // 原始的选项生成函数（重命名）
@@ -817,17 +836,17 @@ async function generateOptionsForFieldOriginal(item, index, retryCount = 0) {
 // 防抖的增强版选项生成函数
 const debouncedGenerateOptionsForFieldEnhanced = debounce((item, index, retryCount = 0) => {
     generateOptionsForFieldEnhancedOriginal(item, index, retryCount);
-}, 3000); // 3秒防抖延迟，避免频繁调用
+}, 300); // 0.3秒防抖延迟，优先速度
 
 // 增强版选项生成（后台静默升级）
 async function generateOptionsForFieldEnhanced(item, index, retryCount = 0) {
-    // 使用防抖版本
-    debouncedGenerateOptionsForFieldEnhanced(item, index, retryCount);
+    // 直接调用，移除防抖机制，确保每个字段都能独立执行
+    generateOptionsForFieldEnhancedOriginal(item, index, retryCount);
 }
 
 // 原始的增强版选项生成函数
 async function generateOptionsForFieldEnhancedOriginal(item, index, retryCount = 0) {
-    const maxRetries = 1; // 减少重试次数，避免过多API调用
+    const maxRetries = 0; // 移除重试机制，优先速度
     
     try {
         console.log(`🤖 后台为字段 "${item.key}" 生成AI选项... (尝试 ${retryCount + 1}/${maxRetries + 1})`);
@@ -876,14 +895,9 @@ async function generateOptionsForFieldEnhancedOriginal(item, index, retryCount =
             loadingIndicator.style.display = 'none';
         }
         
-        // 如果是429错误且还有重试次数，则等待后重试
-        if (error.message.includes('429') && retryCount < maxRetries) {
-            const delay = 15000; // 调试模式：等待15秒后重试
-            console.log(`⏰ 速率限制，${delay/1000}秒后重试字段 "${item.key}"`);
-            
-            setTimeout(() => {
-                generateOptionsForFieldEnhancedOriginal(item, index, retryCount + 1);
-            }, delay);
+        // 优化：速率限制时不重试，直接使用预设选项
+        if (error.message.includes('429')) {
+            console.log(`⚡ 速率限制，跳过字段 "${item.key}" 的AI生成，保持预设选项`);
         }
         
         // 静默失败，不影响用户体验，预设选项已经可用
@@ -997,11 +1011,12 @@ function showThinkingForm(analysisResult, originalPrompt) {
         const optionsContainer = fieldDiv.querySelector('.quick-options-container');
         bindQuickOptionEventsForContainer(optionsContainer);
         
-        // 错开时间调用AI API，用更好的选项替换预设选项
-        // 调试模式：使用3秒间隔快速测试
+        // 错开调用AI API，确保每个字段都能独立生成选项
+        // 修复：移除防抖后，每个字段都能独立调用API
+        const randomDelay = Math.random() * 500; // 随机0-500ms延迟避免同时请求
         setTimeout(() => {
             generateOptionsForFieldEnhanced(item, index);
-        }, index * 3000); // 每个字段间隔3秒
+        }, index * 300 + randomDelay); // 每个字段间隔0.3秒+随机延迟
     });
 
     // 添加自定义补充信息区域
