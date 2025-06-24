@@ -132,15 +132,7 @@ const debouncedOptimizePrompt = debounce(() => {
     }
 }, 1500); // 1.5秒防抖延迟
 
-// 防抖的快速优化函数
-const debouncedQuickOptimizePrompt = debounce(() => {
-    const selectedMode = getSelectedMode();
-    if (selectedMode === 'thinking') {
-        handleThinkingMode();
-    } else {
-        quickOptimizePrompt();
-    }
-}, 1000); // 1秒防抖延迟
+
 
 // 防抖提示函数
 function showDebounceHint(delay) {
@@ -151,29 +143,9 @@ function showDebounceHint(delay) {
 
 // 处理键盘事件
 function handleKeyboardEvents(e) {
-    // Ctrl + Enter: 快速优化 (使用Gemini Flash模型)
-    if (e.key === 'Enter' && e.ctrlKey) {
-        e.preventDefault();
-        if (optimizeBtn) {
-            optimizeBtn.classList.remove('pulse-hint');
-            addButtonAnimation(optimizeBtn);
-        }
-
-        // 使用防抖的快速优化
-        debouncedQuickOptimizePrompt();
-    }
-    // Enter: 根据当前模式选择相应的处理方式
-    else if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        if (optimizeBtn) {
-            optimizeBtn.classList.remove('pulse-hint');
-            addButtonAnimation(optimizeBtn);
-        }
-
-        // 使用防抖的普通优化
-        debouncedOptimizePrompt();
-    }
-    // Shift + Enter: 换行 (默认行为)
+    // Enter键只用于换行，不再触发优化
+    // 用户必须使用鼠标点击优化按钮
+    // 所有快捷键功能已移除
 }
 
 // 更新字符计数

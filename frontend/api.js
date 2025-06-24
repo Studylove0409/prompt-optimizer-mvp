@@ -164,52 +164,7 @@ async function optimizePrompt() {
     }
 }
 
-// 快速优化提示词 (使用Gemini Flash模型)
-async function quickOptimizePrompt() {
-    // 防止重复调用
-    if (isOptimizing) {
-        console.log('正在优化中，跳过重复调用');
-        return;
-    }
 
-    const originalPromptTextarea = document.getElementById('originalPrompt');
-    const originalPrompt = originalPromptTextarea.value.trim();
-    const quickModel = 'gemini-2.5-flash-preview-05-20'; // 使用Gemini Flash模型
-    const selectedMode = getSelectedMode(); // 获取当前模式
-    console.log('快速优化 - 当前选择的模式:', selectedMode);
-
-    if (!originalPrompt) {
-        showCustomAlert('请输入要优化的提示词', 'warning', 3000);
-        throw new Error('没有输入提示词');
-    }
-
-    // 设置优化状态
-    isOptimizing = true;
-
-    // 显示加载状态
-    showLoading();
-
-    try {
-        const data = await optimizePromptAPI(originalPrompt, quickModel, selectedMode);
-
-        // 显示结果（默认会滚动）
-        showResult(data.optimized_prompt, data.model_used);
-
-        // 显示成功提示（标明是快速优化）
-        showCustomAlert('快速优化成功！', 'success', 2000);
-
-        return data; // 返回结果数据
-
-    } catch (error) {
-        console.error('快速优化失败:', error);
-        showCustomAlert('快速优化失败，请检查网络连接或稍后重试', 'error', 3500);
-        throw error; // 重新抛出错误以便调用者处理
-    } finally {
-        hideLoading();
-        // 重置优化状态
-        isOptimizing = false;
-    }
-}
 
 // 显示加载状态
 function showLoading() {
@@ -455,7 +410,6 @@ async function generateQuickAnswerAPI(prompt, model = 'gemini-2.5-flash-preview-
 
 // 导出函数到全局作用域
 window.optimizePrompt = optimizePrompt;
-window.quickOptimizePrompt = quickOptimizePrompt;
 window.analyzeThinkingPrompt = analyzeThinkingPrompt;
 window.optimizeThinkingPrompt = optimizeThinkingPrompt;
 window.generateQuickOptions = generateQuickOptions;
