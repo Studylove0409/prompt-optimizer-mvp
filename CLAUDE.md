@@ -22,6 +22,9 @@ cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ### Frontend Development
 ```bash
+# Install frontend dependencies (if needed)
+npm install
+
 # Serve frontend locally (from project root)
 cd frontend && python -m http.server 3000
 
