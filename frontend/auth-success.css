@@ -92,9 +92,9 @@
 /* 吐司容器 */
 .toast-container {
     position: fixed;
-    top: 20px;
+    top: 80px;
     right: 20px;
-    z-index: 10000;
+    z-index: 9998;
     pointer-events: none;
 }
 
@@ -284,7 +284,7 @@
     }
     
     .toast-container {
-        top: 10px;
+        top: 70px;
         right: 10px;
         left: 10px;
     }
@@ -320,6 +320,10 @@
         padding: 9px 18px;
         font-size: 14px;
         border-radius: 20px;
+    }
+    
+    .toast-container {
+        top: 20px;
     }
     
     .toast {

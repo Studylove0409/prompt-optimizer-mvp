@@ -1,7 +1,7 @@
 /* 自定义提示框样式 */
 .custom-alert {
     position: fixed;
-    top: 20px;
+    top: 80px;
     right: 20px;
     min-width: 300px;
     max-width: 400px;
@@ -10,7 +10,7 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     border-left: 4px solid #007AFF;
     padding: 16px;
-    z-index: 10000;
+    z-index: 9998;
     opacity: 0;
     transform: translateX(100%);
     transition: all 0.3s ease;
@@ -75,4 +75,24 @@
 .alert-close:hover {
     background: #F2F2F7;
     color: #424245;
+}
+
+/* 响应式 Toast 定位 */
+@media (max-width: 768px) {
+    .custom-alert {
+        top: 70px;
+        right: 16px;
+        left: 16px;
+        max-width: none;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .custom-alert {
+        top: 20px;
+        bottom: auto;
+        right: 12px;
+        left: 12px;
+    }
 }

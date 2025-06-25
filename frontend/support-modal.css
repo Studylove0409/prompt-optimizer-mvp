@@ -91,16 +91,6 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.support-welcome {
-    font-size: 18px;
-    color: #1e293b;
-    margin-bottom: 20px;
-    text-align: center;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
-    border-radius: 12px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
-}
 
 .support-item {
     margin: 16px 0;

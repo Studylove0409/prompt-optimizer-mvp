@@ -1756,3 +1756,97 @@ window.removeCustomInfoField = removeCustomInfoField;
 window.findFieldOptions = findFieldOptions;
 window.showModeSelectionFeedback = showModeSelectionFeedback;
 window.initUI = initUI;
+
+// ===== 成为共创者联系弹框功能 =====
+
+// 显示成为共创者联系弹框
+function showCreatorContactModal() {
+    const modal = document.getElementById('creatorContactModal');
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+        
+        // 聚焦到邮箱地址以便用户选择
+        setTimeout(() => {
+            const emailElement = document.getElementById('creatorEmail');
+            if (emailElement) {
+                emailElement.focus();
+            }
+        }, 300);
+    }
+}
+
+// 隐藏成为共创者联系弹框
+function hideCreatorContactModal() {
+    const modal = document.getElementById('creatorContactModal');
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = ''; // 恢复滚动
+    }
+}
+
+// 复制邮箱地址
+function copyCreatorEmail() {
+    const emailElement = document.getElementById('creatorEmail');
+    const copyBtn = document.querySelector('.copy-email-btn');
+    
+    if (emailElement && copyBtn) {
+        const email = emailElement.textContent.trim();
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(email).then(() => {
+            // 更新按钮状态显示成功
+            const originalHtml = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span class="copy-icon">✅</span>已复制';
+            copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            // 显示成功提示
+            showCustomAlert(`邮箱地址已复制：${email}`, 'success', 3000);
+            
+            // 3秒后恢复按钮状态
+            setTimeout(() => {
+                copyBtn.innerHTML = originalHtml;
+                copyBtn.style.background = '';
+            }, 3000);
+        }).catch(() => {
+            // 复制失败的降级处理
+            showCustomAlert('复制失败，请手动选择邮箱地址', 'warning', 3000);
+            
+            // 选中邮箱文本
+            if (window.getSelection) {
+                const range = document.createRange();
+                range.selectNode(emailElement);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+            }
+        });
+    }
+}
+
+// 绑定点击背景关闭弹框事件
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('creatorContactModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            // 如果点击的是背景（modal本身），则关闭弹框
+            if (e.target === modal) {
+                hideCreatorContactModal();
+            }
+        });
+    }
+    
+    // ESC键关闭弹框
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('creatorContactModal');
+            if (modal && modal.classList.contains('show')) {
+                hideCreatorContactModal();
+            }
+        }
+    });
+});
+
+// 导出函数到全局作用域
+window.showCreatorContactModal = showCreatorContactModal;
+window.hideCreatorContactModal = hideCreatorContactModal;
+window.copyCreatorEmail = copyCreatorEmail;

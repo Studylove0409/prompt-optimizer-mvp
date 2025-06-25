@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="alert-styles.css">
     <link rel="stylesheet" href="quick-answer-modal.css">
     <link rel="stylesheet" href="support-modal.css">
+    <link rel="stylesheet" href="creator-contact-modal.css">
     <!-- 性能优化CSS -->
     <link rel="stylesheet" href="performance-optimizations.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -933,14 +934,6 @@
             <div class="support-modal-body">
                 <div class="support-content-box">
                     <div class="support-text">
-                        <p class="support-welcome">💖 <strong>感谢您使用智优词！</strong></p>
-
-                        <p class="support-item">🎯 <strong>我们的使命</strong> - 让AI提示词优化变得简单高效，帮助每个人更好地与AI交流</p>
-
-                        <p class="support-item">✨ <strong>完全免费</strong> - 智优词始终坚持免费使用，无任何隐藏费用</p>
-
-                        <p class="support-item">🚀 <strong>持续改进</strong> - 我们不断优化产品，添加新功能，提升用户体验</p>
-
                         <div class="support-ways">
                             <h3>💝 支持方式</h3>
                             
@@ -978,10 +971,10 @@
                                     <h4>成为"智优词"的荣誉共创者</h4>
                                     <p>与我们一起打造更好的AI提示词优化工具</p>
                                     <div class="donation-buttons">
-                                        <a href="https://mbd.pub/o/bread/mbd-YZWUmppvbQ==" target="_blank" class="donation-btn creator-btn">
+                                        <button class="donation-btn creator-btn" onclick="showCreatorContactModal()">
                                             <span class="btn-icon">🌟</span>
                                             <span>成为共创者</span>
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1073,6 +1066,38 @@
         </div>
     </div>
 
+    <!-- 成为共创者联系弹框 -->
+    <div id="creatorContactModal" class="modal creator-contact-modal">
+        <div class="modal-content creator-contact-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span class="title-icon">🌟</span>
+                    <span>成为智优词共创者</span>
+                </div>
+                <button class="modal-close" onclick="hideCreatorContactModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="contact-info">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-details">
+                        <h3>联系我们</h3>
+                        <p>如果您对成为智优词的共创者感兴趣，请通过邮箱与我们联系：</p>
+                        <div class="email-display">
+                            <span id="creatorEmail">song3286791241@gmail.com</span>
+                            <button class="copy-email-btn" onclick="copyCreatorEmail()">
+                                <span class="copy-icon">📋</span>
+                                复制邮箱
+                            </button>
+                        </div>
+                        <div class="contact-note">
+                            <p>我们期待与您探讨合作的可能性，共同打造更好的AI提示词优化工具！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
    
 
 
@@ -1084,6 +1109,103 @@
 
     
     <script src="utils.js"></script>
+    
+    <!-- 成为共创者弹框功能脚本 -->
+    <script>
+        // 确保函数在全局作用域可用
+        function showCreatorContactModal() {
+            const modal = document.getElementById('creatorContactModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+                
+                // 聚焦到邮箱地址以便用户选择
+                setTimeout(() => {
+                    const emailElement = document.getElementById('creatorEmail');
+                    if (emailElement) {
+                        emailElement.focus();
+                    }
+                }, 300);
+            }
+        }
+
+        function hideCreatorContactModal() {
+            const modal = document.getElementById('creatorContactModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function copyCreatorEmail() {
+            const emailElement = document.getElementById('creatorEmail');
+            const copyBtn = document.querySelector('.copy-email-btn');
+            
+            if (emailElement && copyBtn) {
+                const email = emailElement.textContent.trim();
+                
+                // 复制到剪贴板
+                navigator.clipboard.writeText(email).then(() => {
+                    // 更新按钮状态显示成功
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span class="copy-icon">✅</span>已复制';
+                    copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    
+                    // 显示成功提示（如果showCustomAlert函数可用）
+                    if (typeof showCustomAlert === 'function') {
+                        showCustomAlert(`邮箱地址已复制：${email}`, 'success', 3000);
+                    }
+                    
+                    // 3秒后恢复按钮状态
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalHtml;
+                        copyBtn.style.background = '';
+                    }, 3000);
+                }).catch(() => {
+                    // 复制失败的降级处理
+                    if (typeof showCustomAlert === 'function') {
+                        showCustomAlert('复制失败，请手动选择邮箱地址', 'warning', 3000);
+                    }
+                    
+                    // 选中邮箱文本
+                    if (window.getSelection) {
+                        const range = document.createRange();
+                        range.selectNode(emailElement);
+                        window.getSelection().removeAllRanges();
+                        window.getSelection().addRange(range);
+                    }
+                });
+            }
+        }
+
+        // 页面加载完成后绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('creatorContactModal');
+            if (modal) {
+                // 点击背景关闭弹框
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        hideCreatorContactModal();
+                    }
+                });
+            }
+            
+            // ESC键关闭弹框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('creatorContactModal');
+                    if (modal && modal.classList.contains('show')) {
+                        hideCreatorContactModal();
+                    }
+                }
+            });
+        });
+
+        // 确保函数在全局作用域中可用
+        window.showCreatorContactModal = showCreatorContactModal;
+        window.hideCreatorContactModal = hideCreatorContactModal;
+        window.copyCreatorEmail = copyCreatorEmail;
+    </script>
     
     <!-- Supabase 客户端初始化 -->
     <script>
