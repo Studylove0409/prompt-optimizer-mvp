@@ -64,6 +64,10 @@
       "dest": "frontend/support-modal.css"
     },
     {
+      "src": "/creator-contact-modal.css",
+      "dest": "frontend/creator-contact-modal.css"
+    },
+    {
       "src": "/script.js",
       "dest": "frontend/script.js"
     },

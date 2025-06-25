@@ -1144,19 +1144,54 @@
             if (emailElement && copyBtn) {
                 const email = emailElement.textContent.trim();
                 
-                // 复制到剪贴板
-                navigator.clipboard.writeText(email).then(() => {
-                    // 更新按钮状态显示成功
+                // 兼容性增强的复制实现
+                function copyTextCompat(text) {
+                    // 方法1: 现代浏览器的 Clipboard API
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        return navigator.clipboard.writeText(text).catch(() => {
+                            // 如果失败，使用传统方法
+                            return copyTextLegacyInline(text);
+                        });
+                    } else {
+                        // 方法2: 传统方法
+                        return Promise.resolve(copyTextLegacyInline(text));
+                    }
+                }
+                
+                function copyTextLegacyInline(text) {
+                    try {
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        textArea.style.opacity = '0';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        textArea.setSelectionRange(0, text.length);
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        if (successful) {
+                            return Promise.resolve();
+                        } else {
+                            return Promise.reject(new Error('复制失败'));
+                        }
+                    } catch (err) {
+                        return Promise.reject(err);
+                    }
+                }
+                
+                copyTextCompat(email).then(() => {
+                    // 成功复制
                     const originalHtml = copyBtn.innerHTML;
                     copyBtn.innerHTML = '<span class="copy-icon">✅</span>已复制';
                     copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                     
-                    // 显示成功提示（如果showCustomAlert函数可用）
                     if (typeof showCustomAlert === 'function') {
-                        showCustomAlert(`邮箱地址已复制：${email}`, 'success', 3000);
+                        showCustomAlert('邮箱地址已复制：' + email, 'success', 3000);
                     }
                     
-                    // 3秒后恢复按钮状态
                     setTimeout(() => {
                         copyBtn.innerHTML = originalHtml;
                         copyBtn.style.background = '';
@@ -1165,14 +1200,25 @@
                     // 复制失败的降级处理
                     if (typeof showCustomAlert === 'function') {
                         showCustomAlert('复制失败，请手动选择邮箱地址', 'warning', 3000);
+                    } else {
+                        alert('请手动复制邮箱地址：' + email);
                     }
                     
                     // 选中邮箱文本
-                    if (window.getSelection) {
-                        const range = document.createRange();
-                        range.selectNode(emailElement);
-                        window.getSelection().removeAllRanges();
-                        window.getSelection().addRange(range);
+                    try {
+                        if (window.getSelection && document.createRange) {
+                            const range = document.createRange();
+                            range.selectNodeContents(emailElement);
+                            const selection = window.getSelection();
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        } else if (document.selection && document.body.createTextRange) {
+                            const textRange = document.body.createTextRange();
+                            textRange.moveToElementText(emailElement);
+                            textRange.select();
+                        }
+                    } catch (selectErr) {
+                        console.error('文本选择失败:', selectErr);
                     }
                 });
             }
