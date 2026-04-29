@@ -36,7 +36,7 @@ async def generate_quick_answer(
         # 生成快速回答
         result = await quick_answer_service.generate_answer(
             prompt=request.prompt,
-            model=request.model or "gemini-2.5-flash-preview-05-20"
+            model=request.model or "deepseek-v4-flash"
         )
         
         return QuickAnswerResponse(
@@ -67,11 +67,11 @@ async def get_supported_models() -> Dict[str, Any]:
     return {
         "supported_models": [
             {
-                "id": "gemini-2.5-flash-preview-05-20",
-                "name": "Gemini 2.5 Flash Preview",
-                "description": "Google最新的Gemini 2.5 Flash预览版，具备极速响应和卓越性能",
+                "id": "deepseek-v4-flash",
+                "name": "DeepSeek V4 Flash",
+                "description": "DeepSeek最新极速模型，快速响应与高质量输出并存",
                 "features": ["极速响应", "高效推理", "优质回答"]
             }
         ],
-        "default_model": "gemini-2.5-flash-preview-05-20"
+        "default_model": "deepseek-v4-flash"
     }

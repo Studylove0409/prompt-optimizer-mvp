@@ -66,7 +66,7 @@ class QuickOptionsRequest(BaseModel):
     """快速选择选项生成请求模型"""
     field_key: str = Field(..., description="字段关键字")
     question: str = Field(..., description="问题描述")
-    model: str = "gemini-2.0-flash"
+    model: str = "deepseek-v4-flash"
 
 
 class QuickOptionsResponse(BaseModel):
@@ -79,7 +79,7 @@ class QuickOptionsResponse(BaseModel):
 class QuickAnswerRequest(BaseModel):
     """快速回答请求模型"""
     prompt: str = Field(..., max_length=5000, description="优化后的提示词")
-    model: str = "gemini-2.5-pro-preview-03-25"
+    model: str = "deepseek-v4-flash"
 
 
 class QuickAnswerResponse(BaseModel):

@@ -153,7 +153,7 @@ function showCustomConfirm(message, onConfirm, onCancel, emoji = '🤔') {
 // 获取选中的模型
 function getSelectedModel() {
     const selectedRadio = document.querySelector('input[name="model"]:checked');
-    return selectedRadio ? selectedRadio.value : 'gemini-2.0-flash';
+    return selectedRadio ? selectedRadio.value : 'deepseek-v4-flash';
 }
 
 // 获取当前选择的模式
@@ -165,10 +165,7 @@ function getSelectedMode() {
 // 获取模型显示名称
 function getModelDisplayName(modelId) {
     const modelNames = {
-        'deepseek-chat': '普通版',
-        'gemini-2.0-flash': 'Pro版',
-        'gemini-2.5-pro-preview-03-25': 'ULTRA版',
-        'gemini-2.5-flash-preview-05-20': 'ULTRA版(旧)'
+        'deepseek-v4-flash': '极速版'
     };
     return modelNames[modelId] || modelId;
 }

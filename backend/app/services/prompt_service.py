@@ -259,7 +259,7 @@ class PromptService:
             ]
             
             # 调用Gemini API - 使用支持的模型
-            response = await self.llm_service.call_llm_api("gemini-2.0-flash", messages)
+            response = await self.llm_service.call_llm_api("deepseek-v4-flash", messages)
             
             # 解析返回的选项
             options_text = response.strip()
@@ -291,5 +291,4 @@ class PromptService:
                 field_key=request.field_key,
                 question=request.question
             )
-
 

@@ -3,57 +3,20 @@
 """
 
 # 支持的模型列表
-SUPPORTED_MODELS = [
-    "deepseek-chat",
-    "deepseek-reasoner", 
-    "gemini-2.0-flash",
-    "gemini-2.5-pro-preview-03-25",
-    "gemini-2.5-flash-preview-05-20",
-    "gemini-2.5-flash-lite-preview-06-17"
-]
+SUPPORTED_MODELS = ["deepseek-v4-flash"]
 
 # 模型信息
 MODEL_INFO = [
     {
-        "id": "deepseek-chat",
-        "name": "DeepSeek Chat (V3-0324)",
-        "description": "更快的响应速度，适合日常对话和简单任务",
+        "id": "deepseek-v4-flash",
+        "name": "DeepSeek V4 Flash",
+        "description": "DeepSeek最新极速模型，快速响应与高质量输出并存",
         "speed": "fast"
-    },
-    {
-        "id": "deepseek-reasoner",
-        "name": "DeepSeek Reasoner (R1-0528)",
-        "description": "更强的推理能力，适合复杂分析和深度思考",
-        "speed": "slow"
-    },
-    {
-        "id": "gemini-2.0-flash",
-        "name": "Gemini 2.0 Flash",
-        "description": "Google最新的Gemini 2.0 Flash，快速响应与高质量并存",
-        "speed": "fast"
-    },
-    {
-        "id": "gemini-2.5-pro-preview-03-25",
-        "name": "Gemini 2.5 Pro Preview",
-        "description": "Google最新的Gemini 2.5 Pro预览版，具备更强的推理和创新能力",
-        "speed": "medium"
-    },
-    {
-        "id": "gemini-2.5-flash-preview-05-20",
-        "name": "Gemini 2.5 Flash Preview",
-        "description": "Google最新的Gemini 2.5 Flash预览版，具备极速响应和卓越性能",
-        "speed": "fast"
-    },
-    {
-        "id": "gemini-2.5-flash-lite-preview-06-17",
-        "name": "Gemini 2.5 Flash Lite Preview",
-        "description": "Google最新的Gemini 2.5 Flash Lite预览版，专为快速回答优化",
-        "speed": "very_fast"
     }
 ]
 
 # 默认模型
-DEFAULT_MODEL = "deepseek-chat"
+DEFAULT_MODEL = "deepseek-v4-flash"
 
 # 元提示词模板 - DeepSeek模型专用
 META_PROMPT_TEMPLATE = """## 角色与核心任务
