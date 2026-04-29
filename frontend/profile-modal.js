@@ -270,7 +270,12 @@ class ProfileModal {
             }
 
             // 获取认证token
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            const { data: { session } } = await Promise.race([
+                window.supabaseClient.auth.getSession(),
+                new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('获取认证令牌超时')), 800);
+                })
+            ]);
             if (!session?.access_token) {
                 throw new Error('用户未登录');
             }

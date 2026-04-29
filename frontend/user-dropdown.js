@@ -261,7 +261,7 @@ class UserDropdownManager {
         const {
             name = '用户',
             email = 'user@example.com',
-            avatar = 'https://via.placeholder.com/40'
+            avatar = '/img/raphael-ai.jpeg'
         } = userInfo;
 
         // 更新用户名

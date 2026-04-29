@@ -28,6 +28,17 @@ const API_CONFIG = {
     timeout: 120000 // 120秒超时（2分钟）
 };
 
+const AUTH_SESSION_TIMEOUT_MS = 800;
+
+function withTimeout(promise, timeoutMs) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('获取认证令牌超时')), timeoutMs);
+        })
+    ]);
+}
+
 // 获取当前用户的认证令牌
 async function getAuthToken() {
     if (!window.supabaseClient) {
@@ -35,13 +46,16 @@ async function getAuthToken() {
     }
 
     try {
-        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        const { data: { session }, error } = await withTimeout(
+            window.supabaseClient.auth.getSession(),
+            AUTH_SESSION_TIMEOUT_MS
+        );
         if (error || !session) {
             return null;
         }
         return session.access_token;
     } catch (error) {
-        console.error('获取认证令牌失败:', error);
+        console.warn('获取认证令牌失败，继续使用匿名请求:', error.message || error);
         return null;
     }
 }

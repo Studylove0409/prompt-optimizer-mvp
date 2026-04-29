@@ -439,13 +439,18 @@ class CascadingQuestionManager {
             }
             
             try {
-                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+                const { data: { session }, error } = await Promise.race([
+                    window.supabaseClient.auth.getSession(),
+                    new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('获取认证令牌超时')), 800);
+                    })
+                ]);
                 if (error || !session) {
                     return null;
                 }
                 return session.access_token;
             } catch (error) {
-                console.error('获取认证令牌失败:', error);
+                console.warn('获取认证令牌失败，继续使用匿名请求:', error.message || error);
                 return null;
             }
         };

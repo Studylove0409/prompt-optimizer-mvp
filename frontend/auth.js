@@ -705,7 +705,12 @@ async function checkCurrentUser() {
     }
 
     try {
-        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        const { data: { session }, error } = await Promise.race([
+            window.supabaseClient.auth.getSession(),
+            new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('获取当前用户状态超时')), 800);
+            })
+        ]);
 
         if (error) {
             return;
@@ -721,6 +726,8 @@ async function checkCurrentUser() {
 
     } catch (error) {
         // 静默处理错误
+        currentUser = null;
+        updateUIForLoggedOutUser();
     }
 }
 

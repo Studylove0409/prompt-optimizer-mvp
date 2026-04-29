@@ -277,7 +277,12 @@ class HistoryManager {
         try {
             // 使用全局的 supabaseClient 而不是 supabase
             if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
-                const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+                const { data: { session }, error } = await Promise.race([
+                    window.supabaseClient.auth.getSession(),
+                    new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('获取访问令牌超时')), 800);
+                    })
+                ]);
 
                 if (error) {
                     console.error('获取会话时出错:', error);
