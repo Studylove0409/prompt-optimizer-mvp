@@ -4,6 +4,7 @@ LLM API调用服务
 """
 from openai import OpenAI
 import openai
+import time
 from fastapi import HTTPException
 
 from ..config import Settings
@@ -65,6 +66,7 @@ class LLMService:
         """调用DeepSeek API"""
         try:
             client = self._create_deepseek_client()
+            start_time = time.time()
             
             response = client.chat.completions.create(
                 model=model,
@@ -73,8 +75,10 @@ class LLMService:
                 temperature=API_TEMPERATURE,
                 max_tokens=API_MAX_TOKENS
             )
-            
-            return response.choices[0].message.content.strip()
+
+            content = response.choices[0].message.content.strip()
+            print(f"DeepSeek API响应成功，模型: {model}，耗时: {time.time() - start_time:.2f}s，内容长度: {len(content)}")
+            return content
             
         except openai.APIConnectionError as e:
             raise HTTPException(
@@ -224,6 +228,7 @@ class LLMService:
         """调用DeepSeek API（带自定义token限制）"""
         try:
             client = self._create_deepseek_client()
+            start_time = time.time()
             
             response = client.chat.completions.create(
                 model=model,
@@ -232,8 +237,10 @@ class LLMService:
                 temperature=API_TEMPERATURE,
                 max_tokens=max_tokens
             )
-            
-            return response.choices[0].message.content.strip()
+
+            content = response.choices[0].message.content.strip()
+            print(f"DeepSeek API响应成功，模型: {model}，max_tokens: {max_tokens}，耗时: {time.time() - start_time:.2f}s，内容长度: {len(content)}")
+            return content
             
         except openai.APIConnectionError as e:
             raise HTTPException(
@@ -332,4 +339,3 @@ class LLMService:
                 "content": formatted_content
             }
         ]
-

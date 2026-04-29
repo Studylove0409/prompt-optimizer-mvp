@@ -366,7 +366,7 @@ async function generateQuickOptions(fieldKey, question) {
     const requestBody = {
         field_key: fieldKey,
         question: question,
-        model: 'gemini-2.0-flash-lite'
+        model: 'deepseek-v4-flash'
     };
     
     console.log('🚀 发送快速选项生成请求:', requestBody);
@@ -394,7 +394,7 @@ async function optimizeThinkingPrompt(originalPrompt, additionalInfo, model) {
 }
 
 // 快速回答API调用
-async function generateQuickAnswerAPI(prompt, model = 'gemini-2.5-flash-preview-05-20') {
+async function generateQuickAnswerAPI(prompt, model = 'deepseek-v4-flash') {
     const requestBody = {
         prompt: prompt,
         model: model
